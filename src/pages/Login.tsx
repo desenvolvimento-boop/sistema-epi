@@ -102,7 +102,7 @@ const Login = () => {
               type="submit"
               className="w-full py-4 bg-primary-500 text-white rounded-2xl font-bold text-sm hover:bg-primary-600 active:scale-[0.98] transition-all shadow-lg shadow-primary-500/20 mt-4"
             >
-              Acessar Sistema
+              Acessar Sistema 
             </button>
           </form>
 
