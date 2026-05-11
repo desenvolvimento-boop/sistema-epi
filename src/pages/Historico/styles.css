@@ -1,0 +1,302 @@
+.historico-container > * + * {
+  margin-top: 1.5rem;
+}
+
+.historico-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .historico-header {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.historico-title {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+  color: var(--color-slate-800);
+}
+
+.historico-subtitle {
+  color: var(--color-slate-500);
+}
+
+.historico-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.historico-search-wrapper {
+  position: relative;
+}
+
+.historico-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-slate-400);
+}
+
+.historico-search-input {
+  padding: 0.5rem 1rem 0.5rem 2.5rem;
+  background-color: white;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  width: 16rem;
+}
+
+.historico-search-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.2);
+  border-color: var(--color-primary-500);
+}
+
+.historico-filter-btn {
+  padding: 0.5rem;
+  background-color: white;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.75rem;
+  color: var(--color-slate-600);
+}
+
+.historico-filter-btn:hover {
+  background-color: var(--color-slate-50);
+}
+
+.historico-table-card {
+  background-color: white;
+  border-radius: 1rem;
+  border: 1px solid var(--color-slate-200);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.historico-table-scroll {
+  overflow-x: auto;
+}
+
+.historico-table {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+.historico-thead-row {
+  background-color: rgb(248 250 252 / 0.5);
+  border-bottom: 1px solid var(--color-slate-100);
+}
+
+.historico-th {
+  padding: 1rem 1.5rem;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-slate-400);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.historico-th-center {
+  padding: 1rem 1.5rem;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-slate-400);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+.historico-tbody > * + * {
+  border-top: 1px solid var(--color-slate-100);
+}
+
+.historico-row {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.historico-row:hover {
+  background-color: rgb(248 250 252 / 0.5);
+}
+
+.historico-cell {
+  padding: 1rem 1.5rem;
+}
+
+.historico-colab-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.historico-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  background-color: var(--color-slate-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 700;
+  color: var(--color-slate-500);
+}
+
+.historico-colab-name {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  color: var(--color-slate-800);
+}
+
+.historico-colab-id {
+  font-size: 10px;
+  color: var(--color-slate-500);
+}
+
+.historico-empresa-wrapper > * + * {
+  margin-top: 0.25rem;
+}
+
+.historico-empresa-text {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--color-slate-600);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.historico-unidade-text {
+  font-size: 10px;
+  color: var(--color-slate-400);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.historico-icon-xs {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.historico-event-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.historico-event-text {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  color: var(--color-slate-700);
+}
+
+.historico-date-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--color-slate-600);
+}
+
+.historico-date-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--color-slate-400);
+}
+
+.historico-status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.historico-status-validado {
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-700);
+}
+
+.historico-status-concluido {
+  background-color: var(--color-blue-100);
+  color: var(--color-blue-700);
+}
+
+.historico-status-pendente {
+  background-color: var(--color-amber-100);
+  color: var(--color-amber-700);
+}
+
+.historico-status-default {
+  background-color: var(--color-slate-100);
+  color: var(--color-slate-700);
+}
+
+.historico-action-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.historico-view-btn {
+  padding: 0.5rem;
+  color: var(--color-slate-400);
+  border-radius: 0.5rem;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.historico-view-btn:hover {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-600);
+}
+
+.historico-icon-md {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.historico-icon-entrega {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-primary-500);
+}
+
+.historico-icon-troca {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-blue-500);
+}
+
+.historico-icon-alerta {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-amber-500);
+}
+
+.historico-icon-admissao {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-slate-900);
+}
+
+.historico-icon-default {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-slate-400);
+}

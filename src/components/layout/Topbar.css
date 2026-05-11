@@ -1,0 +1,119 @@
+.topbar {
+  height: 4rem;
+  background-color: var(--color-white, #fff);
+  border-bottom: 1px solid var(--color-slate-200);
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 16rem;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+}
+
+.topbar-title {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 700;
+  color: var(--color-slate-800);
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.topbar-search-wrapper {
+  position: relative;
+}
+
+.topbar-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-slate-400);
+}
+
+.topbar-search-input {
+  padding: 0.5rem 1rem 0.5rem 2.5rem;
+  background-color: var(--color-slate-100);
+  border: none;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  width: 16rem;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.topbar-search-input:focus {
+  box-shadow: 0 0 0 2px var(--color-primary-500);
+  outline: none;
+}
+
+.topbar-notification-button {
+  position: relative;
+  padding: 0.5rem;
+  color: var(--color-slate-500);
+  border-radius: 9999px;
+  transition: color 0.15s, background-color 0.15s;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.topbar-notification-button:hover {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-600);
+}
+
+.topbar-notification-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.topbar-notification-dot {
+  position: absolute;
+  top: 0.375rem;
+  right: 0.375rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--color-red-500);
+  border-radius: 9999px;
+  border: 2px solid var(--color-white, #fff);
+}
+
+.topbar-divider {
+  height: 2rem;
+  width: 1px;
+  background-color: var(--color-slate-200);
+}
+
+.topbar-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.topbar-user-info-inner {
+  text-align: right;
+}
+
+.topbar-company-name {
+  font-size: 0.875rem;
+  line-height: 1;
+  font-weight: 600;
+  color: var(--color-slate-800);
+}
+
+.topbar-session {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--color-slate-500);
+  margin-top: 0.25rem;
+}

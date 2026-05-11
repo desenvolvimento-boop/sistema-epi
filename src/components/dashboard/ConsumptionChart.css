@@ -1,0 +1,33 @@
+.consumption-chart {
+  grid-column: span 2 / span 2;
+  background-color: var(--color-white, #fff);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--color-slate-200);
+  box-shadow: var(--shadow-sm);
+}
+
+.consumption-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.consumption-chart-title {
+  font-weight: 700;
+  color: var(--color-slate-800);
+}
+
+.consumption-chart-select {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.5rem;
+  background-color: var(--color-slate-50);
+  padding: 0.375rem 0.75rem;
+}
+
+.consumption-chart-body {
+  height: 20rem;
+}

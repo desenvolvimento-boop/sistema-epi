@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ReplacementRule } from '../../types/system.types';
+import './RegraTrocaForm.css';
 
 interface RegraTrocaFormProps {
   onClose: () => void;
@@ -10,13 +11,13 @@ export const RegraTrocaForm = ({ onClose, initialData }: RegraTrocaFormProps) =>
   const [gatilho, setGatilho] = useState(initialData?.motivo || 'Vencimento por Tempo');
 
   return (
-    <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); onClose(); }}>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-slate-700">EPI Alvo</label>
+    <form className="regra-troca-form" onSubmit={(e) => { e.preventDefault(); onClose(); }}>
+      <div className="regra-troca-form-grid">
+        <div className="regra-troca-form-field">
+          <label className="regra-troca-form-label">EPI Alvo</label>
           <select 
             defaultValue={initialData?.epi}
-            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
+            className="regra-troca-form-input"
           >
             <option>Selecione o EPI</option>
             <option value="Capacete de Segurança">Capacete de Segurança</option>
@@ -26,33 +27,33 @@ export const RegraTrocaForm = ({ onClose, initialData }: RegraTrocaFormProps) =>
             <option value="Bota de Segurança">Bota de Segurança</option>
           </select>
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-slate-700">Vida Útil (Dias)</label>
+        <div className="regra-troca-form-field">
+          <label className="regra-troca-form-label">Vida Útil (Dias)</label>
           <input 
             type="number" 
             placeholder="Ex: 180" 
             defaultValue={initialData?.vidaUtil}
-            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
+            className="regra-troca-form-input"
             required
           />
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-slate-700">Criticidade</label>
+        <div className="regra-troca-form-field">
+          <label className="regra-troca-form-label">Criticidade</label>
           <select 
             defaultValue={initialData?.criticidade}
-            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
+            className="regra-troca-form-input"
           >
             <option value="Baixa">Baixa</option>
             <option value="Média">Média</option>
             <option value="Alta">Alta</option>
           </select>
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-slate-700">Gatilho de Troca</label>
+        <div className="regra-troca-form-field">
+          <label className="regra-troca-form-label">Gatilho de Troca</label>
           <select 
             value={gatilho}
             onChange={(e) => setGatilho(e.target.value)}
-            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
+            className="regra-troca-form-input"
           >
             <option value="Vencimento por Tempo">Vencimento por Tempo</option>
             <option value="Desgaste Natural">Desgaste Natural</option>
@@ -66,11 +67,11 @@ export const RegraTrocaForm = ({ onClose, initialData }: RegraTrocaFormProps) =>
         
         {gatilho === 'Regra do contrato' && (
           <>
-            <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
-              <label className="text-sm font-bold text-slate-700">Contrato</label>
+            <div className="regra-troca-form-field-animated">
+              <label className="regra-troca-form-label">Contrato</label>
               <select 
                 defaultValue={initialData?.contrato}
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
+                className="regra-troca-form-input"
               >
                 <option value="">Selecione o Contrato</option>
                 <option value="CONTRATO-001">CONTRATO-001 - Limpeza Urbana</option>
@@ -78,11 +79,11 @@ export const RegraTrocaForm = ({ onClose, initialData }: RegraTrocaFormProps) =>
                 <option value="CONTRATO-003">CONTRATO-003 - Segurança Patrimonial</option>
               </select>
             </div>
-            <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
-              <label className="text-sm font-bold text-slate-700">Jornada de Trabalho</label>
+            <div className="regra-troca-form-field-animated">
+              <label className="regra-troca-form-label">Jornada de Trabalho</label>
               <select 
                 defaultValue={initialData?.jornada || ""}
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
+                className="regra-troca-form-input"
               >
                 <option value="" disabled>Selecione a Jornada de Trabalho</option>
                 <option value="DIARISTA">DIARISTA</option>
@@ -93,17 +94,17 @@ export const RegraTrocaForm = ({ onClose, initialData }: RegraTrocaFormProps) =>
         )}
       </div>
 
-      <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
+      <div className="regra-troca-form-actions">
         <button
           type="button"
           onClick={onClose}
-          className="px-6 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-all"
+          className="regra-troca-form-cancel"
         >
           Cancelar
         </button>
         <button
           type="submit"
-          className="px-6 py-2 bg-primary-600 text-white rounded-xl text-sm font-bold hover:bg-primary-700 transition-all shadow-sm shadow-primary-200"
+          className="regra-troca-form-submit"
         >
           {initialData ? 'Salvar Alterações' : 'Salvar Regra'}
         </button>

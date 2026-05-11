@@ -1,4 +1,5 @@
 import React from 'react';
+import './FuncaoForm.css';
 
 interface FuncaoFormProps {
   onClose: () => void;
@@ -6,31 +7,31 @@ interface FuncaoFormProps {
 
 export const FuncaoForm = ({ onClose }: FuncaoFormProps) => {
   return (
-    <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); onClose(); }}>
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-slate-700">Nome da Função</label>
+    <form className="funcao-form" onSubmit={(e) => { e.preventDefault(); onClose(); }}>
+      <div className="funcao-form-fields">
+        <div className="funcao-form-field">
+          <label className="funcao-form-label">Nome da Função</label>
           <input 
             type="text" 
             placeholder="Ex: Operador de Empilhadeira" 
-            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
+            className="funcao-form-input"
             required
           />
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-slate-700">Descrição das Atividades</label>
+        <div className="funcao-form-field">
+          <label className="funcao-form-label">Descrição das Atividades</label>
           <textarea 
             placeholder="Descreva as principais atividades e riscos desta função..." 
-            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all min-h-[100px]"
+            className="funcao-form-textarea"
             required
           />
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-slate-700">EPIs Obrigatórios (Seleção Múltipla)</label>
-          <div className="grid grid-cols-2 gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+        <div className="funcao-form-field">
+          <label className="funcao-form-label">EPIs Obrigatórios (Seleção Múltipla)</label>
+          <div className="funcao-form-checkbox-grid">
             {['Capacete de Segurança', 'Luva de Vaqueta', 'Bota de Segurança', 'Protetor Auricular', 'Óculos de Proteção'].map(epi => (
-              <label key={epi} className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-slate-900 transition-colors">
-                <input type="checkbox" className="rounded border-slate-300 text-primary-600 focus:ring-primary-500" />
+              <label key={epi} className="funcao-form-checkbox-label">
+                <input type="checkbox" className="funcao-form-checkbox" />
                 {epi}
               </label>
             ))}
@@ -38,17 +39,17 @@ export const FuncaoForm = ({ onClose }: FuncaoFormProps) => {
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
+      <div className="funcao-form-actions">
         <button
           type="button"
           onClick={onClose}
-          className="px-6 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-all"
+          className="funcao-form-cancel"
         >
           Cancelar
         </button>
         <button
           type="submit"
-          className="px-6 py-2 bg-primary-600 text-white rounded-xl text-sm font-bold hover:bg-primary-700 transition-all shadow-sm shadow-primary-200"
+          className="funcao-form-submit"
         >
           Salvar Função
         </button>

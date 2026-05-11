@@ -1,0 +1,74 @@
+.status-badge {
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  border: 1px solid;
+}
+
+.status-badge-regular {
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-700);
+  border-color: var(--color-primary-200);
+}
+
+.status-badge-atencao {
+  background-color: var(--color-amber-100);
+  color: var(--color-amber-700);
+  border-color: var(--color-amber-200);
+}
+
+.status-badge-irregular {
+  background-color: var(--color-red-100);
+  color: var(--color-red-700);
+  border-color: var(--color-red-200);
+}
+
+.status-badge-vencido {
+  background-color: var(--color-red-100);
+  color: var(--color-red-700);
+  border-color: var(--color-red-200);
+}
+
+.status-badge-ativo {
+  background-color: var(--color-blue-100);
+  color: var(--color-blue-700);
+  border-color: var(--color-blue-200);
+}
+
+.status-badge-sucesso {
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-700);
+  border-color: var(--color-primary-200);
+}
+
+.status-badge-falha-facial {
+  background-color: var(--color-red-100);
+  color: var(--color-red-700);
+  border-color: var(--color-red-200);
+}
+
+.status-badge-pendente {
+  background-color: var(--color-slate-100);
+  color: var(--color-slate-700);
+  border-color: var(--color-slate-200);
+}
+
+.status-badge-aguardando {
+  background-color: var(--color-blue-100);
+  color: var(--color-blue-700);
+  border-color: var(--color-blue-200);
+}
+
+.status-badge-erro-validacao {
+  background-color: var(--color-orange-100);
+  color: var(--color-orange-700);
+  border-color: var(--color-orange-200);
+}
+
+.status-badge-default {
+  background-color: var(--color-slate-100);
+  color: var(--color-slate-700);
+  border-color: var(--color-slate-200);
+}

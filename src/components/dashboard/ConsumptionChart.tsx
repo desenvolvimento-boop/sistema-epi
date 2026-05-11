@@ -8,6 +8,7 @@ import {
   Tooltip, 
   ResponsiveContainer 
 } from 'recharts';
+import './ConsumptionChart.css';
 
 interface ConsumptionChartProps {
   data: any[];
@@ -15,15 +16,15 @@ interface ConsumptionChartProps {
 
 export const ConsumptionChart = ({ data }: ConsumptionChartProps) => {
   return (
-    <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="font-bold text-slate-800">Consumo Mensal de EPIs</h3>
-        <select className="text-sm border-slate-200 rounded-lg bg-slate-50 px-3 py-1.5">
+    <div className="consumption-chart">
+      <div className="consumption-chart-header">
+        <h3 className="consumption-chart-title">Consumo Mensal de EPIs</h3>
+        <select className="consumption-chart-select">
           <option>Últimos 6 meses</option>
           <option>Último ano</option>
         </select>
       </div>
-      <div className="h-80">
+      <div className="consumption-chart-body">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />

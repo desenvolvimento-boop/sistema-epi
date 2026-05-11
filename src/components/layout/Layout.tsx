@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import './Layout.css';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -39,13 +40,13 @@ export const Layout = ({ children }: LayoutProps) => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+    <div className="layout-wrapper">
       <Sidebar />
       
-      <main className="pl-64 pt-16 min-h-screen">
+      <main className="layout-main">
         <Topbar title={title} />
         
-        <div className="p-8 max-w-7xl mx-auto">
+        <div className="layout-content">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
