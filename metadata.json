@@ -1,0 +1,9 @@
+{
+  "name": "EPI Control - SaaS de Gestão de Segurança do Trabalho",
+  "description": "Plataforma administrativa de alta responsabilidade jurídica para controle de EPIs, auditoria facial e rastreabilidade trabalhista em empresas de terceirização.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
