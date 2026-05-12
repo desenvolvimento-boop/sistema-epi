@@ -66,11 +66,33 @@ export interface Role {
 }
 
 export interface User {
-  id: number;
-  nome: string;
-  email: string;
-  perfil: string;
-  status: string;
+  usr_id: number;
+  usr_active: number | null;
+  usr_full_name: string | null;
+  usr_username: string | null;
+  usr_email: string | null;
+  usr_password?: string;
+  usr_agent_type: string | null;
+  usr_access_profile: string | null;
+  usr_phone_country_code: string | null;
+  usr_phone_area_code: string | null;
+  usr_phone_number: string | null;
+  usr_mobile_country_code: string | null;
+  usr_mobile_area_code: string | null;
+  usr_mobile_number: string | null;
+  usr_zip_code: string | null;
+  usr_country: string | null;
+  usr_state: string | null;
+  usr_city: string | null;
+  usr_neighborhood: string | null;
+  usr_street: string | null;
+  usr_street_number: string | null;
+  usr_complement: string | null;
+  usr_notes: string | null;
+  usr_id_insert: number | null;
+  usr_datetimeinsert?: string;
+  usr_id_lastupdate: number | null;
+  usr_datetimeupdate?: string;
 }
 
 export interface ReplacementRule {

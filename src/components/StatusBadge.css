@@ -67,6 +67,12 @@
   border-color: var(--color-orange-200);
 }
 
+.status-badge-inativo {
+  background-color: var(--color-red-100);
+  color: var(--color-red-700);
+  border-color: var(--color-red-200);
+}
+
 .status-badge-default {
   background-color: var(--color-slate-100);
   color: var(--color-slate-700);

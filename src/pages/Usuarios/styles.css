@@ -15,6 +15,36 @@
   color: var(--color-slate-800);
 }
 
+.usuarios-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.usuarios-refresh-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  background-color: var(--color-slate-100);
+  color: var(--color-slate-500);
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.usuarios-refresh-btn:hover {
+  background-color: var(--color-slate-200);
+  color: var(--color-slate-700);
+}
+
+.usuarios-refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .usuarios-add-btn {
   display: flex;
   align-items: center;
@@ -44,6 +74,72 @@
   height: 1.5rem;
 }
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.usuarios-spin {
+  animation: spin 0.8s linear infinite;
+}
+
+/* Loading */
+.usuarios-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem 1rem;
+  color: var(--color-slate-400);
+  font-size: 0.875rem;
+}
+
+.usuarios-loading-icon {
+  width: 2rem;
+  height: 2rem;
+}
+
+/* Error Banner */
+.usuarios-error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-red-50);
+  border: 1px solid var(--color-red-200);
+  border-radius: 0.75rem;
+  color: var(--color-red-700);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.usuarios-retry-btn {
+  padding: 0.375rem 0.75rem;
+  background-color: white;
+  color: var(--color-red-600);
+  border: 1px solid var(--color-red-200);
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.usuarios-retry-btn:hover {
+  background-color: var(--color-red-50);
+}
+
+/* Empty state */
+.usuarios-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--color-slate-400);
+  font-size: 0.875rem;
+}
+
+/* Delete modal */
 .usuarios-delete-content > * + * {
   margin-top: 1.5rem;
 }
@@ -68,6 +164,7 @@
   justify-content: center;
   color: var(--color-red-600);
   box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
 }
 
 .usuarios-delete-title {
@@ -107,6 +204,11 @@
   background-color: var(--color-slate-200);
 }
 
+.usuarios-cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .usuarios-confirm-delete-btn {
   flex: 1 1 0%;
   padding-top: 0.75rem;
@@ -123,6 +225,12 @@
   background-color: var(--color-red-700);
 }
 
+.usuarios-confirm-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Table */
 .usuarios-table-card {
   background-color: white;
   border-radius: 1rem;
@@ -208,6 +316,17 @@
   border: 1px solid var(--color-blue-100);
 }
 
+.usuarios-type-badge {
+  padding: 0.25rem 0.5rem;
+  background-color: var(--color-slate-50);
+  color: var(--color-slate-600);
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  border: 1px solid var(--color-slate-200);
+}
+
 .usuarios-actions {
   display: flex;
   align-items: center;
@@ -249,4 +368,73 @@
 .usuarios-action-delete:hover {
   color: var(--color-red-600);
   background-color: var(--color-red-50);
+}
+
+/* View modal */
+.usuarios-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.usuarios-view-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 639px) {
+  .usuarios-view-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.usuarios-view-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.usuarios-view-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.usuarios-view-value {
+  font-size: 0.875rem;
+  color: var(--color-slate-800);
+}
+
+.usuarios-view-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-slate-100);
+}
+
+.usuarios-view-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-slate-100);
+}
+
+.usuarios-view-close-btn {
+  padding: 0.625rem 1.5rem;
+  background-color: var(--color-slate-100);
+  color: var(--color-slate-600);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.usuarios-view-close-btn:hover {
+  background-color: var(--color-slate-200);
 }

@@ -49,9 +49,9 @@ export const ROLES: Role[] = [
 ];
 
 export const USERS: User[] = [
-  { id: 1, nome: 'Carlos Alberto', email: 'carlos@empresa.com.br', perfil: 'Administrador', status: 'Ativo' },
-  { id: 2, nome: 'Juliana Mendes', email: 'juliana.sesmt@empresa.com.br', perfil: 'Segurança do Trabalho', status: 'Ativo' },
-  { id: 3, nome: 'Roberto Santos', email: 'roberto.sup@empresa.com.br', perfil: 'Supervisor', status: 'Ativo' },
+  { usr_id: 1, usr_active: 1, usr_full_name: 'Carlos Alberto', usr_username: 'carlos.alberto', usr_email: 'carlos@empresa.com.br', usr_agent_type: 'Interno', usr_access_profile: 'Administrador', usr_phone_country_code: null, usr_phone_area_code: null, usr_phone_number: null, usr_mobile_country_code: null, usr_mobile_area_code: null, usr_mobile_number: null, usr_zip_code: null, usr_country: null, usr_state: null, usr_city: null, usr_neighborhood: null, usr_street: null, usr_street_number: null, usr_complement: null, usr_notes: null, usr_id_insert: null, usr_id_lastupdate: null },
+  { usr_id: 2, usr_active: 1, usr_full_name: 'Juliana Mendes', usr_username: 'juliana.mendes', usr_email: 'juliana.sesmt@empresa.com.br', usr_agent_type: 'Interno', usr_access_profile: 'Gestor', usr_phone_country_code: null, usr_phone_area_code: null, usr_phone_number: null, usr_mobile_country_code: null, usr_mobile_area_code: null, usr_mobile_number: null, usr_zip_code: null, usr_country: null, usr_state: null, usr_city: null, usr_neighborhood: null, usr_street: null, usr_street_number: null, usr_complement: null, usr_notes: null, usr_id_insert: null, usr_id_lastupdate: null },
+  { usr_id: 3, usr_active: 0, usr_full_name: 'Roberto Santos', usr_username: 'roberto.santos', usr_email: 'roberto.sup@empresa.com.br', usr_agent_type: 'Externo', usr_access_profile: 'Operador', usr_phone_country_code: null, usr_phone_area_code: null, usr_phone_number: null, usr_mobile_country_code: null, usr_mobile_area_code: null, usr_mobile_number: null, usr_zip_code: null, usr_country: null, usr_state: null, usr_city: null, usr_neighborhood: null, usr_street: null, usr_street_number: null, usr_complement: null, usr_notes: null, usr_id_insert: null, usr_id_lastupdate: null },
 ];
 
 export const REPLACEMENT_RULES: ReplacementRule[] = [

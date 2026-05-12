@@ -13,6 +13,7 @@ const statusClassMap: Record<string, string> = {
   'Pendente': 'status-badge-pendente',
   'Aguardando validação': 'status-badge-aguardando',
   'Erro na validação': 'status-badge-erro-validacao',
+  'Inativo': 'status-badge-inativo',
 };
 
 export const StatusBadge = ({ status }: { status: string }) => {
