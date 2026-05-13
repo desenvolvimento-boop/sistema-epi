@@ -116,3 +116,17 @@
 .epi-form-submit:hover {
   background-color: var(--color-primary-700);
 }
+
+@media (max-width: 639px) {
+  .epi-form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .epi-form-cancel,
+  .epi-form-submit {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+}

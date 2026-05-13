@@ -251,3 +251,41 @@
   width: 0.75rem;
   height: 0.75rem;
 }
+
+@media (max-width: 639px) {
+  .detalhes-card {
+    padding: 1.25rem;
+  }
+
+  .detalhes-profile {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .detalhes-avatar {
+    width: 4rem;
+    height: 4rem;
+    font-size: 1.5rem;
+  }
+
+  .detalhes-name {
+    font-size: 1.25rem;
+  }
+
+  .detalhes-badge-wrapper {
+    position: static;
+    padding: 0;
+    margin-bottom: 1rem;
+  }
+
+  .detalhes-timeline-content {
+    padding: 0.75rem;
+  }
+
+  .detalhes-timeline-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}

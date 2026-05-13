@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { useLocation } from 'react-router-dom';
@@ -34,6 +34,20 @@ export const Layout = ({ children }: LayoutProps) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const title = titles[location.pathname] || 'EPI Control';
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [sidebarOpen]);
 
   if (!isAuthenticated) {
     return <>{children}</>;
@@ -41,10 +55,14 @@ export const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="layout-wrapper">
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
+      {sidebarOpen && (
+        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
+
       <main className="layout-main">
-        <Topbar title={title} />
+        <Topbar title={title} onMenuToggle={() => setSidebarOpen(prev => !prev)} />
         
         <div className="layout-content">
           <AnimatePresence mode="wait">

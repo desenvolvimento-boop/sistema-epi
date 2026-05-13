@@ -271,3 +271,29 @@
 .historico-timeline-link:hover {
   text-decoration: underline;
 }
+
+@media (max-width: 639px) {
+  .historico-card-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .historico-card-body {
+    padding: 1rem;
+  }
+
+  .historico-timeline-content {
+    padding: 0.75rem;
+  }
+
+  .historico-timeline-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .historico-timeline-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

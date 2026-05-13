@@ -258,3 +258,34 @@
   width: 1rem;
   height: 1rem;
 }
+
+@media (max-width: 639px) {
+  .editar-card-body {
+    padding: 1rem;
+  }
+
+  .editar-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .editar-footer-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .editar-submit-btn,
+  .editar-cancel-btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .editar-warning {
+    justify-content: center;
+  }
+
+  .editar-field-row {
+    grid-template-columns: 1fr;
+  }
+}

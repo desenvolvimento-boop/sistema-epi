@@ -94,3 +94,19 @@
 .risk-indicator-button:hover {
   background-color: var(--color-slate-800);
 }
+
+@media (max-width: 639px) {
+  .risk-indicator {
+    padding: 1rem;
+  }
+
+  .risk-indicator-gauge {
+    width: 9rem;
+    height: 9rem;
+  }
+
+  .risk-indicator-value {
+    font-size: 1.75rem;
+    line-height: 2rem;
+  }
+}

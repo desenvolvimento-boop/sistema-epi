@@ -438,3 +438,57 @@
 .usuarios-view-close-btn:hover {
   background-color: var(--color-slate-200);
 }
+
+.usuarios-table-card {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 1023px) {
+  .usuarios-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .usuarios-header-actions {
+    justify-content: flex-end;
+  }
+
+  .usuarios-table {
+    min-width: 600px;
+  }
+
+  .usuarios-cell,
+  .usuarios-cell-right,
+  .usuarios-th,
+  .usuarios-th-right {
+    padding: 0.75rem 1rem;
+  }
+
+  .usuarios-view-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .usuarios-delete-actions {
+    flex-direction: column;
+  }
+
+  .usuarios-cancel-btn,
+  .usuarios-confirm-delete-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 639px) {
+  .usuarios-add-btn {
+    font-size: 0.8125rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .usuarios-error-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+}

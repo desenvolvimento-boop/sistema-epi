@@ -529,3 +529,55 @@
   color: var(--color-blue-600);
   background-color: var(--color-blue-50);
 }
+
+@media (max-width: 1023px) {
+  .relatorios-filters {
+    flex-wrap: wrap;
+  }
+
+  .relatorios-chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .relatorios-chart-container {
+    height: 220px;
+  }
+
+  .relatorios-dist-chart {
+    height: 200px;
+  }
+}
+
+@media (max-width: 639px) {
+  .relatorios-title {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  .relatorios-filters {
+    width: 100%;
+  }
+
+  .relatorios-date-select {
+    width: 100%;
+  }
+
+  .relatorios-filter-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .relatorios-report-btn {
+    flex-wrap: nowrap;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .relatorios-recent-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

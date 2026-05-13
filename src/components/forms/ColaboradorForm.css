@@ -89,3 +89,17 @@
 .colaborador-form-submit:hover {
   background-color: var(--color-primary-700);
 }
+
+@media (max-width: 639px) {
+  .colaborador-form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .colaborador-form-cancel,
+  .colaborador-form-submit {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+}

@@ -133,3 +133,17 @@
 .funcao-form-submit:hover {
   background-color: var(--color-primary-700);
 }
+
+@media (max-width: 639px) {
+  .funcao-form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .funcao-form-cancel,
+  .funcao-form-submit {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+}

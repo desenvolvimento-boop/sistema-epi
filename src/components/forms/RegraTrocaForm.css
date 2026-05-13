@@ -108,3 +108,17 @@
 .regra-troca-form-submit:hover {
   background-color: var(--color-primary-700);
 }
+
+@media (max-width: 639px) {
+  .regra-troca-form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .regra-troca-form-cancel,
+  .regra-troca-form-submit {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+}

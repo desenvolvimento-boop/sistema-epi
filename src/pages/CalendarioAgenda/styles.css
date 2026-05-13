@@ -518,3 +518,77 @@
 .calendario-schedule-btn:hover {
   color: var(--color-primary-500);
 }
+
+@media (max-width: 1023px) {
+  .calendario-view-switcher {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .calendario-day-cell {
+    min-height: 80px;
+    padding: 0.25rem;
+  }
+
+  .calendario-exchange-item {
+    font-size: 8px;
+  }
+
+  .calendario-week-column {
+    min-height: 350px;
+  }
+
+  .calendario-week-day-header {
+    padding: 0.5rem;
+  }
+
+  .calendario-day-event-card {
+    min-width: 200px;
+  }
+
+  .calendario-hour-label {
+    width: 3.5rem;
+    padding: 1rem 0.5rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .calendario-title {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  .calendario-weekday-label {
+    font-size: 8px;
+    padding: 0.5rem 0;
+  }
+
+  .calendario-day-number {
+    font-size: 0.625rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .calendario-day-cell {
+    min-height: 60px;
+  }
+
+  .calendario-exchange-list {
+    display: none;
+  }
+
+  .calendario-view-btn {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.625rem;
+  }
+
+  .calendario-today-btn {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.625rem;
+  }
+
+  .calendario-nav-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

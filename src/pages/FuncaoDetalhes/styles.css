@@ -444,3 +444,41 @@
   line-height: 1.25rem;
   color: var(--color-slate-600);
 }
+
+@media (max-width: 1023px) {
+  .funcao-detalhes-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .funcao-detalhes-riscos-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .funcao-detalhes-riscos-table {
+    min-width: 500px;
+  }
+}
+
+@media (max-width: 639px) {
+  .funcao-detalhes-header-actions {
+    flex-wrap: wrap;
+  }
+
+  .funcao-detalhes-edit-btn,
+  .funcao-detalhes-delete-btn {
+    font-size: 0.8125rem;
+    padding: 0.375rem 0.75rem;
+  }
+
+  .funcao-detalhes-info-card {
+    padding: 1.25rem;
+  }
+
+  .funcao-detalhes-nome {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+}

@@ -1,15 +1,21 @@
 import React from 'react';
-import { Search, Bell } from 'lucide-react';
+import { Search, Bell, Menu } from 'lucide-react';
 import './Topbar.css';
 
 interface TopbarProps {
   title: string;
+  onMenuToggle?: () => void;
 }
 
-export const Topbar = ({ title }: TopbarProps) => {
+export const Topbar = ({ title, onMenuToggle }: TopbarProps) => {
   return (
     <header className="topbar">
-      <h1 className="topbar-title">{title}</h1>
+      <div className="topbar-left">
+        <button className="topbar-menu-btn" onClick={onMenuToggle} aria-label="Menu">
+          <Menu className="topbar-menu-icon" />
+        </button>
+        <h1 className="topbar-title">{title}</h1>
+      </div>
       
       <div className="topbar-actions">
         <div className="topbar-search-wrapper">

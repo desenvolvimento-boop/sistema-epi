@@ -191,3 +191,16 @@ a {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--color-slate-700);
 }
+
+/* Global Responsive Utilities */
+@media (max-width: 639px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 1023px) {
+  table {
+    font-size: 0.8125rem;
+  }
+}

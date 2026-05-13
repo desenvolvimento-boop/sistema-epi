@@ -424,3 +424,20 @@
 .funcao-editar-modal-done-btn:hover {
   background-color: var(--color-slate-800);
 }
+
+@media (max-width: 639px) {
+  .funcao-editar-card-body {
+    padding: 1rem;
+  }
+
+  .funcao-editar-actions {
+    flex-direction: column;
+  }
+
+  .funcao-editar-submit-btn,
+  .funcao-editar-cancel-btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+}

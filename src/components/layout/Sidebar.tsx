@@ -49,7 +49,12 @@ const navItems = [
   { path: '/usuarios', label: 'Usuários', icon: UserCog },
 ];
 
-export const Sidebar = () => {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
@@ -73,7 +78,7 @@ export const Sidebar = () => {
   };
 
   return (
-    <aside className="sidebar">
+    <aside className={clsx("sidebar", isOpen && "sidebar-open")}>
       <div className="sidebar-header">
         <div className="sidebar-logo-wrapper">
           <div className="sidebar-logo">

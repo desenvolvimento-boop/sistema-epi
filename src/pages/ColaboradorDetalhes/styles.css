@@ -345,3 +345,42 @@
 .detalhes-footer-bold {
   font-weight: 700;
 }
+
+@media (max-width: 1023px) {
+  .detalhes-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .detalhes-avatar {
+    width: 5rem;
+    height: 5rem;
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  .detalhes-name {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  .detalhes-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .detalhes-profile-card {
+    padding: 1.25rem;
+  }
+
+  .detalhes-admin-card {
+    padding: 1rem;
+  }
+
+  .detalhes-protection-card {
+    padding: 1.25rem;
+  }
+}

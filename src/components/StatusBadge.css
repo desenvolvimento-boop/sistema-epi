@@ -78,3 +78,11 @@
   color: var(--color-slate-700);
   border-color: var(--color-slate-200);
 }
+
+.status-badge {
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+}

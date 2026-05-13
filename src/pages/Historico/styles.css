@@ -300,3 +300,34 @@
   height: 1rem;
   color: var(--color-slate-400);
 }
+
+@media (max-width: 1023px) {
+  .historico-actions {
+    flex-wrap: wrap;
+  }
+
+  .historico-search-input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .historico-search-wrapper {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 639px) {
+  .historico-title {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  .historico-actions {
+    width: 100%;
+  }
+
+  .historico-search-wrapper {
+    width: 100%;
+  }
+}
