@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Login from '../pages/Login';
+import RecuperarSenha from '../pages/RecuperarSenha';
 import Dashboard from '../pages/Dashboard';
 import Colaboradores from '../pages/Colaboradores';
 import Funcoes from '../pages/Funcoes';
@@ -29,12 +30,29 @@ import FuncaoEditar from '../pages/FuncaoEditar';
 import PlaceholderPage from '../components/PlaceholderPage';
 
 export const AppRouter = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'var(--color-slate-950, #020617)',
+        color: 'var(--color-slate-400, #94a3b8)',
+        fontSize: '0.875rem',
+      }}>
+        Carregando...
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/recuperar-senha" element={<RecuperarSenha />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
@@ -58,16 +76,15 @@ export const AppRouter = () => {
       <Route path="/regras-troca" element={<RegrasTroca />} />
       <Route path="/matriz-funcao-epi" element={<MatrizFuncaoEPI />} />
       <Route path="/intercorrencias" element={<Intercorrencias />} />
+      <Route path="/consumo" element={<Consumo />} />
+      <Route path="/agenda-trocas" element={<AgendaTrocas />} />
+      <Route path="/agenda-trocas/calendario" element={<CalendarioAgenda />} />
       <Route path="/historico" element={<Historico />} />
       <Route path="/historico/:id" element={<HistoricoDetalhes />} />
       <Route path="/usuarios" element={<Usuarios />} />
       <Route path="/relatorios" element={<Relatorios />} />
       <Route path="/relatorios/:id" element={<RelatorioDetalhes />} />
-      <Route path="/consumo" element={<Consumo />} />
-      <Route path="/agenda-trocas" element={<AgendaTrocas />} />
-      <Route path="/agenda-trocas/calendario" element={<CalendarioAgenda />} />
       <Route path="/configuracoes" element={<Configuracoes />} />
-      
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );

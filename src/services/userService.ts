@@ -54,11 +54,7 @@ export const userService = {
     const res = await fetch(`${API_BASE_URL}/user`, {
       headers: getAuthHeaders(),
     });
-    const data = await handleResponse<UserAPI[]>(res);
-    // #region agent log
-    console.log('[DEBUG-4ed3d2] getAll response:', JSON.stringify(data.map(u => ({ usr_id: u.usr_id, type: typeof u.usr_id, name: u.usr_full_name }))));
-    // #endregion
-    return data;
+    return handleResponse<UserAPI[]>(res);
   },
 
   async getById(id: number): Promise<UserAPI> {
@@ -78,9 +74,6 @@ export const userService = {
   },
 
   async update(id: number, data: UserUpdatePayload): Promise<UserAPI> {
-    // #region agent log
-    console.log('[DEBUG-4ed3d2] update called:', { id, idType: typeof id, url: `${API_BASE_URL}/user/${id}` });
-    // #endregion
     const res = await fetch(`${API_BASE_URL}/user/${id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),

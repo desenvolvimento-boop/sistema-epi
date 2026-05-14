@@ -15,11 +15,7 @@ import {
   UserCog,
   User,
   LogOut,
-  ChevronRight,
   ChevronDown,
-  Mail,
-  Shield,
-  MapPin,
   AlertTriangle,
   Settings as SettingsIcon
 } from 'lucide-react';
@@ -55,7 +51,7 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [openSubmenus, setOpenSubmenus] = useState<string[]>(['EPI']);
@@ -66,15 +62,6 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         ? prev.filter(item => item !== label) 
         : [...prev, label]
     );
-  };
-
-  const userData = {
-    nome: 'Admin Master',
-    email: 'desenvolvimento@mobcode.com.br',
-    cargo: 'Administrador de Sistemas',
-    unidade: 'Matriz - São Paulo',
-    permissao: 'Acesso Total',
-    desde: '15/01/2024'
   };
 
   return (
@@ -159,11 +146,11 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           className="sidebar-user-button"
         >
           <div className="sidebar-user-avatar">
-            AD
+            {user?.usr_full_name?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'US'}
           </div>
           <div className="sidebar-user-info">
-            <p className="sidebar-user-name">{userData.nome}</p>
-            <p className="sidebar-user-email">{userData.email}</p>
+            <p className="sidebar-user-name">{user?.usr_full_name || 'Usuário'}</p>
+            <p className="sidebar-user-email">{user?.usr_email || ''}</p>
           </div>
         </button>
       </div>

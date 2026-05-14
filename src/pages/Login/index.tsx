@@ -1,23 +1,29 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Lock, User, Building2, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Lock, User, AlertCircle, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'motion/react';
 import './styles.css';
 
 const Login = () => {
+  const navigate = useNavigate();
   const { login } = useAuth();
-  const [ambiente, setAmbiente] = useState('');
   const [usuario, setUsuario] = useState('');
   const [senha, setSenha] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const success = login(ambiente, usuario, senha);
-    if (!success) {
-      setError('Credenciais inválidas. Verifique os dados e tente novamente.');
+    setLoading(true);
+
+    const errorMsg = await login(usuario, senha);
+    if (errorMsg) {
+      setError(errorMsg);
     }
+
+    setLoading(false);
   };
 
   return (
@@ -43,21 +49,6 @@ const Login = () => {
 
           <form onSubmit={handleSubmit} className="login-form">
             <div className="login-field-group">
-              <label className="login-label">Ambiente</label>
-              <div className="login-input-wrapper">
-                <Building2 className="login-input-icon" />
-                <input 
-                  type="text" 
-                  value={ambiente}
-                  onChange={(e) => setAmbiente(e.target.value)}
-                  placeholder="EX: MOBCODE" 
-                  className="login-input"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="login-field-group">
               <label className="login-label">Usuário</label>
               <div className="login-input-wrapper">
                 <User className="login-input-icon" />
@@ -68,6 +59,7 @@ const Login = () => {
                   placeholder="Seu usuário" 
                   className="login-input"
                   required
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -83,6 +75,7 @@ const Login = () => {
                   placeholder="••••••••" 
                   className="login-input"
                   required
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -101,14 +94,19 @@ const Login = () => {
             <button 
               type="submit"
               className="login-submit-btn"
+              disabled={loading}
             >
-              Acessar Sistema 
+              {loading ? (
+                <Loader2 className="login-btn-spinner" />
+              ) : (
+                'Acessar Sistema'
+              )}
             </button>
           </form>
 
           <div className="login-forgot-wrapper">
             <p className="login-forgot-text">
-              Esqueceu sua senha? <button className="login-forgot-link">Recuperar acesso</button>
+              Esqueceu sua senha? <button className="login-forgot-link" onClick={() => navigate('/recuperar-senha')}>Recuperar acesso</button>
             </p>
           </div>
         </div>

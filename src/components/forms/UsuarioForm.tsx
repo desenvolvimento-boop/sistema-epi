@@ -55,9 +55,6 @@ export const UsuarioForm = ({ onClose, onSaved, initialData }: UsuarioFormProps)
     }
 
     try {
-      // #region agent log
-      console.log('[DEBUG-4ed3d2] handleSubmit:', { isEdit, usrId: initialData?.usr_id, usrIdType: typeof initialData?.usr_id });
-      // #endregion
       if (isEdit) {
         await userService.update(initialData.usr_id, payload);
       } else {
@@ -109,7 +106,7 @@ export const UsuarioForm = ({ onClose, onSaved, initialData }: UsuarioFormProps)
         </div>
         <div className="usuario-form-field">
           <label className="usuario-form-label">Senha <span className="usuario-form-required">*</span></label>
-          <input type="password" name="usr_password" placeholder={isEdit ? 'Deixe vazio para manter' : 'Senha'} className="usuario-form-input" required />
+          <input type="password" name="usr_password" placeholder={isEdit ? 'Deixe vazio para manter' : 'Senha'} className="usuario-form-input" required={!isEdit} />
         </div>
       </div>
 
