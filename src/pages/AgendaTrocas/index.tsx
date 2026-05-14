@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import './styles.css';
 
 const AGENDA_MOCK = [
@@ -26,6 +27,7 @@ const AgendaTrocas = () => {
   const navigate = useNavigate();
   const [selectedExchange, setSelectedExchange] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { canCreate } = useAuth();
 
   const handleOpenRegister = (item: any) => {
     setSelectedExchange(item);
@@ -51,9 +53,11 @@ const AgendaTrocas = () => {
           >
             Visualizar Calendário
           </button>
-          <button className="agenda-btn-generate">
-            Gerar Lote de Troca
-          </button>
+          {canCreate('/agenda-trocas') && (
+            <button className="agenda-btn-generate">
+              Gerar Lote de Troca
+            </button>
+          )}
         </div>
       </div>
 
@@ -146,12 +150,14 @@ const AgendaTrocas = () => {
                     </span>
                   </td>
                   <td className="agenda-td--right">
-                    <button 
-                      onClick={() => handleOpenRegister(item)}
-                      className="agenda-btn-register"
-                    >
-                      Registrar Troca
-                    </button>
+                    {canCreate('/agenda-trocas') && (
+                      <button 
+                        onClick={() => handleOpenRegister(item)}
+                        className="agenda-btn-register"
+                      >
+                        Registrar Troca
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

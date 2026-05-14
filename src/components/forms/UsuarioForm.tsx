@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
-import { Check, X, Search, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Check, X, Search, Loader2, Plus } from 'lucide-react';
 import { User } from '../../types/system.types';
 import { userService } from '../../services/userService';
+import { accessProfileService, type AccessProfileAPI } from '../../services/accessProfileService';
+import { userGroupService, type UserGroupAPI } from '../../services/userGroupService';
+import { UserGroupCrudModal } from './UserGroupCrudModal';
 import './UsuarioForm.css';
 
 interface UsuarioFormProps {
@@ -14,8 +17,55 @@ export const UsuarioForm = ({ onClose, onSaved, initialData }: UsuarioFormProps)
   const [ativo, setAtivo] = useState(initialData ? initialData.usr_active === 1 : true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [accessProfiles, setAccessProfiles] = useState<AccessProfileAPI[]>([]);
+  const [loadingProfiles, setLoadingProfiles] = useState(true);
+  const [selectedAcpId, setSelectedAcpId] = useState<string>(
+    initialData?.acp_id ? String(initialData.acp_id) : ''
+  );
+
+  const [userGroups, setUserGroups] = useState<UserGroupAPI[]>([]);
+  const [loadingGroups, setLoadingGroups] = useState(true);
+  const [selectedGroupId, setSelectedGroupId] = useState<string>(
+    initialData?.agg_id ? String(initialData.agg_id) : ''
+  );
+
+  const [isUserTypeModalOpen, setIsUserTypeModalOpen] = useState(false);
+
+  const handleGroupCreated = (group: UserGroupAPI) => {
+    setUserGroups(prev => [...prev, group]);
+    setSelectedGroupId(String(group.usg_id));
+  };
 
   const isEdit = !!initialData;
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      try {
+        const allProfiles = await accessProfileService.getAll();
+        const activeProfiles = allProfiles.filter(p => p.acp_active === 1);
+        setAccessProfiles(activeProfiles);
+      } catch (err) {
+        console.error('Erro ao carregar perfis de acesso:', err);
+        setAccessProfiles([]);
+      } finally {
+        setLoadingProfiles(false);
+      }
+    };
+    const fetchUserGroups = async () => {
+      try {
+        const groups = await userGroupService.getAll();
+        const activeGroups = groups.filter(g => g.usg_active === 1);
+        setUserGroups(activeGroups);
+      } catch (err) {
+        console.error('Erro ao carregar tipos de usuário:', err);
+        setUserGroups([]);
+      } finally {
+        setLoadingGroups(false);
+      }
+    };
+    fetchProfiles();
+    fetchUserGroups();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,13 +75,20 @@ export const UsuarioForm = ({ onClose, onSaved, initialData }: UsuarioFormProps)
     const form = e.currentTarget;
     const fd = new FormData(form);
 
+    const acpId = selectedAcpId ? parseInt(selectedAcpId) : null;
+    const selectedProfile = accessProfiles.find(p => p.acp_id === acpId);
+    const aggId = selectedGroupId ? parseInt(selectedGroupId) : null;
+    const selectedGroup = userGroups.find(g => g.usg_id === aggId);
+
     const payload: Record<string, any> = {
       usr_active: ativo ? 1 : 0,
       usr_full_name: fd.get('usr_full_name') as string || null,
       usr_username: fd.get('usr_username') as string || null,
       usr_email: fd.get('usr_email') as string || null,
-      usr_agent_type: fd.get('usr_agent_type') as string || null,
-      usr_access_profile: fd.get('usr_access_profile') as string || null,
+      usr_agent_type: selectedGroup?.usg_integrationid || null,
+      agg_id: aggId,
+      acp_id: acpId,
+      usr_access_profile: selectedProfile?.acp_description || null,
       usr_phone_country_code: fd.get('usr_phone_country_code') as string || null,
       usr_phone_area_code: fd.get('usr_phone_area_code') as string || null,
       usr_phone_number: fd.get('usr_phone_number') as string || null,
@@ -112,22 +169,56 @@ export const UsuarioForm = ({ onClose, onSaved, initialData }: UsuarioFormProps)
 
       <div className="usuario-form-grid">
         <div className="usuario-form-field">
-          <label className="usuario-form-label">Tipo de Agente</label>
-          <select name="usr_agent_type" className="usuario-form-input" defaultValue={initialData?.usr_agent_type ?? ''}>
-            <option value="" disabled>Selecione...</option>
-            <option value="Interno">Interno</option>
-            <option value="Externo">Externo</option>
-            <option value="Terceirizado">Terceirizado</option>
-          </select>
+          <label className="usuario-form-label">Tipo de Usuário</label>
+          <div className="usuario-form-select-with-action">
+            <select
+              className="usuario-form-input"
+              value={selectedGroupId}
+              onChange={(e) => setSelectedGroupId(e.target.value)}
+              disabled={loadingGroups}
+            >
+              <option value="" disabled>
+                {loadingGroups ? 'Carregando tipos...' : 'Selecione...'}
+              </option>
+              {userGroups.map(g => (
+                <option key={g.usg_id} value={String(g.usg_id)}>
+                  {g.usg_integrationid}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className="usuario-form-add-type-btn"
+              onClick={() => setIsUserTypeModalOpen(true)}
+              title="Adicionar novo tipo de usuário"
+            >
+              <Plus className="usuario-form-add-type-icon" />
+            </button>
+          </div>
+
+          <UserGroupCrudModal
+            isOpen={isUserTypeModalOpen}
+            onClose={() => setIsUserTypeModalOpen(false)}
+            onGroupCreated={handleGroupCreated}
+          />
         </div>
         <div className="usuario-form-field">
           <label className="usuario-form-label">Perfil de Acesso <span className="usuario-form-required">*</span></label>
-          <select name="usr_access_profile" className="usuario-form-input" required defaultValue={initialData?.usr_access_profile ?? ''}>
-            <option value="" disabled>Selecione...</option>
-            <option value="Administrador">Administrador</option>
-            <option value="Gestor">Gestor de Unidade</option>
-            <option value="Operador">Operador de Almoxarifado</option>
-            <option value="Auditor">Auditor</option>
+          <select
+            className="usuario-form-input"
+            required
+            value={selectedAcpId}
+            onChange={(e) => setSelectedAcpId(e.target.value)}
+            disabled={loadingProfiles}
+          >
+            <option value="" disabled>
+              {loadingProfiles ? 'Carregando perfis...' : 'Selecione...'}
+            </option>
+            {accessProfiles.map(profile => (
+              <option key={profile.acp_id} value={String(profile.acp_id)}>
+                {profile.acp_description}
+              </option>
+            ))}
           </select>
         </div>
       </div>

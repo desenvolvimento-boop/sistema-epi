@@ -93,6 +93,18 @@ export interface User {
   usr_datetimeinsert?: string;
   usr_id_lastupdate: number | null;
   usr_datetimeupdate?: string;
+  acp_id: number | null;
+  agg_id: number | null;
+}
+
+export interface UserPermission {
+  prm_id: number;
+  acp_id: number;
+  fea_id: number;
+  prm_create: number;
+  prm_view: number;
+  prm_edit: number;
+  prm_delete: number;
 }
 
 export interface ReplacementRule {

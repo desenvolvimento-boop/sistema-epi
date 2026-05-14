@@ -4,22 +4,27 @@ import { Plus, MoreVertical, Shield, Info } from 'lucide-react';
 import { ROLES } from '../../services/api';
 import { Modal } from '../../components/ui/Modal';
 import { FuncaoForm } from '../../components/forms/FuncaoForm';
+import { useAuth } from '../../contexts/AuthContext';
 import './styles.css';
 
 const Funcoes = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { canCreate } = useAuth();
+  const allowCreate = canCreate('/funcoes');
 
   return (
     <div className="funcoes-container">
       <div className="funcoes-header">
         <h2 className="funcoes-title">Definição de Funções e Riscos</h2>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="funcoes-add-btn"
-        >
-          <Plus className="funcoes-btn-icon" /> Nova Função
-        </button>
+        {allowCreate && (
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="funcoes-add-btn"
+          >
+            <Plus className="funcoes-btn-icon" /> Nova Função
+          </button>
+        )}
       </div>
 
       <Modal 

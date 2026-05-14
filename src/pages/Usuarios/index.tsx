@@ -5,9 +5,14 @@ import { userService } from '../../services/userService';
 import { StatusBadge } from '../../components/StatusBadge';
 import { Modal } from '../../components/ui/Modal';
 import { UsuarioForm } from '../../components/forms/UsuarioForm';
+import { useAuth } from '../../contexts/AuthContext';
 import './styles.css';
 
 const Usuarios = () => {
+  const { canCreate, canEdit, canDelete } = useAuth();
+  const allowCreate = canCreate('/usuarios');
+  const allowEdit = canEdit('/usuarios');
+  const allowDelete = canDelete('/usuarios');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,9 +97,11 @@ const Usuarios = () => {
           <button onClick={fetchUsers} className="usuarios-refresh-btn" title="Atualizar lista" disabled={loading}>
             <RefreshCw className={`usuarios-icon-sm ${loading ? 'usuarios-spin' : ''}`} />
           </button>
-          <button onClick={handleOpenCreate} className="usuarios-add-btn">
-            <Plus className="usuarios-icon-sm" /> Novo Usuário
-          </button>
+          {allowCreate && (
+            <button onClick={handleOpenCreate} className="usuarios-add-btn">
+              <Plus className="usuarios-icon-sm" /> Novo Usuário
+            </button>
+          )}
         </div>
       </div>
 
@@ -123,8 +130,8 @@ const Usuarios = () => {
               <ViewField label="Nome" value={viewUser.usr_full_name} />
               <ViewField label="Login" value={viewUser.usr_username} />
               <ViewField label="E-mail" value={viewUser.usr_email} />
-              <ViewField label="Tipo de Agente" value={viewUser.usr_agent_type} />
-              <ViewField label="Perfil de Acesso" value={viewUser.usr_access_profile} />
+              <ViewField label="Tipo de Usuário" value={viewUser.usr_agent_type} />
+              <ViewField label="Perfil de Acesso" value={(viewUser as any).accessProfile?.acp_description || viewUser.usr_access_profile} />
               <ViewField label="Status" value={viewUser.usr_active === 1 ? 'Ativo' : 'Inativo'} />
               <ViewField label="Telefone" value={formatPhone(viewUser.usr_phone_country_code, viewUser.usr_phone_area_code, viewUser.usr_phone_number)} />
               <ViewField label="Celular" value={formatPhone(viewUser.usr_mobile_country_code, viewUser.usr_mobile_area_code, viewUser.usr_mobile_number)} />
@@ -219,7 +226,7 @@ const Usuarios = () => {
                       <p className="usuarios-email">{user.usr_email}</p>
                     </td>
                     <td className="usuarios-cell">
-                      <span className="usuarios-badge">{user.usr_access_profile}</span>
+                      <span className="usuarios-badge">{(user as any).accessProfile?.acp_description || user.usr_access_profile || '—'}</span>
                     </td>
                     <td className="usuarios-cell">
                       <span className="usuarios-type-badge">{user.usr_agent_type}</span>
@@ -232,12 +239,16 @@ const Usuarios = () => {
                         <button onClick={() => handleViewUser(user)} className="usuarios-action-view" title="Visualizar">
                           <Eye className="usuarios-icon-sm" />
                         </button>
-                        <button onClick={() => handleOpenEdit(user)} className="usuarios-action-edit" title="Editar">
-                          <Edit2 className="usuarios-icon-sm" />
-                        </button>
-                        <button onClick={() => handleDeleteClick(user)} className="usuarios-action-delete" title="Excluir">
-                          <Trash2 className="usuarios-icon-sm" />
-                        </button>
+                        {allowEdit && (
+                          <button onClick={() => handleOpenEdit(user)} className="usuarios-action-edit" title="Editar">
+                            <Edit2 className="usuarios-icon-sm" />
+                          </button>
+                        )}
+                        {allowDelete && (
+                          <button onClick={() => handleDeleteClick(user)} className="usuarios-action-delete" title="Excluir">
+                            <Trash2 className="usuarios-icon-sm" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

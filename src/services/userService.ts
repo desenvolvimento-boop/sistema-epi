@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://192.168.15.3:3001';
+const API_BASE_URL = 'http://172.20.10.8:3001';
 
 export interface UserAPI {
   usr_id: number;
@@ -28,6 +28,8 @@ export interface UserAPI {
   usr_datetimeinsert?: string;
   usr_id_lastupdate: number | null;
   usr_datetimeupdate?: string;
+  acp_id: number | null;
+  agg_id: number | null;
 }
 
 export type UserCreatePayload = Omit<UserAPI, 'usr_id' | 'usr_datetimeinsert' | 'usr_datetimeupdate'>;

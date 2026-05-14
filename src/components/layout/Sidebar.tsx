@@ -51,7 +51,7 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
-  const { logout, user } = useAuth();
+  const { logout, user, canView } = useAuth();
   const navigate = useNavigate();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [openSubmenus, setOpenSubmenus] = useState<string[]>(['EPI']);
@@ -78,6 +78,9 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       <nav className="sidebar-nav custom-scrollbar">
         {navItems.map((item) => {
           if (item.children) {
+            const visibleChildren = item.children.filter(child => canView(child.path));
+            if (visibleChildren.length === 0) return null;
+
             const isOpen = openSubmenus.includes(item.label);
             return (
               <div key={item.label} className="sidebar-submenu-group">
@@ -97,7 +100,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                 
                 {isOpen && (
                   <div className="sidebar-submenu-items">
-                    {item.children.map((child) => (
+                    {visibleChildren.map((child) => (
                       <NavLink
                         key={child.path}
                         to={child.path}
@@ -120,6 +123,8 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             );
           }
 
+          if (item.path && !canView(item.path)) return null;
+
           return (
             <NavLink
               key={item.path}
@@ -141,18 +146,28 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       </nav>
 
       <div className="sidebar-footer">
-        <button 
-          onClick={() => navigate('/configuracoes')}
-          className="sidebar-user-button"
-        >
-          <div className="sidebar-user-avatar">
-            {user?.usr_full_name?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'US'}
-          </div>
-          <div className="sidebar-user-info">
-            <p className="sidebar-user-name">{user?.usr_full_name || 'Usuário'}</p>
-            <p className="sidebar-user-email">{user?.usr_email || ''}</p>
-          </div>
-        </button>
+        <div className="sidebar-footer-row">
+          <button 
+            onClick={() => canView('/configuracoes') ? navigate('/configuracoes') : undefined}
+            className={clsx("sidebar-user-button", !canView('/configuracoes') && "sidebar-user-button-disabled")}
+            title={canView('/configuracoes') ? 'Configurações' : user?.usr_full_name || 'Usuário'}
+          >
+            <div className="sidebar-user-avatar">
+              {user?.usr_full_name?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'US'}
+            </div>
+            <div className="sidebar-user-info">
+              <p className="sidebar-user-name">{user?.usr_full_name || 'Usuário'}</p>
+              <p className="sidebar-user-email">{user?.usr_email || ''}</p>
+            </div>
+          </button>
+          <button
+            onClick={() => setIsLogoutConfirmOpen(true)}
+            className="sidebar-logout-btn"
+            title="Sair da conta"
+          >
+            <LogOut className="sidebar-logout-btn-icon" />
+          </button>
+        </div>
       </div>
 
       {/* Modal de Confirmação de Logout */}

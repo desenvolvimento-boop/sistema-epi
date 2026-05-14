@@ -5,12 +5,16 @@ import { ROLES, EPIS } from '../../services/api';
 import { Modal } from '../../components/ui/Modal';
 import { MatrizForm } from '../../components/forms/MatrizForm';
 import { Role } from '../../types/system.types';
+import { useAuth } from '../../contexts/AuthContext';
 import './styles.css';
 
 const MatrizFuncaoEPI = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const navigate = useNavigate();
+  const { canCreate, canEdit } = useAuth();
+  const allowCreate = canCreate('/matriz-funcao-epi');
+  const allowEdit = canEdit('/matriz-funcao-epi');
 
   const handleEditMatriz = (role: Role) => {
     setSelectedRole(role);
@@ -26,12 +30,14 @@ const MatrizFuncaoEPI = () => {
     <div className="matriz-page">
       <div className="matriz-header">
         <h2 className="matriz-title">Matriz de Proteção (Função x EPI)</h2>
-        <button 
-          onClick={handleNewMatriz}
-          className="matriz-new-btn"
-        >
-          <Plus className="w-4 h-4" /> Nova Matriz
-        </button>
+        {allowCreate && (
+          <button 
+            onClick={handleNewMatriz}
+            className="matriz-new-btn"
+          >
+            <Plus className="w-4 h-4" /> Nova Matriz
+          </button>
+        )}
       </div>
 
       <Modal 
@@ -90,13 +96,15 @@ const MatrizFuncaoEPI = () => {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button 
-                        onClick={() => handleEditMatriz(role)}
-                        className="matriz-btn-edit"
-                        title="Editar Matriz"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </button>
+                      {allowEdit && (
+                        <button 
+                          onClick={() => handleEditMatriz(role)}
+                          className="matriz-btn-edit"
+                          title="Editar Matriz"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

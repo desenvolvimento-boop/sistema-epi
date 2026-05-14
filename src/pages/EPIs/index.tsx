@@ -5,11 +5,15 @@ import { StatusBadge } from '../../components/StatusBadge';
 import { Modal } from '../../components/ui/Modal';
 import { EPIForm } from '../../components/forms/EPIForm';
 import { EPI } from '../../types/system.types';
+import { useAuth } from '../../contexts/AuthContext';
 import './styles.css';
 
 const EPIs = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEpi, setSelectedEpi] = useState<EPI | null>(null);
+  const { canCreate, canEdit } = useAuth();
+  const allowCreate = canCreate('/epis');
+  const allowEdit = canEdit('/epis');
 
   const handleOpenModal = (epi?: EPI) => {
     setSelectedEpi(epi || null);
@@ -20,12 +24,14 @@ const EPIs = () => {
     <div className="epis-page">
       <div className="page-header">
         <h2 className="page-title">Catálogo de EPIs</h2>
-        <button 
-          onClick={() => handleOpenModal()}
-          className="btn-add"
-        >
-          <Plus className="icon-sm" /> Novo EPI
-        </button>
+        {allowCreate && (
+          <button 
+            onClick={() => handleOpenModal()}
+            className="btn-add"
+          >
+            <Plus className="icon-sm" /> Novo EPI
+          </button>
+        )}
       </div>
 
       <Modal 
@@ -55,7 +61,8 @@ const EPIs = () => {
               <tr 
                 key={epi.id} 
                 className="table-row"
-                onClick={() => handleOpenModal(epi)}
+                onClick={() => allowEdit && handleOpenModal(epi)}
+                style={{ cursor: allowEdit ? 'pointer' : 'default' }}
               >
                 <td className="table-cell">
                   <div className="epi-name-wrapper">
@@ -76,9 +83,11 @@ const EPIs = () => {
                   <StatusBadge status={epi.status} />
                 </td>
                 <td className="table-cell-right">
-                  <button className="btn-edit">
-                    <Edit3 className="icon-sm" />
-                  </button>
+                  {allowEdit && (
+                    <button className="btn-edit">
+                      <Edit3 className="icon-sm" />
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

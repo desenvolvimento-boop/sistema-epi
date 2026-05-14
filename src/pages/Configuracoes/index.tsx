@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Shield, 
   Link as LinkIcon, 
@@ -9,65 +9,48 @@ import {
   Trash2, 
   Copy, 
   Check,
-  ChevronRight,
-  Search,
   AlertTriangle,
   Settings as SettingsIcon,
-  LayoutDashboard,
-  Users,
-  Briefcase,
-  ShieldCheck,
-  RefreshCw,
-  Grid3X3,
-  ClipboardList,
-  Smartphone,
-  Calendar,
-  History,
-  BarChart3,
-  UserCog
+  X,
+  Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import clsx from 'clsx';
 import { Modal } from '../../components/ui/Modal';
 import { useAuth } from '../../contexts/AuthContext';
+import { accessProfileService, type AccessProfileAPI } from '../../services/accessProfileService';
+import { featureService, type FeatureAPI } from '../../services/featureService';
+import { permissionService, type PermissionAPI, type PermissionBulkItem } from '../../services/permissionService';
 import './styles.css';
 
-const MENU_OPTIONS = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'colaboradores', label: 'Colaboradores', icon: Users },
-  { id: 'funcoes', label: 'Gestão de Funções', icon: Briefcase },
-  { id: 'epis', label: 'Cadastro de EPIs', icon: ShieldCheck },
-  { id: 'regras-troca', label: 'Regras de Troca', icon: RefreshCw },
-  { id: 'matriz-funcao-epi', label: 'Matriz Função x EPI', icon: Grid3X3 },
-  { id: 'consumo', label: 'Registro de Consumo', icon: ClipboardList },
-  { id: 'entregas', label: 'Registro de Entrega', icon: Smartphone },
-  { id: 'agenda-trocas', label: 'Agenda de Trocas', icon: Calendar },
-  { id: 'historico', label: 'Histórico', icon: History },
-  { id: 'relatorios', label: 'Relatórios', icon: BarChart3 },
-  { id: 'usuarios', label: 'Usuários', icon: UserCog },
-];
-
-interface AccessProfile {
-  id: string;
-  name: string;
-  permissions: string[];
-  userCount: number;
+interface PermissionSet {
+  criar: boolean;
+  visualizar: boolean;
+  editar: boolean;
+  excluir: boolean;
 }
 
-const INITIAL_PROFILES: AccessProfile[] = [
-  { id: '1', name: 'Administrador Master', permissions: MENU_OPTIONS.map(o => o.id), userCount: 2 },
-  { id: '2', name: 'Supervisor SESMT', permissions: ['dashboard', 'colaboradores', 'epis', 'relatorios'], userCount: 5 },
-  { id: '3', name: 'Operador de Almoxarifado', permissions: ['dashboard', 'consumo', 'entregas', 'epis'], userCount: 12 },
-];
-
 const Configuracoes = () => {
-  const { logout } = useAuth();
+  const { logout, canCreate, canEdit, canDelete } = useAuth();
+  const allowCreate = canCreate('/configuracoes');
+  const allowEdit = canEdit('/configuracoes');
+  const allowDelete = canDelete('/configuracoes');
   const [activeTab, setActiveTab] = useState('perfil');
-  const [profiles, setProfiles] = useState<AccessProfile[]>(INITIAL_PROFILES);
+
+  const [profiles, setProfiles] = useState<AccessProfileAPI[]>([]);
+  const [features, setFeatures] = useState<FeatureAPI[]>([]);
+  const [profilePermissionsCount, setProfilePermissionsCount] = useState<Record<number, number>>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [editingProfile, setEditingProfile] = useState<AccessProfile | null>(null);
+  const [editingProfile, setEditingProfile] = useState<AccessProfileAPI | null>(null);
   const [newProfileName, setNewProfileName] = useState('');
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+  const [newIntegrationId, setNewIntegrationId] = useState('');
+  const [newStatus, setNewStatus] = useState<number>(1);
+  const [newIsDefault, setNewIsDefault] = useState<number>(0);
+  const [selectedPermissions, setSelectedPermissions] = useState<Record<string, PermissionSet>>({});
 
   const tabs = [
     { id: 'perfil', label: 'Perfil de Acesso', icon: Shield },
@@ -85,53 +68,204 @@ const Configuracoes = () => {
   const [isIntegracaoModalOpen, setIsIntegracaoModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<any>(null);
 
+  const createEmptyPermissions = useCallback((): Record<string, PermissionSet> => {
+    const perms: Record<string, PermissionSet> = {};
+    features.forEach(f => {
+      perms[f.fea_id.toString()] = { criar: false, visualizar: false, editar: false, excluir: false };
+    });
+    return perms;
+  }, [features]);
+
+  const createFullPermissions = useCallback((): Record<string, PermissionSet> => {
+    const perms: Record<string, PermissionSet> = {};
+    features.forEach(f => {
+      perms[f.fea_id.toString()] = { criar: true, visualizar: true, editar: true, excluir: true };
+    });
+    return perms;
+  }, [features]);
+
+  const countActiveModules = (perms: Record<string, PermissionSet>) => {
+    return Object.values(perms).filter(p => p.criar || p.visualizar || p.editar || p.excluir).length;
+  };
+
+  const permissionsApiToLocal = (perms: PermissionAPI[]): Record<string, PermissionSet> => {
+    const result: Record<string, PermissionSet> = {};
+    features.forEach(f => {
+      const p = perms.find(pm => pm.fea_id === f.fea_id);
+      result[f.fea_id.toString()] = p
+        ? { criar: !!p.prm_create, visualizar: !!p.prm_view, editar: !!p.prm_edit, excluir: !!p.prm_delete }
+        : { criar: false, visualizar: false, editar: false, excluir: false };
+    });
+    return result;
+  };
+
+  const permissionsLocalToApi = (perms: Record<string, PermissionSet>): PermissionBulkItem[] => {
+    return Object.entries(perms).map(([feaId, p]) => ({
+      fea_id: parseInt(feaId),
+      prm_create: p.criar ? 1 : 0,
+      prm_view: p.visualizar ? 1 : 0,
+      prm_edit: p.editar ? 1 : 0,
+      prm_delete: p.excluir ? 1 : 0,
+    }));
+  };
+
+  const loadPermissionsCount = useCallback(async (profileList: AccessProfileAPI[]) => {
+    const counts: Record<number, number> = {};
+    await Promise.all(
+      profileList.map(async (profile) => {
+        try {
+          const perms = await permissionService.getByProfile(profile.acp_id);
+          const localPerms = permissionsApiToLocal(perms);
+          counts[profile.acp_id] = countActiveModules(localPerms);
+        } catch {
+          counts[profile.acp_id] = 0;
+        }
+      })
+    );
+    setProfilePermissionsCount(counts);
+  }, [features]);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const [profilesData, featuresData] = await Promise.all([
+        accessProfileService.getAll(),
+        featureService.getAll(),
+      ]);
+      setProfiles(profilesData);
+      setFeatures(featuresData);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao carregar dados');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    if (profiles.length > 0 && features.length > 0) {
+      loadPermissionsCount(profiles);
+    }
+  }, [profiles, features, loadPermissionsCount]);
+
   const handleAddProfile = () => {
     setEditingProfile(null);
     setNewProfileName('');
-    setSelectedPermissions([]);
+    setNewIntegrationId('');
+    setNewStatus(1);
+    setNewIsDefault(0);
+    setSelectedPermissions(createEmptyPermissions());
     setIsProfileModalOpen(true);
   };
 
-  const handleEditProfile = (profile: AccessProfile) => {
+  const handleEditProfile = async (profile: AccessProfileAPI) => {
     setEditingProfile(profile);
-    setNewProfileName(profile.name);
-    setSelectedPermissions(profile.permissions);
+    setNewProfileName(profile.acp_description || '');
+    setNewIntegrationId(profile.acp_integrationid || '');
+    setNewStatus(profile.acp_active ?? 1);
+    setNewIsDefault(profile.acp_standard ?? 0);
+    try {
+      const perms = await permissionService.getByProfile(profile.acp_id);
+      setSelectedPermissions(permissionsApiToLocal(perms));
+    } catch {
+      setSelectedPermissions(createEmptyPermissions());
+    }
     setIsProfileModalOpen(true);
   };
 
-  const handleDuplicateProfile = (profile: AccessProfile) => {
-    const duplicated: AccessProfile = {
-      ...profile,
-      id: Math.random().toString(36).substr(2, 9),
-      name: `${profile.name} (Cópia)`,
-      userCount: 0
-    };
-    setProfiles([...profiles, duplicated]);
-  };
-
-  const handleDeleteProfile = (id: string) => {
-    setProfiles(profiles.filter(p => p.id !== id));
-  };
-
-  const handleSaveProfile = () => {
-    if (editingProfile) {
-      setProfiles(profiles.map(p => p.id === editingProfile.id ? { ...p, name: newProfileName, permissions: selectedPermissions } : p));
-    } else {
-      const newProfile: AccessProfile = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: newProfileName,
-        permissions: selectedPermissions,
-        userCount: 0
-      };
-      setProfiles([...profiles, newProfile]);
+  const handleDuplicateProfile = async (profile: AccessProfileAPI) => {
+    try {
+      setSaving(true);
+      const newProfile = await accessProfileService.create({
+        acp_description: `${profile.acp_description} (Cópia)`,
+        acp_integrationid: profile.acp_integrationid,
+        acp_active: profile.acp_active,
+        acp_standard: 0,
+      });
+      const perms = await permissionService.getByProfile(profile.acp_id);
+      if (perms.length > 0) {
+        const bulkItems = perms.map(p => ({
+          fea_id: p.fea_id,
+          prm_create: p.prm_create,
+          prm_view: p.prm_view,
+          prm_edit: p.prm_edit,
+          prm_delete: p.prm_delete,
+        }));
+        await permissionService.bulkSave(newProfile.acp_id, bulkItems);
+      }
+      await fetchData();
+    } catch (err: any) {
+      setError(err.message || 'Erro ao duplicar perfil');
+    } finally {
+      setSaving(false);
     }
-    setIsProfileModalOpen(false);
   };
 
-  const togglePermission = (id: string) => {
-    setSelectedPermissions(prev => 
-      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
-    );
+  const handleDeleteProfile = async (id: number) => {
+    try {
+      setSaving(true);
+      await accessProfileService.delete(id);
+      await fetchData();
+    } catch (err: any) {
+      setError(err.message || 'Erro ao excluir perfil');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setSaving(true);
+      let profileId: number;
+
+      if (editingProfile) {
+        await accessProfileService.update(editingProfile.acp_id, {
+          acp_description: newProfileName,
+          acp_integrationid: newIntegrationId,
+          acp_active: newStatus,
+          acp_standard: newIsDefault,
+        });
+        profileId = editingProfile.acp_id;
+      } else {
+        const created = await accessProfileService.create({
+          acp_description: newProfileName,
+          acp_integrationid: newIntegrationId,
+          acp_active: newStatus,
+          acp_standard: newIsDefault,
+        });
+        profileId = created.acp_id;
+      }
+
+      await permissionService.bulkSave(profileId, permissionsLocalToApi(selectedPermissions));
+      setIsProfileModalOpen(false);
+      await fetchData();
+    } catch (err: any) {
+      setError(err.message || 'Erro ao salvar perfil');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const togglePermission = (feaId: string, type: keyof PermissionSet) => {
+    setSelectedPermissions(prev => ({
+      ...prev,
+      [feaId]: {
+        ...prev[feaId],
+        [type]: !prev[feaId][type]
+      }
+    }));
+  };
+
+  const markAllPermissions = () => {
+    setSelectedPermissions(createFullPermissions());
+  };
+
+  const unmarkAllPermissions = () => {
+    setSelectedPermissions(createEmptyPermissions());
   };
 
   return (
@@ -182,68 +316,100 @@ const Configuracoes = () => {
                     <h3 className="config-section-title">Perfis de Acesso</h3>
                     <p className="config-section-desc">Defina o que cada grupo de usuários pode visualizar.</p>
                   </div>
-                  <button 
-                    onClick={handleAddProfile}
-                    className="config-primary-btn"
-                  >
-                    <Plus className="config-icon-sm" /> Adicionar Perfil
-                  </button>
+                  {allowCreate && (
+                    <button 
+                      onClick={handleAddProfile}
+                      className="config-primary-btn"
+                      disabled={loading}
+                    >
+                      <Plus className="config-icon-sm" /> Adicionar Perfil
+                    </button>
+                  )}
                 </div>
 
-                <div className="config-table-scroll">
-                  <table className="config-table">
-                    <thead>
-                      <tr className="config-thead-row">
-                        <th className="config-th">Nome do Perfil</th>
-                        <th className="config-th">Permissões</th>
-                        <th className="config-th">Usuários</th>
-                        <th className="config-th-right">Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody className="config-tbody">
-                      {profiles.map(profile => (
-                        <tr key={profile.id} className="config-row">
-                          <td className="config-cell">
-                            <span className="config-profile-name">{profile.name}</span>
-                          </td>
-                          <td className="config-cell">
-                            <span className="config-permissions-badge">
-                              {profile.permissions.length} módulos
-                            </span>
-                          </td>
-                          <td className="config-cell">
-                            <span className="config-user-count">{profile.userCount} usuários</span>
-                          </td>
-                          <td className="config-cell-right">
-                            <div className="config-actions">
-                              <button 
-                                onClick={() => handleEditProfile(profile)}
-                                className="config-action-edit"
-                                title="Editar"
-                              >
-                                <Edit2 className="config-icon-sm" />
-                              </button>
-                              <button 
-                                onClick={() => handleDuplicateProfile(profile)}
-                                className="config-action-copy"
-                                title="Duplicar"
-                              >
-                                <Copy className="config-icon-sm" />
-                              </button>
-                              <button 
-                                onClick={() => handleDeleteProfile(profile.id)}
-                                className="config-action-delete"
-                                title="Excluir"
-                              >
-                                <Trash2 className="config-icon-sm" />
-                              </button>
-                            </div>
-                          </td>
+                {error && (
+                  <div className="config-warning-card">
+                    <div className="config-warning-header">
+                      <AlertTriangle className="config-icon-md" />
+                      <p className="config-warning-title">{error}</p>
+                    </div>
+                  </div>
+                )}
+
+                {loading ? (
+                  <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                    <Loader2 className="config-icon-lg" style={{ animation: 'spin 1s linear infinite' }} />
+                  </div>
+                ) : (
+                  <div className="config-table-scroll">
+                    <table className="config-table">
+                      <thead>
+                        <tr className="config-thead-row">
+                          <th className="config-th">Nome do Perfil</th>
+                          <th className="config-th">Status</th>
+                          <th className="config-th">Permissões</th>
+                          <th className="config-th-right">Ações</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="config-tbody">
+                        {profiles.map(profile => (
+                          <tr key={profile.acp_id} className="config-row">
+                            <td className="config-cell">
+                              <span className="config-profile-name">{profile.acp_description}</span>
+                            </td>
+                            <td className="config-cell">
+                              <span className={clsx(
+                                "config-company-status",
+                                profile.acp_active === 1 ? "config-company-status-active" : "config-company-status-inactive"
+                              )}>
+                                {profile.acp_active === 1 ? 'Ativo' : 'Inativo'}
+                              </span>
+                            </td>
+                            <td className="config-cell">
+                              <span className="config-permissions-badge">
+                                {profilePermissionsCount[profile.acp_id] ?? 0} módulos
+                              </span>
+                            </td>
+                            <td className="config-cell-right">
+                              <div className="config-actions">
+                                {allowEdit && (
+                                  <button 
+                                    onClick={() => handleEditProfile(profile)}
+                                    className="config-action-edit"
+                                    title="Editar"
+                                    disabled={saving}
+                                  >
+                                    <Edit2 className="config-icon-sm" />
+                                  </button>
+                                )}
+                                {allowCreate && (
+                                  <button 
+                                    onClick={() => handleDuplicateProfile(profile)}
+                                    className="config-action-copy"
+                                    title="Duplicar"
+                                    disabled={saving}
+                                  >
+                                    <Copy className="config-icon-sm" />
+                                  </button>
+                                )}
+                                {allowDelete && (
+                                  <button 
+                                    onClick={() => handleDeleteProfile(profile.acp_id)}
+                                    className="config-action-delete"
+                                    title="Excluir"
+                                    disabled={saving}
+                                  >
+                                    <Trash2 className="config-icon-sm" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -489,46 +655,101 @@ const Configuracoes = () => {
       <Modal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
-        title={editingProfile ? `Editar Perfil: ${editingProfile.name}` : "Novo Perfil de Acesso"}
+        title={editingProfile ? `Editar Perfil: ${editingProfile.acp_description}` : "Novo Perfil de Acesso"}
       >
         <div className="config-modal-content">
-          <div className="config-form-group">
-            <label className="config-form-label">Nome do Perfil</label>
-            <input 
-              type="text" 
-              value={newProfileName}
-              onChange={(e) => setNewProfileName(e.target.value)}
-              placeholder="Ex: Supervisor de Campo" 
-              className="config-form-input" 
-            />
+          <div className="config-modal-form-row">
+            <div className="config-form-group">
+              <label className="config-form-label">Nome do Perfil *</label>
+              <input 
+                type="text" 
+                value={newProfileName}
+                onChange={(e) => setNewProfileName(e.target.value)}
+                placeholder="Ex: Administrador" 
+                className="config-form-input" 
+              />
+            </div>
+            <div className="config-form-group">
+              <label className="config-form-label">Identificador de Integração</label>
+              <input 
+                type="text" 
+                value={newIntegrationId}
+                onChange={(e) => setNewIntegrationId(e.target.value)}
+                placeholder="Ex: admin" 
+                className="config-form-input" 
+              />
+            </div>
+          </div>
+
+          <div className="config-modal-form-row">
+            <div className="config-form-group">
+              <label className="config-form-label">Status</label>
+              <select 
+                value={newStatus}
+                onChange={(e) => setNewStatus(parseInt(e.target.value))}
+                className="config-form-select"
+              >
+                <option value={1}>Ativo</option>
+                <option value={0}>Inativo</option>
+              </select>
+            </div>
+            <div className="config-form-group">
+              <label className="config-form-label">Perfil Padrão</label>
+              <select 
+                value={newIsDefault}
+                onChange={(e) => setNewIsDefault(parseInt(e.target.value))}
+                className="config-form-select"
+              >
+                <option value={0}>Não</option>
+                <option value={1}>Sim</option>
+              </select>
+            </div>
           </div>
 
           <div className="config-permissions-section">
-            <label className="config-form-label">Permissões de Visualização</label>
-            <div className="config-permissions-grid">
-              {MENU_OPTIONS.map(option => (
-                <button
-                  key={option.id}
-                  onClick={() => togglePermission(option.id)}
-                  className={clsx(
-                    "config-perm-btn",
-                    selectedPermissions.includes(option.id)
-                      ? "config-perm-btn-active"
-                      : "config-perm-btn-inactive"
-                  )}
-                >
-                  <div className={clsx(
-                    "config-perm-check",
-                    selectedPermissions.includes(option.id)
-                      ? "config-perm-check-active"
-                      : "config-perm-check-inactive"
-                  )}>
-                    {selectedPermissions.includes(option.id) && <Check className="config-check-icon" />}
-                  </div>
-                  <option.icon className="config-perm-option-icon" />
-                  <span className="config-perm-label">{option.label}</span>
+            <div className="config-permissions-header">
+              <span className="config-permissions-title">Permissões por Funcionalidade</span>
+              <div className="config-permissions-bulk-actions">
+                <button type="button" onClick={markAllPermissions} className="config-perm-bulk-btn">
+                  Marcar todos
                 </button>
-              ))}
+                <button type="button" onClick={unmarkAllPermissions} className="config-perm-bulk-btn">
+                  Desmarcar todos
+                </button>
+              </div>
+            </div>
+
+            <div className="config-perm-table-wrapper custom-scrollbar">
+              <table className="config-perm-table">
+                <thead>
+                  <tr>
+                    <th className="config-perm-th config-perm-th-func">FUNCIONALIDADE</th>
+                    <th className="config-perm-th">CRIAR</th>
+                    <th className="config-perm-th">VISUALIZAR</th>
+                    <th className="config-perm-th">EDITAR</th>
+                    <th className="config-perm-th">EXCLUIR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {features.map(feature => (
+                    <tr key={feature.fea_id} className="config-perm-row">
+                      <td className="config-perm-td-func">{feature.fea_description}</td>
+                      {(['criar', 'visualizar', 'editar', 'excluir'] as const).map(type => (
+                        <td key={type} className="config-perm-td">
+                          <label className="config-perm-checkbox-label">
+                            <input
+                              type="checkbox"
+                              checked={selectedPermissions[feature.fea_id.toString()]?.[type] || false}
+                              onChange={() => togglePermission(feature.fea_id.toString(), type)}
+                              className="config-perm-checkbox"
+                            />
+                          </label>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -536,15 +757,18 @@ const Configuracoes = () => {
             <button 
               onClick={() => setIsProfileModalOpen(false)}
               className="config-modal-cancel-btn"
+              disabled={saving}
             >
+              <X className="config-icon-sm" />
               Cancelar
             </button>
             <button 
               onClick={handleSaveProfile}
-              disabled={!newProfileName}
+              disabled={!newProfileName || saving}
               className="config-modal-save-btn"
             >
-              Salvar Perfil
+              {saving ? <Loader2 className="config-icon-sm" style={{ animation: 'spin 1s linear infinite' }} /> : <Check className="config-icon-sm" />}
+              {saving ? 'Salvando...' : 'Salvar'}
             </button>
           </div>
         </div>

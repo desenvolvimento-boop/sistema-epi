@@ -5,11 +5,15 @@ import { EMPLOYEES } from '../../services/api';
 import { StatusBadge } from '../../components/StatusBadge';
 import { Modal } from '../../components/ui/Modal';
 import { ColaboradorForm } from '../../components/forms/ColaboradorForm';
+import { useAuth } from '../../contexts/AuthContext';
 import './styles.css';
 
 const Colaboradores = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { canCreate, canEdit } = useAuth();
+  const allowCreate = canCreate('/colaboradores');
+  const allowEdit = canEdit('/colaboradores');
 
   const isValidationNeeded = (status: string) => {
     return status === 'Aguardando validação' || status === 'Erro na validação';
@@ -31,12 +35,14 @@ const Colaboradores = () => {
             <Filter className="colaboradores-btn-icon" /> Filtros Avançados
           </button>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="colaboradores-add-btn"
-        >
-          <Plus className="colaboradores-btn-icon" /> Novo Colaborador
-        </button>
+        {allowCreate && (
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="colaboradores-add-btn"
+          >
+            <Plus className="colaboradores-btn-icon" /> Novo Colaborador
+          </button>
+        )}
       </div>
 
       <Modal 
@@ -121,13 +127,15 @@ const Colaboradores = () => {
                         >
                           <History className="colaboradores-btn-icon" />
                         </button>
-                        <button 
-                          onClick={() => navigate(`/colaboradores/${emp.id}/editar`)}
-                          className="colaboradores-edit-btn" 
-                          title="Editar"
-                        >
-                          <UserCog className="colaboradores-btn-icon" />
-                        </button>
+                        {allowEdit && (
+                          <button 
+                            onClick={() => navigate(`/colaboradores/${emp.id}/editar`)}
+                            className="colaboradores-edit-btn" 
+                            title="Editar"
+                          >
+                            <UserCog className="colaboradores-btn-icon" />
+                          </button>
+                        )}
                       </>
                     )}
                     <button 

@@ -5,11 +5,15 @@ import clsx from 'clsx';
 import { Modal } from '../../components/ui/Modal';
 import { RegraTrocaForm } from '../../components/forms/RegraTrocaForm';
 import { ReplacementRule } from '../../types/system.types';
+import { useAuth } from '../../contexts/AuthContext';
 import './styles.css';
 
 const RegrasTroca = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRule, setSelectedRule] = useState<ReplacementRule | null>(null);
+  const { canCreate, canEdit } = useAuth();
+  const allowCreate = canCreate('/regras-troca');
+  const allowEdit = canEdit('/regras-troca');
 
   const handleOpenModal = (rule?: ReplacementRule) => {
     setSelectedRule(rule || null);
@@ -20,12 +24,14 @@ const RegrasTroca = () => {
     <div className="regras-page">
       <div className="page-header">
         <h2 className="page-title">Regras de Troca e Substituição</h2>
-        <button 
-          onClick={() => handleOpenModal()}
-          className="btn-add"
-        >
-          <Plus className="icon-sm" /> Nova Regra
-        </button>
+        {allowCreate && (
+          <button 
+            onClick={() => handleOpenModal()}
+            className="btn-add"
+          >
+            <Plus className="icon-sm" /> Nova Regra
+          </button>
+        )}
       </div>
 
       <Modal 
@@ -55,7 +61,8 @@ const RegrasTroca = () => {
               <tr 
                 key={rule.id} 
                 className="table-row"
-                onClick={() => handleOpenModal(rule)}
+                onClick={() => allowEdit && handleOpenModal(rule)}
+                style={{ cursor: allowEdit ? 'pointer' : 'default' }}
               >
                 <td className="table-cell">
                   <span className="rule-epi-name">{rule.epi}</span>
@@ -76,9 +83,11 @@ const RegrasTroca = () => {
                   </span>
                 </td>
                 <td className="table-cell-right">
-                  <button className="btn-edit">
-                    <Edit3 className="icon-sm" />
-                  </button>
+                  {allowEdit && (
+                    <button className="btn-edit">
+                      <Edit3 className="icon-sm" />
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
