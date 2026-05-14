@@ -1,16 +1,50 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MoreHorizontal, ShieldCheck, FileText, AlertTriangle, UserMinus, RefreshCw } from 'lucide-react';
-import { EMPLOYEES } from '../../services/api';
+import { ArrowLeft, MoreHorizontal, ShieldCheck, FileText, UserMinus, RefreshCw, Loader2 } from 'lucide-react';
+import { employeeService, type EmployeeAPI } from '../../services/employeeService';
 import { StatusBadge } from '../../components/StatusBadge';
 import './styles.css';
+
+function formatDate(dateStr: string): string {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('pt-BR');
+}
+
+function getStatusLabel(emp: EmployeeAPI): string {
+  return emp.emp_active === 1 ? 'Ativo' : 'Inativo';
+}
 
 const ColaboradorDetalhes = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const colaborador = EMPLOYEES.find(e => e.id === Number(id)) || EMPLOYEES[0];
+  const [loading, setLoading] = useState(true);
+  const [employee, setEmployee] = useState<EmployeeAPI | null>(null);
 
-  const ACÕES_ADICIONAIS = [
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const emp = await employeeService.getById(Number(id));
+        setEmployee(emp);
+      } catch (err: any) {
+        alert(err.message || 'Erro ao carregar colaborador');
+        navigate('/colaboradores');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [id, navigate]);
+
+  if (loading || !employee) {
+    return (
+      <div className="detalhes-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4rem' }}>
+        <Loader2 style={{ width: '2rem', height: '2rem', animation: 'spin 1s linear infinite', color: 'var(--color-primary-600)' }} />
+      </div>
+    );
+  }
+
+  const ACOES_ADICIONAIS = [
     { label: 'Emitir Ficha de EPI', icon: FileText, iconClass: 'detalhes-admin-icon-emitir', path: 'emitir-ficha' },
     { label: 'Transferir Unidade', icon: RefreshCw, iconClass: 'detalhes-admin-icon-transferir', path: 'transferir-unidade' },
     { label: 'Desativar Colaborador', icon: UserMinus, iconClass: 'detalhes-admin-icon-desativar', path: 'desativar' },
@@ -40,28 +74,34 @@ const ColaboradorDetalhes = () => {
         <div className="detalhes-main">
           <div className="detalhes-profile-card">
             <div className="detalhes-avatar">
-              {colaborador.nome.charAt(0)}
+              {employee.emp_full_name.charAt(0).toUpperCase()}
             </div>
             <div className="detalhes-profile-info">
               <div>
                 <div className="detalhes-name-row">
-                  <h3 className="detalhes-name">{colaborador.nome}</h3>
-                  <StatusBadge status={colaborador.status} />
+                  <h3 className="detalhes-name">{employee.emp_full_name}</h3>
+                  <StatusBadge status={getStatusLabel(employee)} />
                 </div>
-                <p className="detalhes-role">{colaborador.funcao} • {colaborador.empresa}</p>
+                <p className="detalhes-role">
+                  {employee.role?.rol_description || '—'} • {employee.company?.com_description || '—'}
+                </p>
               </div>
               <div className="detalhes-info-grid">
                 <div>
                   <p className="detalhes-info-label">Matrícula</p>
-                  <p className="detalhes-info-value">{colaborador.matricula}</p>
+                  <p className="detalhes-info-value">{employee.emp_registration}</p>
                 </div>
                 <div>
                   <p className="detalhes-info-label">CPF</p>
-                  <p className="detalhes-info-value">{colaborador.cpf}</p>
+                  <p className="detalhes-info-value">{employee.emp_cpf}</p>
                 </div>
                 <div>
                   <p className="detalhes-info-label">Admissão</p>
-                  <p className="detalhes-info-value">{colaborador.admissao}</p>
+                  <p className="detalhes-info-value">{formatDate(employee.emp_admission_date)}</p>
+                </div>
+                <div>
+                  <p className="detalhes-info-label">Setor</p>
+                  <p className="detalhes-info-value">{employee.section?.sec_description || '—'}</p>
                 </div>
               </div>
             </div>
@@ -87,7 +127,7 @@ const ColaboradorDetalhes = () => {
           <div className="detalhes-admin-card">
             <h4 className="detalhes-admin-title">Ações Administrativas</h4>
             <div className="detalhes-admin-actions">
-              {ACÕES_ADICIONAIS.map((acao, index) => (
+              {ACOES_ADICIONAIS.map((acao, index) => (
                 <button 
                   key={index}
                   onClick={() => navigate(`/colaboradores/${id}/${acao.path}`)}
@@ -104,7 +144,7 @@ const ColaboradorDetalhes = () => {
 
           <div className="detalhes-footer-card">
             <p className="detalhes-footer-text">
-              Última atualização cadastral realizada por <span className="detalhes-footer-bold">Admin Master</span> em 09/03/2026 às 14:30.
+              Última atualização cadastral em {employee.emp_datetimeupdate ? new Date(employee.emp_datetimeupdate).toLocaleString('pt-BR') : '—'}.
             </p>
           </div>
         </div>

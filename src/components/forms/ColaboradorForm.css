@@ -1,26 +1,72 @@
 .colaborador-form {
   display: flex;
   flex-direction: column;
+  gap: 1.25rem;
 }
 
-.colaborador-form > * + * {
-  margin-top: 1.5rem;
+/* Toggle */
+.colaborador-form-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
+.colaborador-form-toggle-label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-slate-700);
+}
+
+.colaborador-form-toggle {
+  position: relative;
+  width: 3rem;
+  height: 1.625rem;
+  border-radius: 9999px;
+  background-color: var(--color-slate-300);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  padding: 0;
+}
+
+.colaborador-form-toggle--active {
+  background-color: #1E293B;
+}
+
+.colaborador-form-toggle-thumb {
+  position: absolute;
+  top: 0.1875rem;
+  left: 0.1875rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.colaborador-form-toggle--active .colaborador-form-toggle-thumb {
+  transform: translateX(1.375rem);
+}
+
+/* Grid */
 .colaborador-form-grid {
   display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   .colaborador-form-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-.colaborador-form-field > * + * {
-  margin-top: 0.5rem;
+/* Fields */
+.colaborador-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
 }
 
 .colaborador-form-label {
@@ -28,6 +74,10 @@
   line-height: 1.25rem;
   font-weight: 700;
   color: var(--color-slate-700);
+}
+
+.colaborador-form-required {
+  color: var(--color-red-500);
 }
 
 .colaborador-form-input {
@@ -38,7 +88,12 @@
   border-radius: 0.75rem;
   font-size: 0.875rem;
   line-height: 1.25rem;
+  color: var(--color-slate-800);
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.colaborador-form-input::placeholder {
+  color: var(--color-slate-400);
 }
 
 .colaborador-form-input:focus {
@@ -46,12 +101,132 @@
   outline: none;
 }
 
+/* Select with "+" button */
+.colaborador-form-select-with-action {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.colaborador-form-select-with-action select {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.colaborador-form-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.375rem;
+  background-color: #1E293B;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.colaborador-form-add-btn:hover {
+  background-color: #334155;
+}
+
+.colaborador-form-add-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/* Foto upload */
+.colaborador-form-foto-area {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.colaborador-form-foto-input {
+  display: none;
+}
+
+.colaborador-form-foto-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 7.5rem;
+  height: 7.5rem;
+  background-color: var(--color-slate-50);
+  border: 2px dashed var(--color-slate-300);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--color-slate-400);
+}
+
+.colaborador-form-foto-upload:hover {
+  border-color: #1E293B;
+  color: #1E293B;
+  background-color: var(--color-slate-100);
+}
+
+.colaborador-form-foto-upload-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.colaborador-form-foto-upload-text {
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.colaborador-form-foto-preview {
+  position: relative;
+  width: 7.5rem;
+  height: 7.5rem;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 2px solid var(--color-slate-200);
+}
+
+.colaborador-form-foto-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.colaborador-form-foto-remove {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.colaborador-form-foto-remove:hover {
+  background-color: rgba(220, 38, 38, 0.9);
+}
+
+.colaborador-form-foto-remove-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Actions */
 .colaborador-form-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 0.75rem;
-  padding-top: 1.5rem;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--color-slate-100);
 }
 
@@ -90,6 +265,16 @@
   background-color: var(--color-primary-700);
 }
 
+.colaborador-form-spin {
+  animation: colaborador-form-spin-anim 1s linear infinite;
+}
+
+@keyframes colaborador-form-spin-anim {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
 @media (max-width: 639px) {
   .colaborador-form-actions {
     flex-direction: column;

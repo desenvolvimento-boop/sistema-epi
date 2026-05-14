@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://172.20.10.8:3001';
+const API_BASE_URL = 'http://192.168.15.3:3001';
 
 export interface AuthPermission {
   prm_id: number;

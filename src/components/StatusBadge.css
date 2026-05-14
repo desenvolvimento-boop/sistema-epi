@@ -32,9 +32,9 @@
 }
 
 .status-badge-ativo {
-  background-color: var(--color-blue-100);
-  color: var(--color-blue-700);
-  border-color: var(--color-blue-200);
+  background-color: var(--color-emerald-100);
+  color: var(--color-emerald-700);
+  border-color: var(--color-emerald-200);
 }
 
 .status-badge-sucesso {
