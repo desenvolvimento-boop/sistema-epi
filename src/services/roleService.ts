@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://192.168.15.3:3001';
+import { API_BASE_URL } from './authService';
 
 export interface RoleAPI {
   rol_id: number;
