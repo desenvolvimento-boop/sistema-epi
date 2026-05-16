@@ -2,6 +2,49 @@
   margin-top: 1.5rem;
 }
 
+.epis-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 3rem;
+  color: var(--color-slate-500);
+}
+
+.epis-spin {
+  animation: epis-spin 1s linear infinite;
+}
+
+@keyframes epis-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.epi-category {
+  font-size: 0.875rem;
+  color: var(--color-slate-600);
+}
+
+.epi-origin-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.epi-origin-totvs {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.epi-origin-senior {
+  background: #fef3c7;
+  color: #b45309;
+}
+
 .page-header {
   display: flex;
   justify-content: space-between;

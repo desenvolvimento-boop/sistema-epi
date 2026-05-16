@@ -17,7 +17,7 @@ function mapRolesToCrud(roles: RoleAPI[]): SimpleCrudItem[] {
   return roles.map(r => ({
     id: r.rol_id,
     name: r.rol_description,
-    description: r.rol_integration_id,
+    description: r.rol_activities || r.rol_integration_id,
     active: r.rol_active === 1,
   }));
 }
@@ -104,7 +104,11 @@ export const ColaboradorForm = ({ onClose, onSaved, initialData }: ColaboradorFo
       const created = await roleService.create({
         rol_active: item.active ? 1 : 0,
         rol_description: item.name,
-        rol_integration_id: item.description,
+        rol_activities: item.description || null,
+        rol_code: null,
+        rol_integration_id: null,
+        rol_integration_source: 'Manual',
+        rol_cbo: null,
         usr_id_insert: null,
         usr_id_lastupdate: null,
       });

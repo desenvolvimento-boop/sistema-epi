@@ -194,6 +194,55 @@
   background-color: var(--color-slate-50);
 }
 
+.funcoes-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 3rem;
+  color: var(--color-slate-500);
+}
+
+.funcoes-spin {
+  animation: funcoes-spin 1s linear infinite;
+}
+
+@keyframes funcoes-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.funcoes-status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.funcoes-status-active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.funcoes-status-inactive {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.funcoes-origin-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.funcoes-origin-totvs {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
 .funcoes-table-container {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;

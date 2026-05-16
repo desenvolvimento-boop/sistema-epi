@@ -23,6 +23,36 @@
   margin-top: 0.5rem;
 }
 
+.epi-form-required {
+  color: #dc2626;
+}
+
+.epi-form-integration-toggle {
+  margin-top: 0.5rem;
+}
+
+.epi-form-link-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.epi-form-integration {
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.epi-form-integration-note {
+  font-size: 0.8125rem;
+  color: #64748b;
+  margin-bottom: 1rem;
+}
+
 .epi-form-field-full {
   grid-column: span 1;
 }

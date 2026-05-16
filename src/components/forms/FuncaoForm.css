@@ -7,12 +7,58 @@
   margin-top: 1.5rem;
 }
 
-.funcao-form-fields > * + * {
-  margin-top: 1rem;
+.funcao-form-fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .funcao-form-fields {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .funcao-form-field > * + * {
   margin-top: 0.5rem;
+}
+
+.funcao-form-field-full {
+  grid-column: 1 / -1;
+}
+
+.funcao-form-required {
+  color: #dc2626;
+}
+
+.funcao-form-integration-toggle {
+  margin-top: 0.5rem;
+}
+
+.funcao-form-link-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.funcao-form-integration {
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.funcao-form-integration-note {
+  font-size: 0.8125rem;
+  color: #64748b;
+  margin-bottom: 0.75rem;
+}
+
+.funcao-form-empty-epis {
+  font-size: 0.875rem;
+  color: #64748b;
 }
 
 .funcao-form-label {

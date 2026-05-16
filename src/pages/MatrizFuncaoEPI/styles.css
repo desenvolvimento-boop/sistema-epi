@@ -1,3 +1,21 @@
+.matriz-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 3rem;
+  color: var(--color-slate-500);
+}
+
+.matriz-spin {
+  animation: matriz-spin 1s linear infinite;
+}
+
+@keyframes matriz-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .matriz-page > * + * {
   margin-top: 1.5rem;
 }

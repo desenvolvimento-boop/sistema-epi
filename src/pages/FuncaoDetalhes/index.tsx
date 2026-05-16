@@ -1,25 +1,77 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Shield, AlertTriangle, Users, Edit3, Trash2, CheckCircle2 } from 'lucide-react';
-import { ROLES } from '../../services/api';
+import { ArrowLeft, Shield, AlertTriangle, Users, Edit3, Trash2, CheckCircle2, Loader2 } from 'lucide-react';
+import { roleService, type RoleAPI, type RoleRiskAPI } from '../../services/roleService';
+import type { EpiAPI } from '../../services/epiService';
 import './styles.css';
 
 const FuncaoDetalhes = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const funcao = ROLES.find(r => r.id === Number(id)) || ROLES[0];
+  const roleId = Number(id);
 
-  const RISCOS_MOCK = [
-    { tipo: 'Físico', descricao: 'Ruído contínuo acima de 85dB', severidade: 'Alta' },
-    { tipo: 'Químico', descricao: 'Exposição a vapores orgânicos', severidade: 'Média' },
-    { tipo: 'Ergonômico', descricao: 'Postura inadequada prolongada', severidade: 'Baixa' },
-  ];
+  const [funcao, setFuncao] = useState<RoleAPI | null>(null);
+  const [epis, setEpis] = useState<(EpiAPI & { rle_mandatory?: number })[]>([]);
+  const [risks, setRisks] = useState<RoleRiskAPI[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!roleId) return;
+    const load = async () => {
+      setLoading(true);
+      try {
+        const [role, linkedEpis, linkedRisks] = await Promise.all([
+          roleService.getById(roleId),
+          roleService.getEpis(roleId),
+          roleService.getRisks(roleId),
+        ]);
+        setFuncao(role);
+        setEpis(linkedEpis);
+        setRisks(linkedRisks);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [roleId]);
+
+  const handleDelete = async () => {
+    if (!funcao || !confirm('Inativar esta função?')) return;
+    try {
+      await roleService.delete(funcao.rol_id);
+      navigate('/funcoes');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao inativar');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="funcao-detalhes-container">
+        <div className="funcao-detalhes-loading">
+          <Loader2 className="funcao-detalhes-icon-sm funcao-detalhes-spin" />
+          <span>Carregando...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!funcao) {
+    return (
+      <div className="funcao-detalhes-container">
+        <p>Função não encontrada.</p>
+        <button type="button" onClick={() => navigate('/funcoes')}>Voltar</button>
+      </div>
+    );
+  }
 
   return (
     <div className="funcao-detalhes-container">
       <div className="funcao-detalhes-header">
         <div className="funcao-detalhes-header-left">
-          <button onClick={() => navigate('/funcoes')} className="funcao-detalhes-back-btn">
+          <button onClick={() => navigate('/funcoes')} className="funcao-detalhes-back-btn" type="button">
             <ArrowLeft className="funcao-detalhes-back-icon" />
           </button>
           <div>
@@ -28,11 +80,11 @@ const FuncaoDetalhes = () => {
           </div>
         </div>
         <div className="funcao-detalhes-header-actions">
-          <button onClick={() => navigate(`/funcoes/${id}/editar`)} className="funcao-detalhes-edit-btn">
+          <button onClick={() => navigate(`/funcoes/${id}/editar`)} className="funcao-detalhes-edit-btn" type="button">
             <Edit3 className="funcao-detalhes-icon-sm" /> Editar
           </button>
-          <button className="funcao-detalhes-delete-btn">
-            <Trash2 className="funcao-detalhes-icon-sm" /> Excluir
+          <button onClick={handleDelete} className="funcao-detalhes-delete-btn" type="button">
+            <Trash2 className="funcao-detalhes-icon-sm" /> Inativar
           </button>
         </div>
       </div>
@@ -40,24 +92,36 @@ const FuncaoDetalhes = () => {
       <div className="funcao-detalhes-grid">
         <div className="funcao-detalhes-main">
           <div className="funcao-detalhes-info-card">
+            
             <div>
-              <h3 className="funcao-detalhes-nome">{funcao.nome}</h3>
-              <p className="funcao-detalhes-descricao">{funcao.descricao}</p>
+              <h3 className="funcao-detalhes-nome">{funcao.rol_description}</h3>
+              <p className="funcao-detalhes-descricao">{funcao.rol_activities || '—'}</p>
+              {funcao.rol_code && <p className="funcao-detalhes-meta">Código: {funcao.rol_code}</p>}
+              <span className={`funcao-detalhes-origin funcao-detalhes-origin-${(funcao.rol_integration_source || 'Manual').toLowerCase()}`}>
+                Origem: {funcao.rol_integration_source || 'Manual'}
+                {funcao.rol_integration_id ? ` (${funcao.rol_integration_id})` : ''}
+              </span>
             </div>
             <div className="funcao-detalhes-epi-section">
               <h4 className="funcao-detalhes-epi-title">EPIs Obrigatórios (NR-06)</h4>
               <div className="funcao-detalhes-epi-grid">
-                {funcao.epis.map((epi, index) => (
-                  <div key={index} className="funcao-detalhes-epi-item">
-                    <div className="funcao-detalhes-epi-icon-wrapper">
-                      <Shield className="funcao-detalhes-epi-icon" />
+                {epis.length === 0 ? (
+                  <p className="funcao-detalhes-empty">Nenhum EPI vinculado.</p>
+                ) : (
+                  epis.map((epi) => (
+                    <div key={epi.epi_id} className="funcao-detalhes-epi-item">
+                      <div className="funcao-detalhes-epi-icon-wrapper">
+                        <Shield className="funcao-detalhes-epi-icon" />
+                      </div>
+                      <div>
+                        <p className="funcao-detalhes-epi-name">{epi.epi_description}</p>
+                        <p className="funcao-detalhes-epi-period">
+                          CA: {epi.epi_ca} · Troca a cada {epi.epi_lifespan_days} dias
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="funcao-detalhes-epi-name">{epi}</p>
-                      <p className="funcao-detalhes-epi-period">Troca a cada 180 dias</p>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -67,36 +131,47 @@ const FuncaoDetalhes = () => {
               <h4 className="funcao-detalhes-riscos-title">
                 <AlertTriangle className="funcao-detalhes-riscos-title-icon" /> Riscos Ocupacionais Identificados
               </h4>
-              <button className="funcao-detalhes-riscos-link">Ver PGR Completo</button>
             </div>
             <div className="funcao-detalhes-riscos-body">
               <table className="funcao-detalhes-riscos-table">
                 <thead>
                   <tr className="funcao-detalhes-riscos-thead-row">
-                    <th className="funcao-detalhes-riscos-th">Tipo de Risco</th>
-                    <th className="funcao-detalhes-riscos-th">Descrição do Agente</th>
+                    <th className="funcao-detalhes-riscos-th">Tipo</th>
+                    <th className="funcao-detalhes-riscos-th">Agente</th>
+                    <th className="funcao-detalhes-riscos-th">Origem</th>
                     <th className="funcao-detalhes-riscos-th-right">Severidade</th>
                   </tr>
                 </thead>
                 <tbody className="funcao-detalhes-riscos-tbody">
-                  {RISCOS_MOCK.map((risco, index) => (
-                    <tr key={index} className="funcao-detalhes-riscos-row">
-                      <td className="funcao-detalhes-riscos-cell">
-                        <span className="funcao-detalhes-riscos-tipo">{risco.tipo}</span>
-                      </td>
-                      <td className="funcao-detalhes-riscos-cell">
-                        <span className="funcao-detalhes-riscos-descricao">{risco.descricao}</span>
-                      </td>
-                      <td className="funcao-detalhes-riscos-cell-right">
-                        <span className={`funcao-detalhes-severidade ${
-                          risco.severidade === 'Alta' ? 'funcao-detalhes-severidade-alta' :
-                          risco.severidade === 'Média' ? 'funcao-detalhes-severidade-media' : 'funcao-detalhes-severidade-baixa'
-                        }`}>
-                          {risco.severidade}
-                        </span>
-                      </td>
+                  {risks.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="funcao-detalhes-riscos-cell">Nenhum risco cadastrado.</td>
                     </tr>
-                  ))}
+                  ) : (
+                    risks.map((risco) => (
+                      <tr key={risco.rsk_id} className="funcao-detalhes-riscos-row">
+                        <td className="funcao-detalhes-riscos-cell">
+                          <span className="funcao-detalhes-riscos-tipo">{risco.rsk_type}</span>
+                        </td>
+                        <td className="funcao-detalhes-riscos-cell">
+                          <span className="funcao-detalhes-riscos-descricao">{risco.rsk_agent}</span>
+                        </td>
+                        <td className="funcao-detalhes-riscos-cell">
+                          <span className={`funcao-detalhes-origin funcao-detalhes-origin-${(risco.rsk_integration_source || 'Manual').toLowerCase()}`}>
+                            {risco.rsk_integration_source || 'Manual'}
+                          </span>
+                        </td>
+                        <td className="funcao-detalhes-riscos-cell-right">
+                          <span className={`funcao-detalhes-severidade ${
+                            risco.rsk_severity === 'Alta' ? 'funcao-detalhes-severidade-alta' :
+                            risco.rsk_severity === 'Média' ? 'funcao-detalhes-severidade-media' : 'funcao-detalhes-severidade-baixa'
+                          }`}>
+                            {risco.rsk_severity}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -111,9 +186,9 @@ const FuncaoDetalhes = () => {
               </div>
               <span className="funcao-detalhes-stats-badge">Ativos</span>
             </div>
-            <h3 className="funcao-detalhes-stats-number">128</h3>
+            <h3 className="funcao-detalhes-stats-number">{funcao.employee_count ?? 0}</h3>
             <p className="funcao-detalhes-stats-text">Colaboradores vinculados a esta função atualmente.</p>
-            <button onClick={() => navigate('/colaboradores')} className="funcao-detalhes-stats-btn">
+            <button onClick={() => navigate('/colaboradores')} className="funcao-detalhes-stats-btn" type="button">
               Ver Listagem Completa
             </button>
           </div>
@@ -123,15 +198,15 @@ const FuncaoDetalhes = () => {
             <div className="funcao-detalhes-conformidade-list">
               <div className="funcao-detalhes-conformidade-item">
                 <CheckCircle2 className="funcao-detalhes-conformidade-icon" />
-                <span className="funcao-detalhes-conformidade-text">PGR Atualizado (2026)</span>
+                <span className="funcao-detalhes-conformidade-text">
+                  {epis.length > 0 ? 'Matriz de EPI configurada' : 'Matriz de EPI pendente'}
+                </span>
               </div>
               <div className="funcao-detalhes-conformidade-item">
                 <CheckCircle2 className="funcao-detalhes-conformidade-icon" />
-                <span className="funcao-detalhes-conformidade-text">LTCAT Vinculado</span>
-              </div>
-              <div className="funcao-detalhes-conformidade-item">
-                <CheckCircle2 className="funcao-detalhes-conformidade-icon" />
-                <span className="funcao-detalhes-conformidade-text">PCMSO em Dia</span>
+                <span className="funcao-detalhes-conformidade-text">
+                  {risks.length > 0 ? 'Riscos mapeados' : 'Riscos pendentes'}
+                </span>
               </div>
             </div>
           </div>

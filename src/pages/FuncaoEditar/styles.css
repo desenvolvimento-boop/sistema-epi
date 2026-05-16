@@ -441,3 +441,77 @@
     text-align: center;
   }
 }
+
+.funcao-editar-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 3rem;
+}
+
+.funcao-editar-spin {
+  animation: funcao-editar-spin 1s linear infinite;
+}
+
+@keyframes funcao-editar-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.funcao-editar-risks-card {
+  margin-top: 1.5rem;
+}
+
+.funcao-editar-risk-form {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: var(--color-slate-50);
+  border-radius: 0.75rem;
+}
+
+.funcao-editar-field-full {
+  grid-column: 1 / -1;
+}
+
+.funcao-editar-risk-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.funcao-editar-risks-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.funcao-editar-risks-table th,
+.funcao-editar-risks-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-slate-200);
+}
+
+.funcao-editar-origin {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  background: #e2e8f0;
+}
+
+.funcao-editar-origin-totvs {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.funcao-editar-save-btn {
+  padding: 0.5rem 1rem;
+  background: var(--color-primary-600);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
