@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { roleService, type RoleAPI } from '../../services/roleService';
-import { epiService, type EpiAPI } from '../../services/epiService';
+import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
 import './MatrizForm.css';
 
 interface MatrizFormProps {
@@ -12,23 +12,23 @@ interface MatrizFormProps {
 export const MatrizForm = ({ onClose, onSaved, initialRole }: MatrizFormProps) => {
   const [saving, setSaving] = useState(false);
   const [roles, setRoles] = useState<RoleAPI[]>([]);
-  const [epis, setEpis] = useState<EpiAPI[]>([]);
+  const [epiTypes, setEpiTypes] = useState<EpiTypeAPI[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState(initialRole ? String(initialRole.rol_id) : '');
-  const [selectedEpiIds, setSelectedEpiIds] = useState<number[]>([]);
+  const [selectedEptIds, setSelectedEptIds] = useState<number[]>([]);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [rolesData, episData] = await Promise.all([
+        const [rolesData, typesData] = await Promise.all([
           roleService.getActive(),
-          epiService.getActive(),
+          epiTypeService.getActive(),
         ]);
         setRoles(rolesData);
-        setEpis(episData);
+        setEpiTypes(typesData);
 
         if (initialRole) {
-          const linked = await roleService.getEpis(initialRole.rol_id);
-          setSelectedEpiIds(linked.map((e) => e.epi_id));
+          const linked = await roleService.getEpiTypes(initialRole.rol_id);
+          setSelectedEptIds(linked.map((e) => e.ept_id));
         }
       } catch (err) {
         console.error(err);
@@ -41,8 +41,8 @@ export const MatrizForm = ({ onClose, onSaved, initialRole }: MatrizFormProps) =
     if (!selectedRoleId || initialRole) return;
     const loadLinked = async () => {
       try {
-        const linked = await roleService.getEpis(Number(selectedRoleId));
-        setSelectedEpiIds(linked.map((e) => e.epi_id));
+        const linked = await roleService.getEpiTypes(Number(selectedRoleId));
+        setSelectedEptIds(linked.map((e) => e.ept_id));
       } catch (err) {
         console.error(err);
       }
@@ -50,9 +50,9 @@ export const MatrizForm = ({ onClose, onSaved, initialRole }: MatrizFormProps) =
     loadLinked();
   }, [selectedRoleId, initialRole]);
 
-  const toggleEpi = (epiId: number) => {
-    setSelectedEpiIds((prev) =>
-      prev.includes(epiId) ? prev.filter((id) => id !== epiId) : [...prev, epiId]
+  const toggleEpt = (eptId: number) => {
+    setSelectedEptIds((prev) =>
+      prev.includes(eptId) ? prev.filter((id) => id !== eptId) : [...prev, eptId]
     );
   };
 
@@ -66,9 +66,9 @@ export const MatrizForm = ({ onClose, onSaved, initialRole }: MatrizFormProps) =
 
     setSaving(true);
     try {
-      await roleService.setEpis(
+      await roleService.setEpiTypes(
         rolId,
-        selectedEpiIds.map((epi_id) => ({ epi_id, rle_mandatory: 1 }))
+        selectedEptIds.map((ept_id) => ({ ept_id, rle_mandatory: 1 }))
       );
       onSaved?.();
       onClose();
@@ -84,12 +84,11 @@ export const MatrizForm = ({ onClose, onSaved, initialRole }: MatrizFormProps) =
 
   return (
     <form className="matriz-form" onSubmit={handleSubmit}>
-      <div className="matriz-form-fields">
+      <section className="matriz-form-fields">
         <div className="matriz-form-field">
           <label className="matriz-form-label">Função Selecionada</label>
           {initialRole ? (
-            <div className="matriz-form-static-value">{roleName}
-            </div>
+            <div className="matriz-form-static-value">{roleName}</div>
           ) : (
             <select
               className="matriz-form-input"
@@ -106,19 +105,19 @@ export const MatrizForm = ({ onClose, onSaved, initialRole }: MatrizFormProps) =
         </div>
 
         <div className="matriz-form-field">
-          <label className="matriz-form-label">Vincular EPIs Obrigatórios</label>
+          <label className="matriz-form-label">Vincular Tipos de EPI Obrigatórios</label>
           <div className="matriz-form-checkbox-grid custom-scrollbar">
-            {epis.map((epi) => (
-              <label key={epi.epi_id} className="matriz-form-checkbox-label">
+            {epiTypes.map((epi) => (
+              <label key={epi.ept_id} className="matriz-form-checkbox-label">
                 <input
                   type="checkbox"
                   className="matriz-form-checkbox"
-                  checked={selectedEpiIds.includes(epi.epi_id)}
-                  onChange={() => toggleEpi(epi.epi_id)}
+                  checked={selectedEptIds.includes(epi.ept_id)}
+                  onChange={() => toggleEpt(epi.ept_id)}
                 />
                 <span className="matriz-form-checkbox-text">
-                  <span className="matriz-form-checkbox-name">{epi.epi_description}</span>
-                  <span className="matriz-form-checkbox-ca">CA: {epi.epi_ca}</span>
+                  <span className="matriz-form-checkbox-name">{epi.ept_description}</span>
+                  <span className="matriz-form-checkbox-ca">{epi.ept_category}</span>
                 </span>
               </label>
             ))}
@@ -127,19 +126,19 @@ export const MatrizForm = ({ onClose, onSaved, initialRole }: MatrizFormProps) =
 
         <div className="matriz-form-legal-note">
           <p className="matriz-form-legal-note-text">
-            <strong>Nota Jurídica:</strong> Ao salvar esta matriz, o sistema passará a exigir a entrega destes EPIs para todos os colaboradores vinculados a esta função.
+            <strong>Nota Jurídica:</strong> Ao salvar esta matriz, o sistema passará a exigir a entrega destes tipos de EPI para todos os colaboradores vinculados a esta função.
           </p>
         </div>
-      </div>
+      </section>
 
-      <div className="matriz-form-actions">
+      <footer className="matriz-form-actions">
         <button type="button" onClick={onClose} className="matriz-form-cancel" disabled={saving}>
           Cancelar
         </button>
         <button type="submit" className="matriz-form-submit" disabled={saving}>
           {saving ? 'Salvando...' : initialRole ? 'Atualizar Matriz' : 'Salvar Matriz'}
         </button>
-      </div>
+      </footer>
     </form>
   );
 };

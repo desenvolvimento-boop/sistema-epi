@@ -1,0 +1,37 @@
+.variantes-epi-page .epis-catalog-panel {
+  min-height: 16rem;
+}
+
+.variantes-epi-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.variantes-epi-filter-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-slate-700);
+}
+
+.variantes-epi-filter-select {
+  min-width: 14rem;
+  max-width: 100%;
+}
+
+.epis-types-empty {
+  min-height: 14rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--color-slate-500);
+  font-size: 0.875rem;
+}
+
+.epis-catalog-row {
+  cursor: default;
+}
+
+.epis-catalog-row:hover {
+  background-color: rgb(248 250 252 / 0.5);
+}

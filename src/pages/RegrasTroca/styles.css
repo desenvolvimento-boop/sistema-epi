@@ -2,6 +2,29 @@
   margin-top: 1.5rem;
 }
 
+.regras-page-hint {
+  font-size: 0.875rem;
+  color: var(--color-slate-600);
+}
+
+.regras-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 3rem;
+  color: var(--color-slate-500);
+}
+
+.regras-spin {
+  animation: regras-spin 1s linear infinite;
+}
+
+@keyframes regras-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .page-header {
   display: flex;
   align-items: center;

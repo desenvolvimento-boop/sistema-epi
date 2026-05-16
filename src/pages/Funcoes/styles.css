@@ -183,6 +183,110 @@
   background-color: var(--color-primary-50);
 }
 
+.funcoes-edit-btn {
+  padding: 0.5rem;
+  color: var(--color-slate-400);
+  border-radius: 0.5rem;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.funcoes-edit-btn:hover {
+  color: var(--color-blue-600);
+  background-color: var(--color-blue-50);
+}
+
+.funcoes-delete-btn {
+  padding: 0.5rem;
+  color: var(--color-slate-400);
+  border-radius: 0.5rem;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.funcoes-delete-btn:hover {
+  color: var(--color-red-600);
+  background-color: var(--color-red-50);
+}
+
+.funcoes-icon-lg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--color-amber-500);
+}
+
+.funcoes-delete-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.funcoes-delete-warning {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.funcoes-delete-icon-wrapper {
+  flex-shrink: 0;
+  padding: 0.5rem;
+  background-color: var(--color-amber-50);
+  border-radius: 0.5rem;
+}
+
+.funcoes-delete-title {
+  font-weight: 700;
+  color: var(--color-slate-900);
+  margin-bottom: 0.25rem;
+}
+
+.funcoes-delete-text {
+  font-size: 0.875rem;
+  color: var(--color-slate-600);
+}
+
+.funcoes-delete-text-bold {
+  font-weight: 700;
+  color: var(--color-slate-900);
+}
+
+.funcoes-delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.funcoes-cancel-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-slate-600);
+  border-radius: 0.5rem;
+  transition: background-color 0.15s;
+}
+
+.funcoes-cancel-btn:hover:not(:disabled) {
+  background-color: var(--color-slate-100);
+}
+
+.funcoes-confirm-delete-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  background-color: var(--color-red-600);
+  border-radius: 0.5rem;
+  transition: background-color 0.15s;
+}
+
+.funcoes-confirm-delete-btn:hover:not(:disabled) {
+  background-color: var(--color-red-700);
+}
+
+.funcoes-confirm-delete-btn:disabled,
+.funcoes-cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .funcoes-more-btn {
   padding: 0.5rem;
   color: var(--color-slate-400);

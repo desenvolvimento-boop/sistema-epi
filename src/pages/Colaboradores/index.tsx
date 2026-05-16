@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Plus, History, UserCog, MoreVertical, Check, X, Loader2, RefreshCw, AlertTriangle, Trash2 } from 'lucide-react';
+import { Search, Plus, History, UserCog, MoreVertical, Loader2, RefreshCw } from 'lucide-react';
 import { employeeService, type EmployeeAPI } from '../../services/employeeService';
 import { StatusBadge } from '../../components/StatusBadge';
 import { Modal } from '../../components/ui/Modal';
@@ -27,15 +27,10 @@ const Colaboradores = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeeAPI | null>(null);
 
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [employeeToDelete, setEmployeeToDelete] = useState<EmployeeAPI | null>(null);
-  const [deleting, setDeleting] = useState(false);
-
   const navigate = useNavigate();
-  const { canCreate, canEdit, canDelete } = useAuth();
+  const { canCreate, canEdit } = useAuth();
   const allowCreate = canCreate('/colaboradores');
   const allowEdit = canEdit('/colaboradores');
-  const allowDelete = canDelete('/colaboradores');
 
   const fetchEmployees = useCallback(async () => {
     setLoading(true);
@@ -72,26 +67,6 @@ const Colaboradores = () => {
   const handleSaved = () => {
     handleCloseModal();
     fetchEmployees();
-  };
-
-  const handleDeleteClick = (emp: EmployeeAPI) => {
-    setEmployeeToDelete(emp);
-    setIsDeleteModalOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!employeeToDelete) return;
-    setDeleting(true);
-    try {
-      await employeeService.delete(employeeToDelete.emp_id);
-      setIsDeleteModalOpen(false);
-      setEmployeeToDelete(null);
-      fetchEmployees();
-    } catch (err: any) {
-      alert(err.message || 'Erro ao excluir colaborador');
-    } finally {
-      setDeleting(false);
-    }
   };
 
   const filtered = employees.filter(emp => {
@@ -142,34 +117,6 @@ const Colaboradores = () => {
           onSaved={handleSaved}
           initialData={selectedEmployee ?? undefined}
         />
-      </Modal>
-
-      <Modal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        title="Confirmar Exclusão"
-      >
-        <div className="colaboradores-delete-content">
-          <div className="colaboradores-delete-warning">
-            <div className="colaboradores-delete-icon-wrapper">
-              <AlertTriangle className="colaboradores-delete-icon-lg" />
-            </div>
-            <div>
-              <p className="colaboradores-delete-title">Atenção!</p>
-              <p className="colaboradores-delete-text">
-                Você está prestes a excluir o colaborador <span className="colaboradores-delete-bold">{employeeToDelete?.emp_full_name}</span>. Esta ação não pode ser desfeita.
-              </p>
-            </div>
-          </div>
-          <div className="colaboradores-delete-actions">
-            <button onClick={() => setIsDeleteModalOpen(false)} className="colaboradores-delete-cancel-btn" disabled={deleting}>
-              Cancelar
-            </button>
-            <button onClick={confirmDelete} className="colaboradores-delete-confirm-btn" disabled={deleting}>
-              {deleting ? 'Excluindo...' : 'Confirmar Exclusão'}
-            </button>
-          </div>
-        </div>
       </Modal>
 
       {error && (
@@ -244,15 +191,6 @@ const Colaboradores = () => {
                             title="Editar"
                           >
                             <UserCog className="colaboradores-btn-icon" />
-                          </button>
-                        )}
-                        {allowDelete && (
-                          <button
-                            onClick={() => handleDeleteClick(emp)}
-                            className="colaboradores-more-btn"
-                            title="Excluir"
-                          >
-                            <Trash2 className="colaboradores-btn-icon" />
                           </button>
                         )}
                         <button 

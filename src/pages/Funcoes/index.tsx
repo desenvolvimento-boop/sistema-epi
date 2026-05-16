@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Shield, Info, Loader2 } from 'lucide-react';
+import { Plus, Shield, Info, Edit2, Loader2 } from 'lucide-react';
 import { roleService, type RoleAPI } from '../../services/roleService';
 import { Modal } from '../../components/ui/Modal';
 import { FuncaoForm } from '../../components/forms/FuncaoForm';
@@ -13,8 +13,9 @@ const Funcoes = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editRole, setEditRole] = useState<RoleAPI | null>(null);
   const navigate = useNavigate();
-  const { canCreate } = useAuth();
+  const { canCreate, canEdit } = useAuth();
   const allowCreate = canCreate('/funcoes');
+  const allowEdit = canEdit('/funcoes');
 
   const loadRoles = useCallback(async () => {
     setLoading(true);
@@ -37,6 +38,16 @@ const Funcoes = () => {
     setIsModalOpen(true);
   };
 
+  const handleOpenEdit = (role: RoleAPI) => {
+    setEditRole(role);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditRole(null);
+  };
+
   const truncate = (text: string | null | undefined, max = 80) => {
     if (!text) return '—';
     return text.length > max ? `${text.slice(0, max)}...` : text;
@@ -55,11 +66,11 @@ const Funcoes = () => {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         title={editRole ? 'Editar Função' : 'Cadastrar Nova Função'}
       >
         <FuncaoForm
-          onClose={() => setIsModalOpen(false)}
+          onClose={handleCloseModal}
           onSaved={loadRoles}
           initialData={editRole || undefined}
         />
@@ -120,6 +131,16 @@ const Funcoes = () => {
                       >
                         <Info className="funcoes-icon-sm" />
                       </button>
+                      {allowEdit && (
+                        <button
+                          onClick={() => handleOpenEdit(role)}
+                          className="funcoes-edit-btn"
+                          title="Editar"
+                          type="button"
+                        >
+                          <Edit2 className="funcoes-icon-sm" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

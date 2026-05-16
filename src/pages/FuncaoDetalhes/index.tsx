@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Shield, AlertTriangle, Users, Edit3, Trash2, CheckCircle2, Loader2 } from 'lucide-react';
-import { roleService, type RoleAPI, type RoleRiskAPI } from '../../services/roleService';
-import type { EpiAPI } from '../../services/epiService';
+import { ArrowLeft, Shield, AlertTriangle, Users, Edit3, Trash2, CheckCircle2, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
+import { roleService, type RoleAPI, type RoleRiskAPI, type RoleEpiTypeWithLink } from '../../services/roleService';
 import './styles.css';
 
 const FuncaoDetalhes = () => {
@@ -11,22 +10,32 @@ const FuncaoDetalhes = () => {
   const roleId = Number(id);
 
   const [funcao, setFuncao] = useState<RoleAPI | null>(null);
-  const [epis, setEpis] = useState<(EpiAPI & { rle_mandatory?: number })[]>([]);
+  const [epiTypes, setEpiTypes] = useState<RoleEpiTypeWithLink[]>([]);
+  const [expandedEptIds, setExpandedEptIds] = useState<Set<number>>(new Set());
   const [risks, setRisks] = useState<RoleRiskAPI[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const toggleExpanded = (eptId: number) => {
+    setExpandedEptIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(eptId)) next.delete(eptId);
+      else next.add(eptId);
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!roleId) return;
     const load = async () => {
       setLoading(true);
       try {
-        const [role, linkedEpis, linkedRisks] = await Promise.all([
+        const [role, linkedTypes, linkedRisks] = await Promise.all([
           roleService.getById(roleId),
-          roleService.getEpis(roleId),
+          roleService.getEpiTypes(roleId, true),
           roleService.getRisks(roleId),
         ]);
         setFuncao(role);
-        setEpis(linkedEpis);
+        setEpiTypes(linkedTypes);
         setRisks(linkedRisks);
       } catch (err) {
         console.error(err);
@@ -92,7 +101,6 @@ const FuncaoDetalhes = () => {
       <div className="funcao-detalhes-grid">
         <div className="funcao-detalhes-main">
           <div className="funcao-detalhes-info-card">
-            
             <div>
               <h3 className="funcao-detalhes-nome">{funcao.rol_description}</h3>
               <p className="funcao-detalhes-descricao">{funcao.rol_activities || '—'}</p>
@@ -105,22 +113,51 @@ const FuncaoDetalhes = () => {
             <div className="funcao-detalhes-epi-section">
               <h4 className="funcao-detalhes-epi-title">EPIs Obrigatórios (NR-06)</h4>
               <div className="funcao-detalhes-epi-grid">
-                {epis.length === 0 ? (
-                  <p className="funcao-detalhes-empty">Nenhum EPI vinculado.</p>
+                {epiTypes.length === 0 ? (
+                  <p className="funcao-detalhes-empty">Nenhum tipo de EPI vinculado.</p>
                 ) : (
-                  epis.map((epi) => (
-                    <div key={epi.epi_id} className="funcao-detalhes-epi-item">
-                      <div className="funcao-detalhes-epi-icon-wrapper">
-                        <Shield className="funcao-detalhes-epi-icon" />
+                  epiTypes.map((epi) => {
+                    const expanded = expandedEptIds.has(epi.ept_id);
+                    const variants = epi.variants ?? [];
+                    return (
+                      <div key={epi.ept_id} className="funcao-detalhes-epi-item funcao-detalhes-epi-item-expandable">
+                        <button
+                          type="button"
+                          className="funcao-detalhes-epi-toggle"
+                          onClick={() => toggleExpanded(epi.ept_id)}
+                          aria-expanded={expanded}
+                        >
+                          <div className="funcao-detalhes-epi-icon-wrapper">
+                            <Shield className="funcao-detalhes-epi-icon" />
+                          </div>
+                          <div className="funcao-detalhes-epi-toggle-text">
+                            <p className="funcao-detalhes-epi-name">{epi.ept_description}</p>
+                            <p className="funcao-detalhes-epi-period">
+                              {epi.ept_category} · {variants.length} variante{variants.length !== 1 ? 's' : ''} homologada{variants.length !== 1 ? 's' : ''}
+                            </p>
+                          </div>
+                          {expanded ? (
+                            <ChevronDown className="funcao-detalhes-epi-chevron" />
+                          ) : (
+                            <ChevronRight className="funcao-detalhes-epi-chevron" />
+                          )}
+                        </button>
+                        {expanded && variants.length > 0 && (
+                          <ul className="funcao-detalhes-variant-list">
+                            {variants.map((v) => (
+                              <li key={v.epv_id} className="funcao-detalhes-variant-item">
+                                <span>{[v.epv_manufacturer, v.epv_model].filter(Boolean).join(' · ')}</span>
+                                <span className="funcao-detalhes-variant-ca">CA {v.epv_ca}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {expanded && variants.length === 0 && (
+                          <p className="funcao-detalhes-variant-empty">Nenhuma variante cadastrada.</p>
+                        )}
                       </div>
-                      <div>
-                        <p className="funcao-detalhes-epi-name">{epi.epi_description}</p>
-                        <p className="funcao-detalhes-epi-period">
-                          CA: {epi.epi_ca} · Troca a cada {epi.epi_lifespan_days} dias
-                        </p>
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -199,7 +236,7 @@ const FuncaoDetalhes = () => {
               <div className="funcao-detalhes-conformidade-item">
                 <CheckCircle2 className="funcao-detalhes-conformidade-icon" />
                 <span className="funcao-detalhes-conformidade-text">
-                  {epis.length > 0 ? 'Matriz de EPI configurada' : 'Matriz de EPI pendente'}
+                  {epiTypes.length > 0 ? 'Matriz de EPI configurada' : 'Matriz de EPI pendente'}
                 </span>
               </div>
               <div className="funcao-detalhes-conformidade-item">

@@ -289,3 +289,27 @@
     gap: 0.25rem;
   }
 }
+
+.detalhes-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 4rem;
+  color: var(--color-slate-500);
+}
+
+.detalhes-spin {
+  animation: detalhes-spin 1s linear infinite;
+}
+
+@keyframes detalhes-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.detalhes-empty {
+  color: var(--color-slate-500);
+  font-size: 0.875rem;
+  padding: 1rem 0;
+}

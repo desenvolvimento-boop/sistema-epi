@@ -459,6 +459,35 @@
   to { transform: rotate(360deg); }
 }
 
+.funcao-editar-select-with-action {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.funcao-editar-select-with-action select {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.funcao-editar-add-type-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.375rem;
+  background-color: #1e293b;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.funcao-editar-add-type-btn:hover {
+  background-color: #334155;
+}
+
 .funcao-editar-risks-card {
   margin-top: 1.5rem;
 }

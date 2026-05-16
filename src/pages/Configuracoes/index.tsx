@@ -6,7 +6,6 @@ import {
   LogOut, 
   Plus, 
   Edit2, 
-  Trash2, 
   Copy, 
   Check,
   AlertTriangle,
@@ -31,10 +30,9 @@ interface PermissionSet {
 }
 
 const Configuracoes = () => {
-  const { logout, canCreate, canEdit, canDelete } = useAuth();
+  const { logout, canCreate, canEdit } = useAuth();
   const allowCreate = canCreate('/configuracoes');
   const allowEdit = canEdit('/configuracoes');
-  const allowDelete = canDelete('/configuracoes');
   const [activeTab, setActiveTab] = useState('perfil');
 
   const [profiles, setProfiles] = useState<AccessProfileAPI[]>([]);
@@ -200,18 +198,6 @@ const Configuracoes = () => {
       await fetchData();
     } catch (err: any) {
       setError(err.message || 'Erro ao duplicar perfil');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDeleteProfile = async (id: number) => {
-    try {
-      setSaving(true);
-      await accessProfileService.delete(id);
-      await fetchData();
-    } catch (err: any) {
-      setError(err.message || 'Erro ao excluir perfil');
     } finally {
       setSaving(false);
     }
@@ -390,16 +376,6 @@ const Configuracoes = () => {
                                     disabled={saving}
                                   >
                                     <Copy className="config-icon-sm" />
-                                  </button>
-                                )}
-                                {allowDelete && (
-                                  <button 
-                                    onClick={() => handleDeleteProfile(profile.acp_id)}
-                                    className="config-action-delete"
-                                    title="Excluir"
-                                    disabled={saving}
-                                  >
-                                    <Trash2 className="config-icon-sm" />
                                   </button>
                                 )}
                               </div>

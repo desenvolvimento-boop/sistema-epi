@@ -33,8 +33,8 @@ const MatrizFuncaoEPI = () => {
     loadMatrix();
   }, [loadMatrix]);
 
-  const isLinked = (rolId: number, epiId: number) => {
-    return matrixData?.matrix.some((m) => m.rol_id === rolId && m.epi_id === epiId) ?? false;
+  const isLinked = (rolId: number, eptId: number) => {
+    return matrixData?.matrix.some((m) => m.rol_id === rolId && m.ept_id === eptId) ?? false;
   };
 
   const handleEditMatriz = (role: RoleAPI) => {
@@ -48,7 +48,7 @@ const MatrizFuncaoEPI = () => {
   };
 
   const roles = matrixData?.roles ?? [];
-  const epis = matrixData?.epis ?? [];
+  const epiTypes = matrixData?.epiTypes ?? [];
 
   return (
     <div className="matriz-page">
@@ -89,9 +89,9 @@ const MatrizFuncaoEPI = () => {
               <thead>
                 <tr className="matriz-thead-row">
                   <th className="matriz-th-sticky-left">Função</th>
-                  {epis.map((epi) => (
-                    <th key={epi.epi_id} className="matriz-th" title={epi.epi_description}>
-                      {epi.epi_description.split(' ')[0]}
+                  {epiTypes.map((epi) => (
+                    <th key={epi.ept_id} className="matriz-th" title={epi.ept_description}>
+                      {epi.ept_description.split(' ')[0]}
                     </th>
                   ))}
                   <th className="matriz-th-sticky-right">Ações</th>
@@ -101,10 +101,10 @@ const MatrizFuncaoEPI = () => {
                 {roles.map((role) => (
                   <tr key={role.rol_id} className="matriz-row">
                     <td className="matriz-td-role">{role.rol_description}</td>
-                    {epis.map((epi) => {
-                      const required = isLinked(role.rol_id, epi.epi_id);
+                    {epiTypes.map((epi) => {
+                      const required = isLinked(role.rol_id, epi.ept_id);
                       return (
-                        <td key={epi.epi_id} className="matriz-td-center">
+                        <td key={epi.ept_id} className="matriz-td-center">
                           {required ? (
                             <div className="matriz-check-wrapper">
                               <div className="matriz-check-icon">

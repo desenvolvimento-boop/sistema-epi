@@ -1,5 +1,6 @@
 import { API_BASE_URL } from './authService';
-import type { EpiAPI } from './epiService';
+import type { EpiTypeAPI } from './epiTypeService';
+import type { EpiVariantAPI } from './epiVariantService';
 
 export interface RoleAPI {
   rol_id: number;
@@ -18,10 +19,15 @@ export interface RoleAPI {
   employee_count?: number;
 }
 
-export interface RoleEpiLink {
-  epi_id: number;
+export interface RoleEpiTypeLink {
+  ept_id: number;
   rle_mandatory?: number;
 }
+
+export type RoleEpiTypeWithLink = EpiTypeAPI & {
+  rle_mandatory?: number;
+  variants?: EpiVariantAPI[];
+};
 
 export interface RoleRiskAPI {
   rsk_id: number;
@@ -41,14 +47,13 @@ export interface RoleRiskAPI {
 
 export interface RoleMatrixResponse {
   roles: RoleAPI[];
-  epis: EpiAPI[];
-  matrix: { rol_id: number; epi_id: number; rle_mandatory: number }[];
+  epiTypes: EpiTypeAPI[];
+  matrix: { rol_id: number; ept_id: number; rle_mandatory: number }[];
 }
 
 export type RoleCreatePayload = Omit<RoleAPI, 'rol_id' | 'rol_datetimeinsert' | 'rol_datetimeupdate' | 'epi_count' | 'employee_count'>;
 export type RoleUpdatePayload = Partial<RoleCreatePayload>;
 
-export const RISK_TYPES = ['Físico', 'Químico', 'Ergonômico', 'Biológico', 'Mecânico', 'Acidentes'] as const;
 export const RISK_SEVERITIES = ['Baixa', 'Média', 'Alta'] as const;
 
 function getAuthHeaders(): Record<string, string> {
@@ -83,7 +88,10 @@ export const roleService = {
     return handleResponse<RoleMatrixResponse>(res);
   },
 
-  async getById(id: number, includeRelations = false): Promise<RoleAPI & { epis?: EpiAPI[]; risks?: RoleRiskAPI[] }> {
+  async getById(
+    id: number,
+    includeRelations = false
+  ): Promise<RoleAPI & { epiTypes?: RoleEpiTypeWithLink[]; risks?: RoleRiskAPI[] }> {
     const qs = includeRelations ? '?include=relations' : '';
     const res = await fetch(`${API_BASE_URL}/role/${id}${qs}`, { headers: getAuthHeaders() });
     return handleResponse(res);
@@ -121,13 +129,14 @@ export const roleService = {
     }
   },
 
-  async getEpis(roleId: number): Promise<(EpiAPI & { rle_mandatory?: number })[]> {
-    const res = await fetch(`${API_BASE_URL}/role/${roleId}/epis`, { headers: getAuthHeaders() });
+  async getEpiTypes(roleId: number, includeVariants = false): Promise<RoleEpiTypeWithLink[]> {
+    const qs = includeVariants ? '?include=variants' : '';
+    const res = await fetch(`${API_BASE_URL}/role/${roleId}/epi-types${qs}`, { headers: getAuthHeaders() });
     return handleResponse(res);
   },
 
-  async setEpis(roleId: number, items: RoleEpiLink[]): Promise<(EpiAPI & { rle_mandatory?: number })[]> {
-    const res = await fetch(`${API_BASE_URL}/role/${roleId}/epis`, {
+  async setEpiTypes(roleId: number, items: RoleEpiTypeLink[]): Promise<RoleEpiTypeWithLink[]> {
+    const res = await fetch(`${API_BASE_URL}/role/${roleId}/epi-types`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify({ items }),
@@ -140,7 +149,10 @@ export const roleService = {
     return handleResponse<RoleRiskAPI[]>(res);
   },
 
-  async createRisk(roleId: number, data: Omit<RoleRiskAPI, 'rsk_id' | 'rol_id' | 'rsk_datetimeinsert' | 'rsk_datetimeupdate'>): Promise<RoleRiskAPI> {
+  async createRisk(
+    roleId: number,
+    data: Omit<RoleRiskAPI, 'rsk_id' | 'rol_id' | 'rsk_datetimeinsert' | 'rsk_datetimeupdate'>
+  ): Promise<RoleRiskAPI> {
     const res = await fetch(`${API_BASE_URL}/role/${roleId}/risks`, {
       method: 'POST',
       headers: getAuthHeaders(),

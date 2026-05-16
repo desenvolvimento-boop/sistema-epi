@@ -592,3 +592,21 @@
     justify-content: center;
   }
 }
+
+.calendario-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 4rem;
+  color: var(--color-slate-500);
+}
+
+.calendario-spin {
+  animation: calendario-spin 1s linear infinite;
+}
+
+@keyframes calendario-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

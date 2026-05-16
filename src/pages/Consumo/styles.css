@@ -358,3 +358,30 @@
     padding: 0.75rem 1rem;
   }
 }
+
+.consumo-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 3rem;
+  color: var(--color-slate-500);
+}
+
+.consumo-spin {
+  animation: consumo-spin 1s linear infinite;
+}
+
+@keyframes consumo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.consumo-stat-value--text {
+  font-size: 1.125rem;
+}
+
+.consumo-empty {
+  text-align: center;
+  color: var(--color-slate-500);
+}

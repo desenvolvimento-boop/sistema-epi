@@ -1,8 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { roleService, type RoleAPI } from '../../services/roleService';
-import { epiService, type EpiAPI } from '../../services/epiService';
-import { INTEGRATION_SOURCES } from '../../services/epiService';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Plus, X } from 'lucide-react';
+import {
+  roleService,
+  RISK_SEVERITIES,
+  type RoleAPI,
+  type RoleRiskAPI,
+} from '../../services/roleService';
+import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
+import { INTEGRATION_SOURCES } from '../../services/epiVariantService';
+import { riskTypeService, type RiskTypeAPI } from '../../services/riskTypeService';
+import { SimpleCrudModal, type SimpleCrudItem } from './SimpleCrudModal';
 import './FuncaoForm.css';
+
+function mapRiskTypesToCrud(types: RiskTypeAPI[]): SimpleCrudItem[] {
+  return types.map((t) => ({
+    id: t.rty_id,
+    name: t.rty_description,
+    description: t.rty_code || t.rty_integration_id,
+    active: t.rty_active === 1,
+  }));
+}
+
+function getDefaultRiskTypeName(types: SimpleCrudItem[]): string {
+  const first = types.find((t) => t.active);
+  return first?.name || '';
+}
 
 interface FuncaoFormProps {
   onClose: () => void;
@@ -10,11 +32,44 @@ interface FuncaoFormProps {
   initialData?: RoleAPI;
 }
 
+interface RiskDraft {
+  tempId: string;
+  rsk_type: string;
+  rsk_agent: string;
+  rsk_severity: string;
+  rsk_pgr_reference: string | null;
+  rsk_integration_id: string | null;
+  rsk_integration_source: string;
+}
+
+function buildRiskPayload(
+  type: string,
+  agent: string,
+  severity: string,
+  pgrRef: string,
+  integrationSource: string,
+  integrationId: string
+) {
+  return {
+    rsk_active: 1,
+    rsk_type: type,
+    rsk_agent: agent.trim(),
+    rsk_severity: severity,
+    rsk_pgr_reference: pgrRef.trim() || null,
+    rsk_integration_id: integrationId.trim() || null,
+    rsk_integration_source: integrationSource,
+    rsk_external_code: null,
+    rsk_integration_sync_at: null,
+    usr_id_insert: null,
+    usr_id_lastupdate: null,
+  };
+}
+
 export const FuncaoForm = ({ onClose, onSaved, initialData }: FuncaoFormProps) => {
   const isIntegrated = initialData?.rol_integration_source && initialData.rol_integration_source !== 'Manual';
   const [saving, setSaving] = useState(false);
-  const [episCatalog, setEpisCatalog] = useState<EpiAPI[]>([]);
-  const [selectedEpiIds, setSelectedEpiIds] = useState<number[]>([]);
+  const [episCatalog, setEpisCatalog] = useState<EpiTypeAPI[]>([]);
+  const [selectedEptIds, setSelectedEptIds] = useState<number[]>([]);
   const [showIntegration, setShowIntegration] = useState(
     !!(initialData?.rol_integration_id || (initialData?.rol_integration_source && initialData.rol_integration_source !== 'Manual'))
   );
@@ -27,16 +82,48 @@ export const FuncaoForm = ({ onClose, onSaved, initialData }: FuncaoFormProps) =
   const [integrationSource, setIntegrationSource] = useState(initialData?.rol_integration_source || 'Manual');
   const [cbo, setCbo] = useState(initialData?.rol_cbo || '');
 
+  const [risks, setRisks] = useState<RoleRiskAPI[]>([]);
+  const [pendingRisks, setPendingRisks] = useState<RiskDraft[]>([]);
+  const [showRiskForm, setShowRiskForm] = useState(false);
+  const [riskTypes, setRiskTypes] = useState<SimpleCrudItem[]>([]);
+  const [isRiskTypeModalOpen, setIsRiskTypeModalOpen] = useState(false);
+  const [riskType, setRiskType] = useState('');
+  const [riskAgent, setRiskAgent] = useState('');
+  const [riskSeverity, setRiskSeverity] = useState<string>(RISK_SEVERITIES[0]);
+  const [riskPgrRef, setRiskPgrRef] = useState('');
+  const [riskIntegrationSource, setRiskIntegrationSource] = useState('Manual');
+  const [riskIntegrationId, setRiskIntegrationId] = useState('');
+
+  const reloadRiskTypes = useCallback(async () => {
+    try {
+      const types = await riskTypeService.getAll();
+      const mapped = mapRiskTypesToCrud(types);
+      setRiskTypes(mapped);
+      setRiskType((current) => {
+        if (current && mapped.some((t) => t.active && t.name === current)) return current;
+        return getDefaultRiskTypeName(mapped);
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
+
   useEffect(() => {
     const load = async () => {
       try {
-        const [catalog, linked] = await Promise.all([
-          epiService.getActive(),
-          initialData ? roleService.getEpis(initialData.rol_id) : Promise.resolve([]),
+        const [catalog, types, linked, linkedRisks] = await Promise.all([
+          epiTypeService.getActive(),
+          riskTypeService.getAll(),
+          initialData ? roleService.getEpiTypes(initialData.rol_id) : Promise.resolve([]),
+          initialData ? roleService.getRisks(initialData.rol_id) : Promise.resolve([]),
         ]);
         setEpisCatalog(catalog);
+        const mappedTypes = mapRiskTypesToCrud(types);
+        setRiskTypes(mappedTypes);
+        setRiskType(getDefaultRiskTypeName(mappedTypes));
         if (initialData) {
-          setSelectedEpiIds(linked.map((e) => e.epi_id));
+          setSelectedEptIds(linked.map((e) => e.ept_id));
+          setRisks(linkedRisks);
         }
       } catch (err) {
         console.error(err);
@@ -45,10 +132,103 @@ export const FuncaoForm = ({ onClose, onSaved, initialData }: FuncaoFormProps) =
     load();
   }, [initialData]);
 
-  const toggleEpi = (epiId: number) => {
-    setSelectedEpiIds((prev) =>
-      prev.includes(epiId) ? prev.filter((id) => id !== epiId) : [...prev, epiId]
+  const activeRiskTypes = riskTypes.filter((t) => t.active);
+
+  const handleRiskTypeCreated = async (item: SimpleCrudItem) => {
+    try {
+      const created = await riskTypeService.create({
+        rty_active: item.active ? 1 : 0,
+        rty_description: item.name,
+        rty_code: item.description,
+        rty_integration_id: null,
+        rty_integration_source: 'Manual',
+        usr_id_insert: null,
+        usr_id_lastupdate: null,
+      });
+      setRiskType(created.rty_description);
+      await reloadRiskTypes();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao criar tipo de risco');
+    }
+  };
+
+  const toggleEpt = (eptId: number) => {
+    setSelectedEptIds((prev) =>
+      prev.includes(eptId) ? prev.filter((id) => id !== eptId) : [...prev, eptId]
     );
+  };
+
+  const resetRiskForm = () => {
+    setRiskType(getDefaultRiskTypeName(riskTypes));
+    setRiskAgent('');
+    setRiskSeverity(RISK_SEVERITIES[0]);
+    setRiskPgrRef('');
+    setRiskIntegrationSource('Manual');
+    setRiskIntegrationId('');
+    setShowRiskForm(false);
+  };
+
+  const handleAddRisk = async () => {
+    if (!riskType) {
+      alert('Selecione o tipo de risco.');
+      return;
+    }
+    if (!riskAgent.trim()) {
+      alert('Informe a descrição do agente de risco.');
+      return;
+    }
+
+    const payload = buildRiskPayload(
+      riskType,
+      riskAgent,
+      riskSeverity,
+      riskPgrRef,
+      riskIntegrationSource,
+      riskIntegrationId
+    );
+
+    if (initialData) {
+      try {
+        await roleService.createRisk(initialData.rol_id, payload);
+        const updated = await roleService.getRisks(initialData.rol_id);
+        setRisks(updated);
+        resetRiskForm();
+      } catch (err: unknown) {
+        alert(err instanceof Error ? err.message : 'Erro ao adicionar risco');
+      }
+      return;
+    }
+
+    setPendingRisks((prev) => [
+      ...prev,
+      {
+        tempId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        rsk_type: payload.rsk_type,
+        rsk_agent: payload.rsk_agent,
+        rsk_severity: payload.rsk_severity,
+        rsk_pgr_reference: payload.rsk_pgr_reference,
+        rsk_integration_id: payload.rsk_integration_id,
+        rsk_integration_source: payload.rsk_integration_source || 'Manual',
+      },
+    ]);
+    resetRiskForm();
+  };
+
+  const removePendingRisk = (tempId: string) => {
+    setPendingRisks((prev) => prev.filter((r) => r.tempId !== tempId));
+  };
+
+  const savePendingRisks = async (roleId: number) => {
+    for (const draft of pendingRisks) {
+      await roleService.createRisk(roleId, buildRiskPayload(
+        draft.rsk_type,
+        draft.rsk_agent,
+        draft.rsk_severity,
+        draft.rsk_pgr_reference || '',
+        draft.rsk_integration_source,
+        draft.rsk_integration_id || ''
+      ));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -79,11 +259,14 @@ export const FuncaoForm = ({ onClose, onSaved, initialData }: FuncaoFormProps) =
       } else {
         const created = await roleService.create(payload);
         roleId = created.rol_id;
+        if (pendingRisks.length > 0) {
+          await savePendingRisks(roleId);
+        }
       }
 
-      await roleService.setEpis(
+      await roleService.setEpiTypes(
         roleId,
-        selectedEpiIds.map((epi_id) => ({ epi_id, rle_mandatory: 1 }))
+        selectedEptIds.map((ept_id) => ({ ept_id, rle_mandatory: 1 }))
       );
 
       onSaved?.();
@@ -94,6 +277,10 @@ export const FuncaoForm = ({ onClose, onSaved, initialData }: FuncaoFormProps) =
       setSaving(false);
     }
   };
+
+  const tableRisks: Array<RoleRiskAPI | (RiskDraft & { isPending: true })> = initialData
+    ? risks
+    : pendingRisks.map((r) => ({ ...r, isPending: true as const }));
 
   return (
     <form className="funcao-form" onSubmit={handleSubmit}>
@@ -155,22 +342,197 @@ export const FuncaoForm = ({ onClose, onSaved, initialData }: FuncaoFormProps) =
               <p className="funcao-form-empty-epis">Cadastre EPIs no catálogo primeiro.</p>
             ) : (
               episCatalog.map((epi) => (
-                <label key={epi.epi_id} className="funcao-form-checkbox-label">
+                <label key={epi.ept_id} className="funcao-form-checkbox-label">
                   <input
                     type="checkbox"
                     className="funcao-form-checkbox"
-                    checked={selectedEpiIds.includes(epi.epi_id)}
-                    onChange={() => toggleEpi(epi.epi_id)}
+                    checked={selectedEptIds.includes(epi.ept_id)}
+                    onChange={() => toggleEpt(epi.ept_id)}
                   />
                   <span>
-                    {epi.epi_description}
-                    <small> CA: {epi.epi_ca}</small>
+                    {epi.ept_description}
+                    <small> · {epi.ept_category}</small>
                   </span>
                 </label>
               ))
             )}
           </div>
         </div>
+      </div>
+
+      <div className="funcao-form-risks-section">
+        <div className="funcao-form-risks-header">
+          <div>
+            <h4 className="funcao-form-risks-title">Riscos Ocupacionais</h4>
+            <p className="funcao-form-risks-hint">
+              Cadastre riscos manualmente ou vincule via integração ERP. Riscos importados aparecem automaticamente após sincronização.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowRiskForm(!showRiskForm)}
+            className="funcao-form-add-risk-btn"
+          >
+            <Plus className="funcao-form-add-risk-icon" />
+            Adicionar Risco
+          </button>
+        </div>
+
+        {showRiskForm && (
+          <div className="funcao-form-risk-form">
+            <div className="funcao-form-risk-grid">
+              <div className="funcao-form-field">
+                <label className="funcao-form-label">Tipo</label>
+                <div className="funcao-form-select-with-action">
+                  <select
+                    className="funcao-form-input"
+                    value={riskType}
+                    onChange={(e) => setRiskType(e.target.value)}
+                    disabled={activeRiskTypes.length === 0}
+                  >
+                    {activeRiskTypes.length === 0 ? (
+                      <option value="">Cadastre um tipo de risco</option>
+                    ) : (
+                      activeRiskTypes.map((t) => (
+                        <option key={t.id} value={t.name}>{t.name}</option>
+                      ))
+                    )}
+                  </select>
+                  <button
+                    type="button"
+                    className="funcao-form-add-btn"
+                    onClick={() => setIsRiskTypeModalOpen(true)}
+                    title="Cadastrar tipo de risco"
+                  >
+                    <Plus className="funcao-form-add-icon" />
+                  </button>
+                </div>
+                <SimpleCrudModal
+                  isOpen={isRiskTypeModalOpen}
+                  onClose={() => {
+                    setIsRiskTypeModalOpen(false);
+                    reloadRiskTypes();
+                  }}
+                  title="Cadastrar Tipo de Risco"
+                  entityLabel="Tipo de Risco"
+                  items={riskTypes}
+                  onItemsChange={setRiskTypes}
+                  onItemCreated={handleRiskTypeCreated}
+                />
+              </div>
+              <div className="funcao-form-field">
+                <label className="funcao-form-label">Severidade</label>
+                <select
+                  className="funcao-form-input"
+                  value={riskSeverity}
+                  onChange={(e) => setRiskSeverity(e.target.value)}
+                >
+                  {RISK_SEVERITIES.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="funcao-form-field funcao-form-field-full">
+                <label className="funcao-form-label">Descrição do agente <span className="funcao-form-required">*</span></label>
+                <input
+                  className="funcao-form-input"
+                  value={riskAgent}
+                  onChange={(e) => setRiskAgent(e.target.value)}
+                  placeholder="Ex: Ruído contínuo acima de 85 dB"
+                />
+              </div>
+              <div className="funcao-form-field">
+                <label className="funcao-form-label">Ref. PGR</label>
+                <input
+                  className="funcao-form-input"
+                  value={riskPgrRef}
+                  onChange={(e) => setRiskPgrRef(e.target.value)}
+                  placeholder="Ex: PGR-AUD-01"
+                />
+              </div>
+              <div className="funcao-form-field">
+                <label className="funcao-form-label">Origem</label>
+                <select
+                  className="funcao-form-input"
+                  value={riskIntegrationSource}
+                  onChange={(e) => setRiskIntegrationSource(e.target.value)}
+                >
+                  {INTEGRATION_SOURCES.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="funcao-form-field">
+                <label className="funcao-form-label">ID TOTVS/ERP</label>
+                <input
+                  className="funcao-form-input"
+                  value={riskIntegrationId}
+                  onChange={(e) => setRiskIntegrationId(e.target.value)}
+                  placeholder={riskIntegrationSource === 'Manual' ? 'Opcional' : 'Código no ERP'}
+                />
+              </div>
+            </div>
+            <div className="funcao-form-risk-actions">
+              <button type="button" className="funcao-form-cancel" onClick={resetRiskForm}>
+                Cancelar
+              </button>
+              <button type="button" className="funcao-form-risk-save-btn" onClick={handleAddRisk}>
+                {initialData ? 'Salvar Risco' : 'Incluir na lista'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {tableRisks.length === 0 ? (
+          <p className="funcao-form-risks-empty">Nenhum risco cadastrado para esta função.</p>
+        ) : (
+          <div className="funcao-form-risks-table-wrap custom-scrollbar">
+            <table className="funcao-form-risks-table">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Agente</th>
+                  <th>Origem</th>
+                  <th>Severidade</th>
+                  {!initialData && <th></th>}
+                </tr>
+              </thead>
+              <tbody>
+                {tableRisks.map((r) => {
+                  const isPending = 'isPending' in r && r.isPending;
+                  const key = isPending ? r.tempId : (r as RoleRiskAPI).rsk_id;
+                  const source = r.rsk_integration_source || 'Manual';
+                  return (
+                    <tr key={key}>
+                      <td>{r.rsk_type}</td>
+                      <td>{r.rsk_agent}</td>
+                      <td>
+                        <span className={`funcao-form-risk-origin funcao-form-risk-origin-${source.toLowerCase()}`}>
+                          {source}
+                        </span>
+                      </td>
+                      <td>{r.rsk_severity}</td>
+                      {!initialData && (
+                        <td className="funcao-form-risks-actions-cell">
+                          {isPending && (
+                            <button
+                              type="button"
+                              className="funcao-form-risk-remove-btn"
+                              title="Remover da lista"
+                              onClick={() => removePendingRisk(r.tempId)}
+                            >
+                              <X className="funcao-form-risk-remove-icon" />
+                            </button>
+                          )}
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <div className="funcao-form-integration-toggle">

@@ -1,10 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2, Loader2 } from 'lucide-react';
-import { roleService, RISK_TYPES, RISK_SEVERITIES, type RoleAPI, type RoleRiskAPI } from '../../services/roleService';
+import { roleService, RISK_SEVERITIES, type RoleAPI, type RoleRiskAPI } from '../../services/roleService';
+import { riskTypeService, type RiskTypeAPI } from '../../services/riskTypeService';
+import { SimpleCrudModal, type SimpleCrudItem } from '../../components/forms/SimpleCrudModal';
 import { FuncaoForm } from '../../components/forms/FuncaoForm';
-import { INTEGRATION_SOURCES } from '../../services/epiService';
+import { INTEGRATION_SOURCES } from '../../services/epiVariantService';
 import './styles.css';
+
+function mapRiskTypesToCrud(types: RiskTypeAPI[]): SimpleCrudItem[] {
+  return types.map((t) => ({
+    id: t.rty_id,
+    name: t.rty_description,
+    description: t.rty_code || t.rty_integration_id,
+    active: t.rty_active === 1,
+  }));
+}
+
+function getDefaultRiskTypeName(types: SimpleCrudItem[]): string {
+  const first = types.find((t) => t.active);
+  return first?.name || '';
+}
 
 const FuncaoEditar = () => {
   const { id } = useParams();
@@ -15,27 +31,67 @@ const FuncaoEditar = () => {
   const [risks, setRisks] = useState<RoleRiskAPI[]>([]);
   const [loading, setLoading] = useState(true);
   const [showRiskForm, setShowRiskForm] = useState(false);
-  const [riskType, setRiskType] = useState(RISK_TYPES[0]);
+  const [riskTypes, setRiskTypes] = useState<SimpleCrudItem[]>([]);
+  const [isRiskTypeModalOpen, setIsRiskTypeModalOpen] = useState(false);
+  const [riskType, setRiskType] = useState('');
   const [riskAgent, setRiskAgent] = useState('');
   const [riskSeverity, setRiskSeverity] = useState<string>(RISK_SEVERITIES[0]);
   const [riskPgrRef, setRiskPgrRef] = useState('');
   const [riskIntegrationSource, setRiskIntegrationSource] = useState('Manual');
   const [riskIntegrationId, setRiskIntegrationId] = useState('');
 
+  const reloadRiskTypes = useCallback(async () => {
+    try {
+      const types = await riskTypeService.getAll();
+      const mapped = mapRiskTypesToCrud(types);
+      setRiskTypes(mapped);
+      setRiskType((current) => {
+        if (current && mapped.some((t) => t.active && t.name === current)) return current;
+        return getDefaultRiskTypeName(mapped);
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
+
   const load = async () => {
     if (!roleId) return;
     setLoading(true);
     try {
-      const [role, linkedRisks] = await Promise.all([
+      const [role, linkedRisks, types] = await Promise.all([
         roleService.getById(roleId),
         roleService.getRisks(roleId),
+        riskTypeService.getAll(),
       ]);
       setFuncao(role);
       setRisks(linkedRisks);
+      const mappedTypes = mapRiskTypesToCrud(types);
+      setRiskTypes(mappedTypes);
+      setRiskType(getDefaultRiskTypeName(mappedTypes));
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const activeRiskTypes = riskTypes.filter((t) => t.active);
+
+  const handleRiskTypeCreated = async (item: SimpleCrudItem) => {
+    try {
+      const created = await riskTypeService.create({
+        rty_active: item.active ? 1 : 0,
+        rty_description: item.name,
+        rty_code: item.description,
+        rty_integration_id: null,
+        rty_integration_source: 'Manual',
+        usr_id_insert: null,
+        usr_id_lastupdate: null,
+      });
+      setRiskType(created.rty_description);
+      await reloadRiskTypes();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao criar tipo de risco');
     }
   };
 
@@ -44,7 +100,7 @@ const FuncaoEditar = () => {
   }, [roleId]);
 
   const resetRiskForm = () => {
-    setRiskType(RISK_TYPES[0]);
+    setRiskType(getDefaultRiskTypeName(riskTypes));
     setRiskAgent('');
     setRiskSeverity(RISK_SEVERITIES[0]);
     setRiskPgrRef('');
@@ -55,7 +111,7 @@ const FuncaoEditar = () => {
 
   const handleAddRisk = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!riskAgent.trim()) return;
+    if (!riskType || !riskAgent.trim()) return;
     try {
       await roleService.createRisk(roleId, {
         rsk_active: 1,
@@ -145,9 +201,42 @@ const FuncaoEditar = () => {
             <div className="funcao-editar-grid">
               <div className="funcao-editar-field-group">
                 <label className="funcao-editar-label">Tipo</label>
-                <select className="funcao-editar-input" value={riskType} onChange={(e) => setRiskType(e.target.value as typeof RISK_TYPES[number])}>
-                  {RISK_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-                </select>
+                <div className="funcao-editar-select-with-action">
+                  <select
+                    className="funcao-editar-input"
+                    value={riskType}
+                    onChange={(e) => setRiskType(e.target.value)}
+                    disabled={activeRiskTypes.length === 0}
+                  >
+                    {activeRiskTypes.length === 0 ? (
+                      <option value="">Cadastre um tipo de risco</option>
+                    ) : (
+                      activeRiskTypes.map((t) => (
+                        <option key={t.id} value={t.name}>{t.name}</option>
+                      ))
+                    )}
+                  </select>
+                  <button
+                    type="button"
+                    className="funcao-editar-add-type-btn"
+                    onClick={() => setIsRiskTypeModalOpen(true)}
+                    title="Cadastrar tipo de risco"
+                  >
+                    <Plus className="funcao-editar-add-epi-icon" />
+                  </button>
+                </div>
+                <SimpleCrudModal
+                  isOpen={isRiskTypeModalOpen}
+                  onClose={() => {
+                    setIsRiskTypeModalOpen(false);
+                    reloadRiskTypes();
+                  }}
+                  title="Cadastrar Tipo de Risco"
+                  entityLabel="Tipo de Risco"
+                  items={riskTypes}
+                  onItemsChange={setRiskTypes}
+                  onItemCreated={handleRiskTypeCreated}
+                />
               </div>
               <div className="funcao-editar-field-group">
                 <label className="funcao-editar-label">Severidade</label>

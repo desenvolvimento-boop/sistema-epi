@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Eye, Edit2, Trash2, AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, Eye, Edit2, Loader2, RefreshCw } from 'lucide-react';
 import { User } from '../../types/system.types';
 import { userService } from '../../services/userService';
 import { StatusBadge } from '../../components/StatusBadge';
@@ -9,10 +9,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import './styles.css';
 
 const Usuarios = () => {
-  const { canCreate, canEdit, canDelete } = useAuth();
+  const { canCreate, canEdit } = useAuth();
   const allowCreate = canCreate('/usuarios');
   const allowEdit = canEdit('/usuarios');
-  const allowDelete = canDelete('/usuarios');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,10 +21,6 @@ const Usuarios = () => {
 
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [viewUser, setViewUser] = useState<User | null>(null);
-
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<User | null>(null);
-  const [deleting, setDeleting] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -69,26 +64,6 @@ const Usuarios = () => {
     setIsViewModalOpen(true);
   };
 
-  const handleDeleteClick = (user: User) => {
-    setUserToDelete(user);
-    setIsDeleteModalOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!userToDelete) return;
-    setDeleting(true);
-    try {
-      await userService.delete(userToDelete.usr_id);
-      setIsDeleteModalOpen(false);
-      setUserToDelete(null);
-      fetchUsers();
-    } catch (err: any) {
-      alert(err.message || 'Erro ao excluir usuário');
-    } finally {
-      setDeleting(false);
-    }
-  };
-
   return (
     <div className="usuarios-container">
       <div className="usuarios-header">
@@ -105,7 +80,6 @@ const Usuarios = () => {
         </div>
       </div>
 
-      {/* Modal Cadastrar / Editar */}
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
@@ -118,7 +92,6 @@ const Usuarios = () => {
         />
       </Modal>
 
-      {/* Modal Visualizar */}
       <Modal
         isOpen={isViewModalOpen}
         onClose={() => setIsViewModalOpen(false)}
@@ -159,36 +132,6 @@ const Usuarios = () => {
         )}
       </Modal>
 
-      {/* Modal Confirmar Exclusão */}
-      <Modal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        title="Confirmar Exclusão"
-      >
-        <div className="usuarios-delete-content">
-          <div className="usuarios-delete-warning">
-            <div className="usuarios-delete-icon-wrapper">
-              <AlertTriangle className="usuarios-icon-lg" />
-            </div>
-            <div>
-              <p className="usuarios-delete-title">Atenção!</p>
-              <p className="usuarios-delete-text">
-                Você está prestes a excluir o usuário <span className="usuarios-delete-text-bold">{userToDelete?.usr_full_name}</span>. Esta ação não pode ser desfeita.
-              </p>
-            </div>
-          </div>
-          <div className="usuarios-delete-actions">
-            <button onClick={() => setIsDeleteModalOpen(false)} className="usuarios-cancel-btn" disabled={deleting}>
-              Cancelar
-            </button>
-            <button onClick={confirmDelete} className="usuarios-confirm-delete-btn" disabled={deleting}>
-              {deleting ? 'Excluindo...' : 'Confirmar Exclusão'}
-            </button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Conteúdo */}
       {error && (
         <div className="usuarios-error-banner">
           <p>{error}</p>
@@ -242,11 +185,6 @@ const Usuarios = () => {
                         {allowEdit && (
                           <button onClick={() => handleOpenEdit(user)} className="usuarios-action-edit" title="Editar">
                             <Edit2 className="usuarios-icon-sm" />
-                          </button>
-                        )}
-                        {allowDelete && (
-                          <button onClick={() => handleDeleteClick(user)} className="usuarios-action-delete" title="Excluir">
-                            <Trash2 className="usuarios-icon-sm" />
                           </button>
                         )}
                       </div>

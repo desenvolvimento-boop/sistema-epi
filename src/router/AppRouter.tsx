@@ -7,6 +7,8 @@ import Dashboard from '../pages/Dashboard';
 import Colaboradores from '../pages/Colaboradores';
 import Funcoes from '../pages/Funcoes';
 import EPIs from '../pages/EPIs';
+import TiposEPI from '../pages/TiposEPI';
+import VariantesEPI from '../pages/VariantesEPI';
 import RegrasTroca from '../pages/RegrasTroca';
 import MatrizFuncaoEPI from '../pages/MatrizFuncaoEPI';
 import Intercorrencias from '../pages/Intercorrencias';
@@ -81,6 +83,8 @@ export const AppRouter = () => {
       <Route path="/funcoes/:id/detalhes" element={<ProtectedRoute path="/funcoes"><FuncaoDetalhes /></ProtectedRoute>} />
       <Route path="/funcoes/:id/editar" element={<ProtectedRoute path="/funcoes"><FuncaoEditar /></ProtectedRoute>} />
       <Route path="/epis" element={<ProtectedRoute path="/epis"><EPIs /></ProtectedRoute>} />
+      <Route path="/tipos-epi" element={<ProtectedRoute path="/epis"><TiposEPI /></ProtectedRoute>} />
+      <Route path="/variantes-epi" element={<ProtectedRoute path="/epis"><VariantesEPI /></ProtectedRoute>} />
       <Route path="/regras-troca" element={<ProtectedRoute path="/regras-troca"><RegrasTroca /></ProtectedRoute>} />
       <Route path="/matriz-funcao-epi" element={<ProtectedRoute path="/matriz-funcao-epi"><MatrizFuncaoEPI /></ProtectedRoute>} />
       <Route path="/intercorrencias" element={<ProtectedRoute path="/intercorrencias"><Intercorrencias /></ProtectedRoute>} />

@@ -6,7 +6,8 @@ import {
   Briefcase, 
   ShieldCheck, 
   RefreshCw, 
-  Grid3X3, 
+  Grid3X3,
+  Layers,
   FileText, 
   ClipboardList, 
   Calendar, 
@@ -32,7 +33,8 @@ const navItems = [
     label: 'EPI', 
     icon: ShieldCheck,
     children: [
-      { path: '/epis', label: 'Cadastro de EPIs', icon: ShieldCheck },
+      { path: '/tipos-epi', label: 'Tipo de EPIs', icon: ShieldCheck },
+      { path: '/variantes-epi', label: 'Variantes de EPIs', icon: Layers },
       { path: '/regras-troca', label: 'Regras de Troca', icon: RefreshCw },
       { path: '/matriz-funcao-epi', label: 'Matriz Função x EPI', icon: Grid3X3 },
     ]

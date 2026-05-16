@@ -331,3 +331,26 @@
     width: 100%;
   }
 }
+
+.historico-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 3rem;
+  color: var(--color-slate-500);
+}
+
+.historico-spin {
+  animation: historico-spin 1s linear infinite;
+}
+
+@keyframes historico-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.historico-empty {
+  text-align: center;
+  color: var(--color-slate-500);
+}

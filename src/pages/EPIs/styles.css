@@ -2,6 +2,106 @@
   margin-top: 1.5rem;
 }
 
+.epis-page-hint {
+  font-size: 0.875rem;
+  color: var(--color-slate-600);
+  line-height: 1.5;
+}
+
+.epis-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.epis-catalog-panel {
+  min-height: 12rem;
+}
+
+.epis-catalog-row {
+  cursor: default;
+}
+
+.epis-types-panel {
+  min-height: 20rem;
+}
+
+.epis-row-selected {
+  background-color: var(--color-primary-50) !important;
+}
+
+.epis-row-selected:hover {
+  background-color: var(--color-primary-50) !important;
+}
+
+.epis-variants-panel {
+  background-color: white;
+  border-radius: 1rem;
+  border: 1px solid var(--color-slate-200);
+  box-shadow: var(--shadow-sm);
+  min-height: 20rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.epis-variants-placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--color-slate-500);
+  font-size: 0.875rem;
+}
+
+.epis-variants-placeholder-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--color-slate-300);
+}
+
+.epis-variants-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-slate-100);
+}
+
+.epis-variants-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-slate-900);
+}
+
+.epis-variants-subtitle {
+  font-size: 0.8125rem;
+  color: var(--color-slate-500);
+  margin-top: 0.25rem;
+}
+
+.epis-variants-add-btn {
+  flex-shrink: 0;
+}
+
+.epis-variants-table-wrap {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  flex: 1;
+}
+
+.epis-empty-cell {
+  text-align: center;
+  color: var(--color-slate-500);
+  padding: 2rem 1.5rem !important;
+}
+
 .epis-loading {
   display: flex;
   align-items: center;
@@ -169,23 +269,15 @@
   color: var(--color-slate-900);
 }
 
-.epi-ca {
+.epi-technical {
   font-size: 0.875rem;
   line-height: 1.25rem;
-  color: var(--color-slate-700);
-}
-
-.epi-manufacturer {
-  font-size: 0.75rem;
-  line-height: 1rem;
   color: var(--color-slate-500);
-}
-
-.epi-vida-util {
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  color: var(--color-slate-600);
-  font-weight: 500;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  max-width: 16rem;
 }
 
 .btn-edit {
@@ -206,6 +298,10 @@
 }
 
 @media (max-width: 1023px) {
+  .epis-layout {
+    grid-template-columns: 1fr;
+  }
+
   .page-header {
     flex-direction: column;
     align-items: stretch;
@@ -213,6 +309,15 @@
   }
 
   .btn-add {
+    justify-content: center;
+  }
+
+  .epis-variants-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .epis-variants-add-btn {
     justify-content: center;
   }
 
