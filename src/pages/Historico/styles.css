@@ -75,6 +75,93 @@
   background-color: var(--color-slate-50);
 }
 
+.historico-filter-btn-active {
+  border-color: var(--color-primary-500);
+  color: var(--color-primary-600);
+  background-color: var(--color-primary-50);
+}
+
+.historico-filter-wrapper {
+  position: relative;
+}
+
+.historico-filter-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  z-index: 20;
+  min-width: 12rem;
+  padding: 0.75rem;
+  background: white;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.historico-filter-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-slate-400);
+}
+
+.historico-filter-select {
+  width: 100%;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.5rem;
+  background: white;
+}
+
+.historico-filter-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+  padding: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--color-slate-600);
+  border-radius: 0.5rem;
+}
+
+.historico-filter-clear:hover {
+  background-color: var(--color-slate-50);
+}
+
+.historico-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.75rem;
+  color: #b91c1c;
+  font-size: 0.875rem;
+}
+
+.historico-retry-btn {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: white;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  color: #b91c1c;
+  white-space: nowrap;
+}
+
+.historico-retry-btn:hover {
+  background: #fff1f2;
+}
+
 .historico-table-card {
   background-color: white;
   border-radius: 1rem;
@@ -160,6 +247,22 @@
   line-height: 1.25rem;
   font-weight: 700;
   color: var(--color-slate-800);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.historico-incident-badge {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
 }
 
 .historico-colab-id {

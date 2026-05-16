@@ -2,11 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Shield, AlertTriangle, Users, Edit3, Trash2, CheckCircle2, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
 import { roleService, type RoleAPI, type RoleRiskAPI, type RoleEpiTypeWithLink } from '../../services/roleService';
+import { useAuth } from '../../contexts/AuthContext';
 import './styles.css';
 
 const FuncaoDetalhes = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { canEdit, canDelete } = useAuth();
+  const allowEdit = canEdit('/funcoes');
+  const allowDelete = canDelete('/funcoes');
   const roleId = Number(id);
 
   const [funcao, setFuncao] = useState<RoleAPI | null>(null);
@@ -89,12 +93,16 @@ const FuncaoDetalhes = () => {
           </div>
         </div>
         <div className="funcao-detalhes-header-actions">
-          <button onClick={() => navigate(`/funcoes/${id}/editar`)} className="funcao-detalhes-edit-btn" type="button">
-            <Edit3 className="funcao-detalhes-icon-sm" /> Editar
-          </button>
-          <button onClick={handleDelete} className="funcao-detalhes-delete-btn" type="button">
-            <Trash2 className="funcao-detalhes-icon-sm" /> Inativar
-          </button>
+          {allowEdit && (
+            <button onClick={() => navigate(`/funcoes/${id}/editar`)} className="funcao-detalhes-edit-btn" type="button">
+              <Edit3 className="funcao-detalhes-icon-sm" /> Editar
+            </button>
+          )}
+          {allowDelete && (
+            <button onClick={handleDelete} className="funcao-detalhes-delete-btn" type="button">
+              <Trash2 className="funcao-detalhes-icon-sm" /> Inativar
+            </button>
+          )}
         </div>
       </div>
 

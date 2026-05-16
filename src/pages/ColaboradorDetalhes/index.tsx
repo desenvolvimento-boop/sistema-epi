@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MoreHorizontal, ShieldCheck, FileText, UserMinus, RefreshCw, Loader2 } from 'lucide-react';
 import { employeeService, type EmployeeAPI } from '../../services/employeeService';
 import { StatusBadge } from '../../components/StatusBadge';
+import { useAuth } from '../../contexts/AuthContext';
 import './styles.css';
 
 function formatDate(dateStr: string): string {
@@ -18,6 +19,7 @@ function getStatusLabel(emp: EmployeeAPI): string {
 const ColaboradorDetalhes = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { canEdit, canDelete } = useAuth();
   const [loading, setLoading] = useState(true);
   const [employee, setEmployee] = useState<EmployeeAPI | null>(null);
 
@@ -45,10 +47,14 @@ const ColaboradorDetalhes = () => {
   }
 
   const ACOES_ADICIONAIS = [
-    { label: 'Emitir Ficha de EPI', icon: FileText, iconClass: 'detalhes-admin-icon-emitir', path: 'emitir-ficha' },
-    { label: 'Transferir Unidade', icon: RefreshCw, iconClass: 'detalhes-admin-icon-transferir', path: 'transferir-unidade' },
-    { label: 'Desativar Colaborador', icon: UserMinus, iconClass: 'detalhes-admin-icon-desativar', path: 'desativar' },
-  ];
+    { label: 'Emitir Ficha de EPI', icon: FileText, iconClass: 'detalhes-admin-icon-emitir', path: 'emitir-ficha', requiresEdit: true },
+    { label: 'Transferir Unidade', icon: RefreshCw, iconClass: 'detalhes-admin-icon-transferir', path: 'transferir-unidade', requiresEdit: true },
+    { label: 'Desativar Colaborador', icon: UserMinus, iconClass: 'detalhes-admin-icon-desativar', path: 'desativar', requiresDelete: true },
+  ].filter((acao) => {
+    if (acao.requiresDelete) return canDelete('/colaboradores');
+    if (acao.requiresEdit) return canEdit('/colaboradores');
+    return true;
+  });
 
   return (
     <div className="detalhes-container">

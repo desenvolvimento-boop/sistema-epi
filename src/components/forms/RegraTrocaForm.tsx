@@ -1,31 +1,48 @@
-import React, { useState } from 'react';
-import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
+import React, { useEffect, useState } from 'react';
+import { epiTypeService, epiTypeCategoryLabel, type EpiTypeAPI } from '../../services/epiTypeService';
+import { useAuth } from '../../contexts/AuthContext';
 import './RegraTrocaForm.css';
 
 interface RegraTrocaFormProps {
   onClose: () => void;
   onSaved?: () => void;
   initialData?: EpiTypeAPI;
+  onManageTriggers?: () => void;
 }
 
-export const RegraTrocaForm = ({ onClose, onSaved, initialData }: RegraTrocaFormProps) => {
+export const RegraTrocaForm = ({
+  onClose,
+  onSaved,
+  initialData,
+  onManageTriggers,
+}: RegraTrocaFormProps) => {
+  const { user } = useAuth();
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [lifespanDays, setLifespanDays] = useState(initialData?.ept_lifespan_days ?? 180);
+
+  useEffect(() => {
+    if (initialData) {
+      setLifespanDays(initialData.ept_lifespan_days ?? 180);
+      setError(null);
+    }
+  }, [initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!initialData) return;
 
     setSaving(true);
+    setError(null);
     try {
       await epiTypeService.update(initialData.ept_id, {
         ept_lifespan_days: Number(lifespanDays) || 180,
-        usr_id_lastupdate: null,
+        usr_id_lastupdate: user?.usr_id ?? null,
       });
       onSaved?.();
       onClose();
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Erro ao salvar regra');
+      setError(err instanceof Error ? err.message : 'Erro ao salvar regra');
     } finally {
       setSaving(false);
     }
@@ -33,6 +50,8 @@ export const RegraTrocaForm = ({ onClose, onSaved, initialData }: RegraTrocaForm
 
   return (
     <form className="regra-troca-form" onSubmit={handleSubmit}>
+      {error && <div className="regra-troca-form-error">{error}</div>}
+
       <div className="regra-troca-form-grid">
         <div className="regra-troca-form-field">
           <label className="regra-troca-form-label">Tipo de EPI</label>
@@ -40,7 +59,9 @@ export const RegraTrocaForm = ({ onClose, onSaved, initialData }: RegraTrocaForm
         </div>
         <div className="regra-troca-form-field">
           <label className="regra-troca-form-label">Categoria</label>
-          <div className="regra-troca-form-static">{initialData?.ept_category ?? '—'}</div>
+          <div className="regra-troca-form-static">
+            {initialData ? epiTypeCategoryLabel(initialData) : '—'}
+          </div>
         </div>
         <div className="regra-troca-form-field">
           <label className="regra-troca-form-label">Vida Útil Padrão (Dias)</label>
@@ -54,10 +75,17 @@ export const RegraTrocaForm = ({ onClose, onSaved, initialData }: RegraTrocaForm
             required
           />
           <p className="regra-troca-form-hint">
-            Define o prazo padrão de troca para este tipo. Variantes podem sobrescrever com vida útil própria.
+            Prazo padrão de troca para este tipo. Variantes podem sobrescrever em Variantes de EPI.
+            Gatilhos condicionais ajustam o prazo efetivo na agenda.
           </p>
         </div>
       </div>
+
+      {onManageTriggers && (
+        <button type="button" className="regra-troca-form-link" onClick={onManageTriggers}>
+          Gerenciar gatilhos deste tipo
+        </button>
+      )}
 
       <div className="regra-troca-form-actions">
         <button type="button" onClick={onClose} className="regra-troca-form-cancel" disabled={saving}>

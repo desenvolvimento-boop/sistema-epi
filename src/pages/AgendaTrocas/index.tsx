@@ -19,37 +19,56 @@ import {
   type ExchangeAgendaItem,
   type ExchangeAgendaResponse,
 } from '../../services/deliveryService';
+import { sectionService, type SectionAPI } from '../../services/sectionService';
 import './styles.css';
 
 const AgendaTrocas = () => {
   const navigate = useNavigate();
   const [agenda, setAgenda] = useState<ExchangeAgendaResponse | null>(null);
+  const [sections, setSections] = useState<SectionAPI[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedExchange, setSelectedExchange] = useState<ExchangeAgendaItem | null>(null);
   const [selectedEpvId, setSelectedEpvId] = useState<string>('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [priorityFilter, setPriorityFilter] = useState('');
+  const [secFilter, setSecFilter] = useState('');
+  const [fromFilter, setFromFilter] = useState('');
+  const [toFilter, setToFilter] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { canCreate } = useAuth();
 
+  useEffect(() => {
+    sectionService.getActive().then(setSections).catch(() => setSections([]));
+  }, []);
+
   const loadAgenda = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      const data = await deliveryService.getExchangeAgenda();
+      const data = await deliveryService.getExchangeAgenda({
+        prioridade: priorityFilter || undefined,
+        sec_id: secFilter ? Number(secFilter) : undefined,
+        from: fromFilter || undefined,
+        to: toFilter || undefined,
+      });
       setAgenda(data);
     } catch (err) {
-      console.error(err);
+      setError(err instanceof Error ? err.message : 'Erro ao carregar agenda de trocas');
+      setAgenda(null);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [priorityFilter, secFilter, fromFilter, toFilter]);
 
   useEffect(() => {
     loadAgenda();
   }, [loadAgenda]);
 
   const handleOpenRegister = (item: ExchangeAgendaItem) => {
+    if (item.variants.length === 0) return;
     setSelectedExchange(item);
     const defaultVariant = item.variants.find((v) => v.epv_id === item.last_epv_id) ?? item.variants[0];
     setSelectedEpvId(defaultVariant ? String(defaultVariant.epv_id) : '');
@@ -73,6 +92,7 @@ const AgendaTrocas = () => {
       });
       setIsModalOpen(false);
       setSelectedExchange(null);
+      setSuccessMessage('Troca registrada com sucesso. O cronograma foi atualizado.');
       await loadAgenda();
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : 'Erro ao registrar troca');
@@ -89,10 +109,20 @@ const AgendaTrocas = () => {
     }
   };
 
-  const items = (agenda?.items ?? []).filter(
-    (item) => !priorityFilter || item.prioridade === priorityFilter
-  );
+  const getPriorityClass = (prioridade: string) => {
+    switch (prioridade) {
+      case 'Crítica':
+        return 'agenda-priority-critica';
+      case 'Alta':
+        return 'agenda-priority-alta';
+      case 'Média':
+        return 'agenda-priority-media';
+      default:
+        return 'agenda-priority-default';
+    }
+  };
 
+  const items = agenda?.items ?? [];
   const stats = agenda?.stats;
 
   return (
@@ -104,6 +134,16 @@ const AgendaTrocas = () => {
         </div>
         <div className="agenda-header-actions">
           <button
+            onClick={loadAgenda}
+            className="agenda-btn-refresh"
+            type="button"
+            disabled={loading}
+            title="Atualizar agenda"
+          >
+            <RefreshCw className={`agenda-icon-md ${loading ? 'agenda-spin' : ''}`} />
+            Atualizar
+          </button>
+          <button
             onClick={() => navigate('/agenda-trocas/calendario')}
             className="agenda-btn-calendar"
             type="button"
@@ -112,6 +152,26 @@ const AgendaTrocas = () => {
           </button>
         </div>
       </div>
+
+      {successMessage && (
+        <div className="agenda-success-banner" role="status">
+          <CheckCircle2 className="agenda-icon-md" />
+          <span>{successMessage}</span>
+          <button type="button" className="agenda-banner-dismiss" onClick={() => setSuccessMessage(null)}>
+            Fechar
+          </button>
+        </div>
+      )}
+
+      {error && (
+        <div className="agenda-error-banner" role="alert">
+          <AlertCircle className="agenda-icon-md" />
+          <span>{error}</span>
+          <button type="button" className="agenda-banner-retry" onClick={loadAgenda}>
+            Tentar novamente
+          </button>
+        </div>
+      )}
 
       <div className="agenda-stats-grid">
         <div className="agenda-stat-card">
@@ -148,18 +208,48 @@ const AgendaTrocas = () => {
         <div className="agenda-table-header">
           <h3 className="agenda-table-title">Cronograma de Substituição</h3>
           <div className="agenda-filter-row">
-            <span className="agenda-filter-label">Filtrar por:</span>
+            <span className="agenda-filter-label">Filtrar:</span>
+            <select
+              className="agenda-filter-select"
+              value={secFilter}
+              onChange={(e) => setSecFilter(e.target.value)}
+              aria-label="Setor"
+            >
+              <option value="">Todos os setores</option>
+              {sections.map((s) => (
+                <option key={s.sec_id} value={s.sec_id}>
+                  {s.sec_description}
+                </option>
+              ))}
+            </select>
             <select
               className="agenda-filter-select"
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
+              aria-label="Prioridade"
             >
-              <option value="">Todas as Prioridades</option>
+              <option value="">Todas as prioridades</option>
               <option value="Crítica">Crítica</option>
               <option value="Alta">Alta</option>
               <option value="Média">Média</option>
               <option value="Baixa">Baixa</option>
             </select>
+            <input
+              type="date"
+              className="agenda-filter-date"
+              value={fromFilter}
+              onChange={(e) => setFromFilter(e.target.value)}
+              aria-label="Data inicial"
+              title="Vencimento a partir de"
+            />
+            <input
+              type="date"
+              className="agenda-filter-date"
+              value={toFilter}
+              onChange={(e) => setToFilter(e.target.value)}
+              aria-label="Data final"
+              title="Vencimento até"
+            />
           </div>
         </div>
         <div className="agenda-table-scroll">
@@ -175,6 +265,8 @@ const AgendaTrocas = () => {
                   <th className="agenda-th">Colaborador</th>
                   <th className="agenda-th">Tipo de EPI</th>
                   <th className="agenda-th">Data Prevista</th>
+                  <th className="agenda-th">Prazo efetivo</th>
+                  <th className="agenda-th">Status</th>
                   <th className="agenda-th">Prioridade</th>
                   <th className="agenda-th--right">Ações</th>
                 </tr>
@@ -182,8 +274,8 @@ const AgendaTrocas = () => {
               <tbody className="agenda-tbody">
                 {items.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="agenda-td agenda-empty">
-                      Nenhuma troca pendente na agenda.
+                    <td colSpan={7} className="agenda-td agenda-empty">
+                      {error ? 'Não foi possível carregar a agenda.' : 'Nenhuma troca pendente na agenda.'}
                     </td>
                   </tr>
                 ) : (
@@ -220,15 +312,26 @@ const AgendaTrocas = () => {
                         </div>
                       </td>
                       <td className="agenda-td">
+                        <span className="agenda-effective-days">
+                          {item.effective_days != null ? `${item.effective_days} dias` : '—'}
+                        </span>
+                        {item.rule_hint && (
+                          <p className="agenda-rule-hint" title={item.rule_hint}>
+                            {item.rule_hint}
+                          </p>
+                        )}
+                      </td>
+                      <td className="agenda-td">
                         <span
-                          className={`agenda-priority-badge ${
-                            item.prioridade === 'Crítica'
-                              ? 'agenda-priority-critica'
-                              : item.prioridade === 'Alta'
-                                ? 'agenda-priority-alta'
-                                : 'agenda-priority-default'
+                          className={`agenda-status-badge ${
+                            item.status === 'Atrasado' ? 'agenda-status-atrasado' : 'agenda-status-pendente'
                           }`}
                         >
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="agenda-td">
+                        <span className={`agenda-priority-badge ${getPriorityClass(item.prioridade)}`}>
                           {item.prioridade}
                         </span>
                       </td>
@@ -238,6 +341,12 @@ const AgendaTrocas = () => {
                             onClick={() => handleOpenRegister(item)}
                             className="agenda-btn-register"
                             type="button"
+                            disabled={item.variants.length === 0}
+                            title={
+                              item.variants.length === 0
+                                ? 'Cadastre uma variante homologada para este tipo de EPI'
+                                : 'Registrar troca'
+                            }
                           >
                             Registrar Troca
                           </button>
@@ -283,6 +392,10 @@ const AgendaTrocas = () => {
               <div className="agenda-modal-field">
                 <p className="agenda-modal-label">Data Prevista</p>
                 <p className="agenda-modal-value--light">{formatDate(selectedExchange.due_date)}</p>
+              </div>
+              <div className="agenda-modal-field">
+                <p className="agenda-modal-label">Status</p>
+                <p className="agenda-modal-value--light">{selectedExchange.status}</p>
               </div>
               <div className="agenda-modal-field agenda-modal-field-full">
                 <label className="agenda-modal-label" htmlFor="agenda-variant-select">

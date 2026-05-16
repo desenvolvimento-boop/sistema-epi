@@ -9,9 +9,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import './styles.css';
 
 const Usuarios = () => {
-  const { canCreate, canEdit } = useAuth();
-  const allowCreate = canCreate('/usuarios');
-  const allowEdit = canEdit('/usuarios');
+  const { canEdit } = useAuth();
+  const allowCreate = canEdit('/configuracoes');
+  const allowEdit = canEdit('/configuracoes');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

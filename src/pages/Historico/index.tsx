@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search,
@@ -9,68 +9,67 @@ import {
   RefreshCw,
   ShieldCheck,
   Loader2,
+  Building2,
+  MapPin,
+  X,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { deliveryService, type DeliveryAPI } from '../../services/deliveryService';
+import clsx from 'clsx';
+import {
+  deliveryService,
+  type HistorySummaryItem,
+  type HistoryStatus,
+} from '../../services/deliveryService';
 import './styles.css';
-
-interface HistoricoRow {
-  emp_id: number;
-  colaborador: string;
-  ultimoEvento: string;
-  data: string;
-  status: string;
-  tipo: string;
-  dlv_id: number;
-}
 
 const Historico = () => {
   const navigate = useNavigate();
-  const [rows, setRows] = useState<HistoricoRow[]>([]);
+  const [rows, setRows] = useState<HistorySummaryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [tipoFilter, setTipoFilter] = useState<'' | 'Entrega' | 'Troca'>('');
+  const [statusFilter, setStatusFilter] = useState<'' | HistoryStatus>('');
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
 
-  const loadDeliveries = useCallback(async () => {
-    setLoading(true);
-    try {
-      const deliveries = await deliveryService.getAll();
-      const byEmployee = new Map<number, DeliveryAPI>();
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchTerm), 300);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
 
-      for (const d of deliveries) {
-        const existing = byEmployee.get(d.emp_id);
-        if (!existing || d.dlv_date > existing.dlv_date) {
-          byEmployee.set(d.emp_id, d);
-        }
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        setFilterOpen(false);
       }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-      const list: HistoricoRow[] = Array.from(byEmployee.values()).map((d) => {
-        const typeLabel = d.variant?.epiType?.ept_description ?? 'EPI';
-        const variantLabel = d.variant
-          ? [d.variant.epv_manufacturer, d.variant.epv_model].filter(Boolean).join(' ')
-          : '';
-        return {
-          emp_id: d.emp_id,
-          colaborador: d.employee?.emp_full_name ?? `Colaborador #${d.emp_id}`,
-          ultimoEvento: `${d.dlv_kind} de ${typeLabel}${variantLabel ? `: ${variantLabel}` : ''}`,
-          data: d.dlv_date,
-          status: 'Concluído',
-          tipo: d.dlv_kind,
-          dlv_id: d.dlv_id,
-        };
+  const loadHistory = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await deliveryService.getHistorySummary({
+        q: debouncedSearch || undefined,
+        dlv_kind: tipoFilter || undefined,
+        status: statusFilter || undefined,
       });
-
-      list.sort((a, b) => b.data.localeCompare(a.data));
-      setRows(list);
+      setRows(data.items);
     } catch (err) {
-      console.error(err);
+      setError(err instanceof Error ? err.message : 'Erro ao carregar histórico');
+      setRows([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [debouncedSearch, tipoFilter, statusFilter]);
 
   useEffect(() => {
-    loadDeliveries();
-  }, [loadDeliveries]);
+    loadHistory();
+  }, [loadHistory]);
 
   const formatDate = (iso: string) => {
     try {
@@ -79,10 +78,6 @@ const Historico = () => {
       return iso;
     }
   };
-
-  const filtered = rows.filter((item) =>
-    item.colaborador.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -108,6 +103,14 @@ const Historico = () => {
     }
   };
 
+  const hasActiveFilters = Boolean(tipoFilter || statusFilter);
+
+  const clearFilters = () => {
+    setTipoFilter('');
+    setStatusFilter('');
+    setFilterOpen(false);
+  };
+
   return (
     <div className="historico-container">
       <div className="historico-header">
@@ -127,11 +130,57 @@ const Historico = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <button className="historico-filter-btn" type="button">
-            <Filter className="historico-icon-md" />
-          </button>
+          <div className="historico-filter-wrapper" ref={filterRef}>
+            <button
+              className={clsx('historico-filter-btn', hasActiveFilters && 'historico-filter-btn-active')}
+              type="button"
+              onClick={() => setFilterOpen((o) => !o)}
+              title="Filtros"
+            >
+              <Filter className="historico-icon-md" />
+            </button>
+            {filterOpen && (
+              <div className="historico-filter-panel">
+                <p className="historico-filter-label">Tipo</p>
+                <select
+                  className="historico-filter-select"
+                  value={tipoFilter}
+                  onChange={(e) => setTipoFilter(e.target.value as '' | 'Entrega' | 'Troca')}
+                >
+                  <option value="">Todos</option>
+                  <option value="Entrega">Entrega</option>
+                  <option value="Troca">Troca</option>
+                </select>
+                <p className="historico-filter-label">Status</p>
+                <select
+                  className="historico-filter-select"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as '' | HistoryStatus)}
+                >
+                  <option value="">Todos</option>
+                  <option value="Validado">Validado</option>
+                  <option value="Concluído">Concluído</option>
+                  <option value="Pendente">Pendente</option>
+                </select>
+                {hasActiveFilters && (
+                  <button type="button" className="historico-filter-clear" onClick={clearFilters}>
+                    <X className="historico-icon-xs" /> Limpar filtros
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {error && (
+        <div className="historico-error">
+          <span>{error}</span>
+          <button type="button" className="historico-retry-btn" onClick={loadHistory}>
+            Tentar novamente
+          </button>
+        </div>
+      )}
 
       <div className="historico-table-card">
         <div className="historico-table-scroll">
@@ -152,30 +201,59 @@ const Historico = () => {
                 </tr>
               </thead>
               <tbody className="historico-tbody">
-                {filtered.length === 0 ? (
+                {rows.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="historico-cell historico-empty">
                       Nenhum registro encontrado.
                     </td>
                   </tr>
                 ) : (
-                  filtered.map((item) => (
+                  rows.map((item) => (
                     <tr key={item.emp_id} className="historico-row">
                       <td className="historico-cell">
                         <div className="historico-colab-wrapper">
                           <div className="historico-avatar">
-                            {item.colaborador.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                            {item.colaborador
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')
+                              .slice(0, 2)}
                           </div>
                           <div>
-                            <p className="historico-colab-name">{item.colaborador}</p>
-                            <p className="historico-colab-id">ID: #{item.emp_id.toString().padStart(4, '0')}</p>
+                            <p className="historico-colab-name">
+                              {item.colaborador}
+                              {item.pending_incidents > 0 && (
+                                <span className="historico-incident-badge" title="Intercorrências pendentes">
+                                  Intercorrência
+                                </span>
+                              )}
+                            </p>
+                            <p className="historico-colab-id">
+                              ID: #{item.emp_id.toString().padStart(4, '0')}
+                            </p>
+                            {(item.empresa || item.unidade) && (
+                              <div className="historico-empresa-wrapper">
+                                {item.empresa && (
+                                  <p className="historico-empresa-text">
+                                    <Building2 className="historico-icon-xs" />
+                                    {item.empresa}
+                                  </p>
+                                )}
+                                {item.unidade && (
+                                  <p className="historico-unidade-text">
+                                    <MapPin className="historico-icon-xs" />
+                                    {item.unidade}
+                                  </p>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>
                       <td className="historico-cell">
                         <div className="historico-event-wrapper">
                           {getEventIcon(item.tipo)}
-                          <span className="historico-event-text">{item.ultimoEvento}</span>
+                          <span className="historico-event-text">{item.ultimo_evento}</span>
                         </div>
                       </td>
                       <td className="historico-cell">

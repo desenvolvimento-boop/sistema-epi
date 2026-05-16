@@ -30,7 +30,7 @@ interface PermissionSet {
 }
 
 const Configuracoes = () => {
-  const { logout, canCreate, canEdit } = useAuth();
+  const { logout, canCreate, canEdit, user, refreshPermissions } = useAuth();
   const allowCreate = canCreate('/configuracoes');
   const allowEdit = canEdit('/configuracoes');
   const [activeTab, setActiveTab] = useState('perfil');
@@ -229,6 +229,9 @@ const Configuracoes = () => {
       await permissionService.bulkSave(profileId, permissionsLocalToApi(selectedPermissions));
       setIsProfileModalOpen(false);
       await fetchData();
+      if (user?.acp_id === profileId) {
+        await refreshPermissions();
+      }
     } catch (err: any) {
       setError(err.message || 'Erro ao salvar perfil');
     } finally {
@@ -700,6 +703,7 @@ const Configuracoes = () => {
                 <thead>
                   <tr>
                     <th className="config-perm-th config-perm-th-func">FUNCIONALIDADE</th>
+                    <th className="config-perm-th">ROTA</th>
                     <th className="config-perm-th">CRIAR</th>
                     <th className="config-perm-th">VISUALIZAR</th>
                     <th className="config-perm-th">EDITAR</th>
@@ -710,6 +714,7 @@ const Configuracoes = () => {
                   {features.map(feature => (
                     <tr key={feature.fea_id} className="config-perm-row">
                       <td className="config-perm-td-func">{feature.fea_description}</td>
+                      <td className="config-perm-td-path">{feature.fea_path || '—'}</td>
                       {(['criar', 'visualizar', 'editar', 'excluir'] as const).map(type => (
                         <td key={type} className="config-perm-td">
                           <label className="config-perm-checkbox-label">
@@ -717,6 +722,7 @@ const Configuracoes = () => {
                               type="checkbox"
                               checked={selectedPermissions[feature.fea_id.toString()]?.[type] || false}
                               onChange={() => togglePermission(feature.fea_id.toString(), type)}
+                              disabled={!allowEdit}
                               className="config-perm-checkbox"
                             />
                           </label>

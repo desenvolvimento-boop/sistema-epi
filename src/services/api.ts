@@ -4,7 +4,7 @@ import {
   Clock, 
   AlertCircle 
 } from 'lucide-react';
-import { Employee, EPI, Delivery, Role, User, ReplacementRule } from '../types/system.types';
+import { Employee, EPI, Delivery, Role, User } from '../types/system.types';
 
 export const DASHBOARD_STATS = [
   { label: 'Colaboradores Ativos', value: '1,284', change: '+12%', icon: Users, color: 'text-blue-600' },
@@ -54,8 +54,3 @@ export const USERS: User[] = [
   { usr_id: 3, usr_active: 0, usr_full_name: 'Roberto Santos', usr_username: 'roberto.santos', usr_email: 'roberto.sup@empresa.com.br', usr_agent_type: 'Externo', usr_access_profile: 'Operador', usr_phone_country_code: null, usr_phone_area_code: null, usr_phone_number: null, usr_mobile_country_code: null, usr_mobile_area_code: null, usr_mobile_number: null, usr_zip_code: null, usr_country: null, usr_state: null, usr_city: null, usr_neighborhood: null, usr_street: null, usr_street_number: null, usr_complement: null, usr_notes: null, usr_id_insert: null, usr_id_lastupdate: null },
 ];
 
-export const REPLACEMENT_RULES: ReplacementRule[] = [
-  { id: 1, epi: 'Luva Nitrílica', vidaUtil: 30, motivo: 'Desgaste / Vencimento', criticidade: 'Alta' },
-  { id: 2, epi: 'Capacete H-700', vidaUtil: 365, motivo: 'Vencimento / Impacto', criticidade: 'Média' },
-  { id: 3, epi: 'Bota de Segurança', vidaUtil: 180, motivo: 'Desgaste / Rasgo', criticidade: 'Média' },
-];

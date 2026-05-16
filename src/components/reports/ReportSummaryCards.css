@@ -1,0 +1,27 @@
+.report-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.report-summary-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.report-summary-label {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.report-summary-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+}

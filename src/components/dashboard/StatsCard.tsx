@@ -6,7 +6,7 @@ import './StatsCard.css';
 interface StatsCardProps {
   label: string;
   value: string;
-  change: string;
+  change?: string;
   icon: React.ElementType;
   color: string;
   index: number;
@@ -25,9 +25,11 @@ export const StatsCard = ({ label, value, change, icon: Icon, color, index }: St
         <div>
           <p className="stats-card-label">{label}</p>
           <h3 className="stats-card-value">{value}</h3>
-          <p className={clsx("stats-card-change", change.startsWith('+') ? 'stats-card-change-positive' : 'stats-card-change-negative')}>
-            {change} <span className="stats-card-change-context">vs mês anterior</span>
-          </p>
+          {change && (
+            <p className={clsx("stats-card-change", change.startsWith('+') ? 'stats-card-change-positive' : 'stats-card-change-negative')}>
+              {change} <span className="stats-card-change-context">vs mês anterior</span>
+            </p>
+          )}
         </div>
         <div className={clsx("stats-card-icon-wrapper", color)}>
           <Icon className="stats-card-icon" />

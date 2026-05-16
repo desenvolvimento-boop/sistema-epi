@@ -20,8 +20,6 @@ const titles: Record<string, string> = {
   '/tipos-epi': 'Tipo de EPIs',
   '/variantes-epi': 'Variantes de EPIs',
   '/regras-troca': 'Regras de Substituição',
-  '/matriz-funcao-epi': 'Matriz de Riscos e EPIs',
-  '/consumo': 'Registro de Consumo',
   '/intercorrencias': 'Intercorrências (Inconsistências e Fraudes)',
   '/agenda-trocas': 'Agenda de Trocas Programadas',
   '/agenda-trocas/calendario': 'Calendário de Trocas',
@@ -34,8 +32,11 @@ const titles: Record<string, string> = {
 export const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-  const title = titles[location.pathname] || 'EPI Control';
+  const { isAuthenticated, hasProfile } = useAuth();
+  const reportMatch = location.pathname.match(/^\/relatorios\/([^/]+)$/);
+  const title =
+    titles[location.pathname] ||
+    (reportMatch ? 'Relatório' : 'EPI Control');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -51,7 +52,7 @@ export const Layout = ({ children }: LayoutProps) => {
     return () => { document.body.style.overflow = ''; };
   }, [sidebarOpen]);
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !hasProfile) {
     return <>{children}</>;
   }
 

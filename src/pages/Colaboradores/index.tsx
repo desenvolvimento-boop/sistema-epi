@@ -178,7 +178,7 @@ const Colaboradores = () => {
                     <td className="colaboradores-cell--right">
                       <div className="colaboradores-actions">
                         <button 
-                          onClick={() => navigate(`/colaboradores/${emp.emp_id}/historico`)}
+                          onClick={() => navigate(`/historico/${emp.emp_id}`)}
                           className="colaboradores-history-btn" 
                           title="Histórico Completo"
                         >

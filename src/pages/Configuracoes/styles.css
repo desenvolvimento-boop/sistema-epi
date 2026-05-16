@@ -1086,6 +1086,12 @@
   padding: 0.625rem 1rem;
 }
 
+.config-perm-td-path {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-family: ui-monospace, monospace;
+}
+
 .config-perm-td-func {
   padding: 0.625rem 1rem;
   font-size: 0.8125rem;

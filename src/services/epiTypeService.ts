@@ -1,10 +1,20 @@
 import { API_BASE_URL } from './authService';
 
+export interface EpiCategoryRef {
+  eca_id: number;
+  eca_description: string;
+  eca_code?: string | null;
+  eca_active?: number;
+}
+
 export interface EpiTypeAPI {
   ept_id: number;
   ept_active: number;
   ept_description: string;
-  ept_category: string;
+  eca_id: number;
+  /** Preenchido pela API a partir de epi_categories */
+  ept_category: string | null;
+  epiCategory?: EpiCategoryRef;
   ept_lifespan_days: number;
   usr_id_insert: number | null;
   ept_datetimeinsert?: string;
@@ -15,16 +25,9 @@ export interface EpiTypeAPI {
 export type EpiTypeCreatePayload = Omit<EpiTypeAPI, 'ept_id' | 'ept_datetimeinsert' | 'ept_datetimeupdate'>;
 export type EpiTypeUpdatePayload = Partial<EpiTypeCreatePayload>;
 
-export const EPI_CATEGORIES = [
-  'Proteção de Cabeça',
-  'Proteção de Mãos',
-  'Proteção de Pés',
-  'Proteção Auditiva',
-  'Proteção Visual',
-  'Proteção Respiratória',
-  'Proteção do Tronco',
-  'Outros',
-] as const;
+export function epiTypeCategoryLabel(type: EpiTypeAPI): string {
+  return type.epiCategory?.eca_description ?? type.ept_category ?? '—';
+}
 
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem('token');

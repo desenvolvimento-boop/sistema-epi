@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
-import { epiTypeService, EPI_CATEGORIES, type EpiTypeAPI } from '../../services/epiTypeService';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Plus } from 'lucide-react';
+import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
+import { epiCategoryService, type EpiCategoryAPI } from '../../services/epiCategoryService';
+import { SimpleCrudModal, type SimpleCrudItem } from './SimpleCrudModal';
 import './EPIForm.css';
 
 interface EpiTypeFormProps {
@@ -8,16 +11,104 @@ interface EpiTypeFormProps {
   initialData?: EpiTypeAPI;
 }
 
+function mapCategoriesToCrud(types: EpiCategoryAPI[]): SimpleCrudItem[] {
+  return types.map((c) => ({
+    id: c.eca_id,
+    name: c.eca_description,
+    description: c.eca_code,
+    active: c.eca_active === 1,
+  }));
+}
+
+function getDefaultCategoryId(items: SimpleCrudItem[]): number | '' {
+  const first = items.find((t) => t.active);
+  return first?.id ?? '';
+}
+
 export const EpiTypeForm = ({ onClose, onSaved, initialData }: EpiTypeFormProps) => {
   const [saving, setSaving] = useState(false);
+  const [categories, setCategories] = useState<SimpleCrudItem[]>([]);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [description, setDescription] = useState(initialData?.ept_description || '');
-  const [category, setCategory] = useState(initialData?.ept_category || EPI_CATEGORIES[0]);
+  const [ecaId, setEcaId] = useState<number | ''>(initialData?.eca_id ?? '');
   const [active, setActive] = useState(initialData ? initialData.ept_active === 1 : true);
+
+  const reloadCategories = useCallback(async () => {
+    try {
+      const data = await epiCategoryService.getAll();
+      const mapped = mapCategoriesToCrud(data);
+      setCategories(mapped);
+      setEcaId((current) => {
+        if (initialData?.eca_id && mapped.some((c) => c.id === initialData.eca_id)) {
+          return initialData.eca_id;
+        }
+        if (current && mapped.some((c) => c.active && c.id === current)) return current;
+        return getDefaultCategoryId(mapped);
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }, [initialData?.eca_id]);
+
+  useEffect(() => {
+    reloadCategories();
+  }, [reloadCategories]);
+
+  const activeCategories = categories.filter((c) => c.active);
+
+  const handleCategoriesChange = async (items: SimpleCrudItem[]) => {
+    const prevMap = new Map(categories.map((c) => [c.id, c]));
+
+    for (const prev of categories) {
+      if (!items.find((i) => i.id === prev.id)) {
+        await epiCategoryService.delete(prev.id);
+      }
+    }
+
+    for (const item of items) {
+      const prev = prevMap.get(item.id);
+      if (!prev) continue;
+      if (
+        prev.name !== item.name ||
+        prev.description !== item.description ||
+        prev.active !== item.active
+      ) {
+        await epiCategoryService.update(item.id, {
+          eca_active: item.active ? 1 : 0,
+          eca_description: item.name,
+          eca_code: item.description,
+          usr_id_lastupdate: null,
+        });
+      }
+    }
+
+    await reloadCategories();
+  };
+
+  const handleCategoryCreated = async (item: SimpleCrudItem) => {
+    try {
+      const created = await epiCategoryService.create({
+        eca_active: item.active ? 1 : 0,
+        eca_description: item.name,
+        eca_code: item.description,
+        usr_id_insert: null,
+        usr_id_lastupdate: null,
+      });
+      setEcaId(created.eca_id);
+      await reloadCategories();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao criar categoria');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!description.trim()) {
       alert('Preencha o nome do tipo de EPI.');
+      return;
+    }
+    if (!ecaId) {
+      alert('Selecione uma categoria.');
       return;
     }
 
@@ -26,7 +117,7 @@ export const EpiTypeForm = ({ onClose, onSaved, initialData }: EpiTypeFormProps)
       const payload = {
         ept_active: active ? 1 : 0,
         ept_description: description.trim(),
-        ept_category: category,
+        eca_id: Number(ecaId),
         usr_id_insert: null,
         usr_id_lastupdate: null,
       };
@@ -61,11 +152,45 @@ export const EpiTypeForm = ({ onClose, onSaved, initialData }: EpiTypeFormProps)
         </div>
         <div className="epi-form-field">
           <label className="epi-form-label">Categoria <span className="epi-form-required">*</span></label>
-          <select className="epi-form-input" value={category} onChange={(e) => setCategory(e.target.value)} required>
-            {EPI_CATEGORIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
+          <div className="epi-form-select-with-action">
+            <select
+              className="epi-form-input"
+              value={ecaId}
+              onChange={(e) => setEcaId(e.target.value ? Number(e.target.value) : '')}
+              required
+              disabled={activeCategories.length === 0}
+            >
+              {activeCategories.length === 0 ? (
+                <option value="">Cadastre uma categoria</option>
+              ) : (
+                activeCategories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))
+              )}
+            </select>
+            <button
+              type="button"
+              className="epi-form-add-btn"
+              onClick={() => setIsCategoryModalOpen(true)}
+              title="Cadastrar categoria"
+            >
+              <Plus className="epi-form-add-icon" />
+            </button>
+          </div>
+          <SimpleCrudModal
+            isOpen={isCategoryModalOpen}
+            onClose={() => {
+              setIsCategoryModalOpen(false);
+              reloadCategories();
+            }}
+            title="Cadastrar Categoria"
+            entityLabel="Categoria"
+            items={categories}
+            onItemsChange={handleCategoriesChange}
+            onItemCreated={handleCategoryCreated}
+          />
         </div>
         <div className="epi-form-field">
           <label className="epi-form-label">Status</label>
@@ -76,9 +201,11 @@ export const EpiTypeForm = ({ onClose, onSaved, initialData }: EpiTypeFormProps)
         </div>
       </div>
       <div className="epi-form-actions">
-        <button type="button" onClick={onClose} className="epi-form-cancel" disabled={saving}>Cancelar</button>
+        <button type="button" onClick={onClose} className="epi-form-cancel" disabled={saving}>
+          Cancelar
+        </button>
         <button type="submit" className="epi-form-submit" disabled={saving}>
-          {saving ? 'Salvando...' : initialData ? 'Salvar Alterações' : 'Salvar Tipo'}
+          {saving ? 'Salvando...' : initialData ? 'Salvar Altera??es' : 'Salvar Tipo'}
         </button>
       </div>
     </form>

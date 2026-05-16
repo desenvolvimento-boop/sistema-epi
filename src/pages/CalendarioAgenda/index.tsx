@@ -7,6 +7,8 @@ import {
   User,
   ArrowLeft,
   Loader2,
+  Package,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   format,
@@ -21,14 +23,12 @@ import {
   isSameDay,
   addDays,
   subDays,
-  startOfDay,
-  eachHourOfInterval,
-  addHours,
   parseISO,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
+import { Modal } from '../../components/ui/Modal';
 import { deliveryService, type ExchangeAgendaItem } from '../../services/deliveryService';
 import './styles.css';
 
@@ -40,6 +40,8 @@ const CalendarioAgenda = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [items, setItems] = useState<ExchangeAgendaItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedItem, setSelectedItem] = useState<ExchangeAgendaItem | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const loadAgenda = useCallback(async () => {
     setLoading(true);
@@ -62,6 +64,37 @@ const CalendarioAgenda = () => {
       return parseISO(item.due_date);
     } catch {
       return new Date(item.due_date);
+    }
+  };
+
+  const formatDate = (iso: string) => {
+    try {
+      return format(parseISO(iso), 'dd/MM/yyyy');
+    } catch {
+      return iso;
+    }
+  };
+
+  const openDetail = (item: ExchangeAgendaItem) => {
+    setSelectedItem(item);
+    setIsDetailModalOpen(true);
+  };
+
+  const closeDetail = () => {
+    setIsDetailModalOpen(false);
+    setSelectedItem(null);
+  };
+
+  const getPriorityClass = (prioridade: string) => {
+    switch (prioridade) {
+      case 'Crítica':
+        return 'calendario-detail-priority-critica';
+      case 'Alta':
+        return 'calendario-detail-priority-alta';
+      case 'Média':
+        return 'calendario-detail-priority-media';
+      default:
+        return 'calendario-detail-priority-default';
     }
   };
 
@@ -172,13 +205,15 @@ const CalendarioAgenda = () => {
                 </div>
                 <div className="calendario-exchange-list">
                   {dayExchanges.slice(0, 3).map((ex) => (
-                    <div
+                    <button
                       key={`${ex.emp_id}-${ex.ept_id}`}
-                      className="calendario-exchange-item"
+                      type="button"
+                      className="calendario-exchange-item calendario-event-clickable"
                       title={`${ex.colaborador} - ${ex.epi}`}
+                      onClick={() => openDetail(ex)}
                     >
                       {ex.colaborador.split(' ')[0]}: {ex.epi}
-                    </div>
+                    </button>
                   ))}
                   {dayExchanges.length > 3 && (
                     <div className="calendario-exchange-more">+ {dayExchanges.length - 3} mais</div>
@@ -221,10 +256,15 @@ const CalendarioAgenda = () => {
                 </div>
                 <div className="calendario-week-events">
                   {dayExchanges.map((ex) => (
-                    <div key={`${ex.emp_id}-${ex.ept_id}`} className="calendario-week-event-card">
+                    <button
+                      key={`${ex.emp_id}-${ex.ept_id}`}
+                      type="button"
+                      className="calendario-week-event-card calendario-event-clickable"
+                      onClick={() => openDetail(ex)}
+                    >
                       <div className="calendario-week-event-time">
                         <Clock className="calendario-icon-xs" />
-                        <span className="calendario-time-text">{format(getItemDate(ex), 'HH:mm')}</span>
+                        <span className="calendario-time-text">Dia inteiro</span>
                       </div>
                       <p className="calendario-event-name">{ex.colaborador}</p>
                       <p className="calendario-event-epi">{ex.epi}</p>
@@ -244,7 +284,7 @@ const CalendarioAgenda = () => {
                           style={{ width: '40%' }}
                         />
                       </div>
-                    </div>
+                    </button>
                   ))}
                   {dayExchanges.length === 0 && (
                     <div className="calendario-no-exchanges">
@@ -262,11 +302,6 @@ const CalendarioAgenda = () => {
 
   const renderDayView = () => {
     const dayExchanges = items.filter((ex) => isSameDay(getItemDate(ex), currentDate));
-    const hours = eachHourOfInterval({
-      start: startOfDay(currentDate),
-      end: addHours(startOfDay(currentDate), 23),
-    });
-
     return (
       <div className="calendario-day-container">
         <div className="calendario-day-header-bar">
@@ -284,45 +319,155 @@ const CalendarioAgenda = () => {
         </div>
 
         <div className="calendario-day-scroll custom-scrollbar">
-          <div className="calendario-day-scroll-inner">
-            {hours.map((hour, idx) => {
-              const hourExchanges = dayExchanges.filter((ex) =>
-                format(getItemDate(ex), 'HH') === format(hour, 'HH')
-              );
-
-              return (
-                <div key={idx} className="calendario-hour-row">
-                  <div className="calendario-hour-label">
-                    <span className="calendario-hour-text">{format(hour, 'HH:mm')}</span>
+          <div className="calendario-day-list">
+            {dayExchanges.length === 0 ? (
+              <p className="calendario-no-exchanges-label">Sem trocas neste dia</p>
+            ) : (
+              dayExchanges.map((ex) => (
+                <button
+                  key={`${ex.emp_id}-${ex.ept_id}`}
+                  type="button"
+                  className="calendario-day-event-card calendario-event-clickable"
+                  onClick={() => openDetail(ex)}
+                >
+                  <div className="calendario-user-avatar">
+                    <User className="calendario-icon-sm" />
                   </div>
-                  <div className="calendario-hour-content">
-                    {hourExchanges.map((ex) => (
-                      <div key={`${ex.emp_id}-${ex.ept_id}`} className="calendario-day-event-card">
-                        <div className="calendario-user-avatar">
-                          <User className="calendario-icon-sm" />
-                        </div>
-                        <div className="calendario-event-info">
-                          <p className="calendario-event-user-name">{ex.colaborador}</p>
-                          <p className="calendario-event-desc">{ex.epi}</p>
-                        </div>
-                        <div
-                          className={`calendario-priority-badge ${
-                            ex.prioridade === 'Alta' || ex.prioridade === 'Crítica'
-                              ? 'calendario-priority-badge-high'
-                              : 'calendario-priority-badge-normal'
-                          }`}
-                        >
-                          {ex.prioridade}
-                        </div>
-                      </div>
-                    ))}
+                  <div className="calendario-event-info">
+                    <p className="calendario-event-user-name">{ex.colaborador}</p>
+                    <p className="calendario-event-desc">{ex.epi}</p>
                   </div>
-                </div>
-              );
-            })}
+                  <div
+                    className={`calendario-priority-badge ${
+                      ex.prioridade === 'Alta' || ex.prioridade === 'Crítica'
+                        ? 'calendario-priority-badge-high'
+                        : 'calendario-priority-badge-normal'
+                    }`}
+                  >
+                    {ex.prioridade}
+                  </div>
+                </button>
+              ))
+            )}
           </div>
         </div>
       </div>
+    );
+  };
+
+  const renderDetailModal = () => {
+    if (!selectedItem) return null;
+
+    const lastVariant = selectedItem.variants.find((v) => v.epv_id === selectedItem.last_epv_id);
+
+    return (
+      <Modal isOpen={isDetailModalOpen} onClose={closeDetail} title="Detalhes da Troca">
+        <div className="calendario-detail-content">
+          <div className="calendario-detail-info">
+            <div className="calendario-detail-info-icon">
+              <ShieldCheck className="calendario-icon-md" />
+            </div>
+            <div>
+              <p className="calendario-detail-info-title">Substituição programada</p>
+              <p className="calendario-detail-info-desc">
+                Informações do colaborador e do EPI conforme a agenda de trocas.
+              </p>
+            </div>
+          </div>
+
+          <div className="calendario-detail-grid">
+            <div className="calendario-detail-field">
+              <p className="calendario-detail-label">Colaborador</p>
+              <p className="calendario-detail-value">{selectedItem.colaborador}</p>
+            </div>
+            <div className="calendario-detail-field">
+              <p className="calendario-detail-label">Tipo de EPI</p>
+              <p className="calendario-detail-value">{selectedItem.epi}</p>
+            </div>
+            <div className="calendario-detail-field">
+              <p className="calendario-detail-label">Data prevista</p>
+              <p className="calendario-detail-value">{formatDate(selectedItem.due_date)}</p>
+            </div>
+            <div className="calendario-detail-field">
+              <p className="calendario-detail-label">Prazo efetivo</p>
+              <p className="calendario-detail-value">
+                {selectedItem.effective_days != null ? `${selectedItem.effective_days} dias` : '—'}
+              </p>
+            </div>
+            <div className="calendario-detail-field">
+              <p className="calendario-detail-label">Status</p>
+              <span
+                className={`calendario-detail-status ${
+                  selectedItem.status === 'Atrasado'
+                    ? 'calendario-detail-status-atrasado'
+                    : 'calendario-detail-status-pendente'
+                }`}
+              >
+                {selectedItem.status}
+              </span>
+            </div>
+            <div className="calendario-detail-field">
+              <p className="calendario-detail-label">Prioridade</p>
+              <span className={`calendario-detail-priority ${getPriorityClass(selectedItem.prioridade)}`}>
+                {selectedItem.prioridade}
+              </span>
+            </div>
+            {selectedItem.ca && (
+              <div className="calendario-detail-field">
+                <p className="calendario-detail-label">CA (última entrega)</p>
+                <p className="calendario-detail-value--mono">{selectedItem.ca}</p>
+              </div>
+            )}
+            {lastVariant && (
+              <div className="calendario-detail-field calendario-detail-field-full">
+                <p className="calendario-detail-label">Última variante entregue</p>
+                <p className="calendario-detail-value">
+                  {[lastVariant.epv_manufacturer, lastVariant.epv_model].filter(Boolean).join(' · ')} — CA{' '}
+                  {lastVariant.epv_ca}
+                </p>
+              </div>
+            )}
+            {selectedItem.rule_hint && (
+              <div className="calendario-detail-field calendario-detail-field-full">
+                <p className="calendario-detail-label">Regra aplicada</p>
+                <p className="calendario-detail-hint">{selectedItem.rule_hint}</p>
+              </div>
+            )}
+          </div>
+
+          {selectedItem.variants.length > 0 && (
+            <div className="calendario-detail-variants">
+              <p className="calendario-detail-label calendario-detail-label-with-icon">
+                <Package className="calendario-icon-xs" />
+                Variantes homologadas ({selectedItem.variants.length})
+              </p>
+              <ul className="calendario-detail-variant-list">
+                {selectedItem.variants.map((v) => (
+                  <li key={v.epv_id} className="calendario-detail-variant-item">
+                    {[v.epv_manufacturer, v.epv_model].filter(Boolean).join(' · ')} — CA {v.epv_ca}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="calendario-detail-footer">
+            <button type="button" className="calendario-detail-btn-close" onClick={closeDetail}>
+              Fechar
+            </button>
+            <button
+              type="button"
+              className="calendario-detail-btn-agenda"
+              onClick={() => {
+                closeDetail();
+                navigate('/agenda-trocas');
+              }}
+            >
+              Ir para Agenda de Trocas
+            </button>
+          </div>
+        </div>
+      </Modal>
     );
   };
 
@@ -353,6 +498,7 @@ const CalendarioAgenda = () => {
           {viewMode === 'day' && renderDayView()}
         </motion.div>
       </AnimatePresence>
+      {renderDetailModal()}
     </div>
   );
 };

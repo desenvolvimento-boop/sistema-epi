@@ -107,12 +107,3 @@ export interface UserPermission {
   prm_delete: number;
 }
 
-export interface ReplacementRule {
-  id: number;
-  epi: string;
-  vidaUtil: number;
-  motivo: string;
-  criticidade: string;
-  contrato?: string;
-  jornada?: 'PLANTONISTA' | 'DIARISTA';
-}
