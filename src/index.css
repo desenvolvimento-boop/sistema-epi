@@ -192,6 +192,24 @@ a {
   background: var(--color-slate-700);
 }
 
+/* First column — internal ID in data grids */
+.table-col-id {
+  width: 1%;
+  white-space: nowrap;
+  padding-left: 1rem !important;
+  padding-right: 0.75rem !important;
+}
+
+th.table-col-id {
+  color: var(--color-slate-500);
+}
+
+td.table-cell-id {
+  color: var(--color-slate-400);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Global Responsive Utilities */
 @media (max-width: 639px) {
   html {

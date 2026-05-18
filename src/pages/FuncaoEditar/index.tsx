@@ -273,6 +273,7 @@ const FuncaoEditar = () => {
         <table className="funcao-editar-risks-table">
           <thead>
             <tr>
+              <th className="table-col-id">ID</th>
               <th>Tipo</th>
               <th>Agente</th>
               <th>Origem</th>
@@ -283,6 +284,7 @@ const FuncaoEditar = () => {
           <tbody>
             {risks.map((r) => (
               <tr key={r.rsk_id}>
+                <td className="table-cell-id">{r.rsk_id}</td>
                 <td>{r.rsk_type}</td>
                 <td>{r.rsk_agent}</td>
                 <td>

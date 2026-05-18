@@ -24,7 +24,7 @@ const Colaboradores = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeeAPI | null>(null);
 
   const navigate = useNavigate();
@@ -49,23 +49,18 @@ const Colaboradores = () => {
     fetchEmployees();
   }, [fetchEmployees]);
 
-  const handleOpenCreate = () => {
-    setSelectedEmployee(null);
-    setIsModalOpen(true);
-  };
-
   const handleOpenEdit = (emp: EmployeeAPI) => {
     setSelectedEmployee(emp);
-    setIsModalOpen(true);
+    setIsEditModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
     setSelectedEmployee(null);
   };
 
-  const handleSaved = () => {
-    handleCloseModal();
+  const handleEditSaved = () => {
+    handleCloseEditModal();
     fetchEmployees();
   };
 
@@ -99,25 +94,28 @@ const Colaboradores = () => {
         </div>
         {allowCreate && (
           <button 
-            onClick={handleOpenCreate}
+            onClick={() => navigate('/colaboradores/novo')}
             className="colaboradores-add-btn"
+            type="button"
           >
             <Plus className="colaboradores-btn-icon" /> Novo Colaborador
           </button>
         )}
       </div>
 
-      <Modal 
-        isOpen={isModalOpen} 
-        onClose={handleCloseModal} 
-        title={selectedEmployee ? 'Editar Colaborador' : 'Cadastrar Novo Colaborador'}
-      >
-        <ColaboradorForm
-          onClose={handleCloseModal}
-          onSaved={handleSaved}
-          initialData={selectedEmployee ?? undefined}
-        />
-      </Modal>
+      {selectedEmployee && (
+        <Modal 
+          isOpen={isEditModalOpen} 
+          onClose={handleCloseEditModal} 
+          title="Editar Colaborador"
+        >
+          <ColaboradorForm
+            onClose={handleCloseEditModal}
+            onSaved={handleEditSaved}
+            initialData={selectedEmployee}
+          />
+        </Modal>
+      )}
 
       {error && (
         <div className="colaboradores-error-banner">
@@ -136,6 +134,7 @@ const Colaboradores = () => {
           <table className="colaboradores-table">
             <thead>
               <tr className="colaboradores-thead-row">
+                <th className="colaboradores-th table-col-id">ID</th>
                 <th className="colaboradores-th">Colaborador</th>
                 <th className="colaboradores-th">Matrícula / CPF</th>
                 <th className="colaboradores-th">Função / Empresa</th>
@@ -146,11 +145,12 @@ const Colaboradores = () => {
             <tbody className="colaboradores-tbody">
               {filtered.length === 0 && !loading ? (
                 <tr>
-                  <td colSpan={5} className="colaboradores-empty">Nenhum colaborador encontrado.</td>
+                  <td colSpan={6} className="colaboradores-empty">Nenhum colaborador encontrado.</td>
                 </tr>
               ) : (
                 filtered.map((emp) => (
                   <tr key={emp.emp_id} className="colaboradores-row">
+                    <td className="colaboradores-cell table-cell-id">{emp.emp_id}</td>
                     <td className="colaboradores-cell">
                       <div className="colaboradores-avatar-group">
                         <div className="colaboradores-avatar">

@@ -193,6 +193,7 @@ const Historico = () => {
             <table className="historico-table">
               <thead>
                 <tr className="historico-thead-row">
+                  <th className="historico-th table-col-id">ID</th>
                   <th className="historico-th">Colaborador</th>
                   <th className="historico-th">Último Evento</th>
                   <th className="historico-th">Data</th>
@@ -203,13 +204,14 @@ const Historico = () => {
               <tbody className="historico-tbody">
                 {rows.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="historico-cell historico-empty">
+                    <td colSpan={6} className="historico-cell historico-empty">
                       Nenhum registro encontrado.
                     </td>
                   </tr>
                 ) : (
                   rows.map((item) => (
                     <tr key={item.emp_id} className="historico-row">
+                      <td className="historico-cell table-cell-id">{item.emp_id}</td>
                       <td className="historico-cell">
                         <div className="historico-colab-wrapper">
                           <div className="historico-avatar">
@@ -227,9 +229,6 @@ const Historico = () => {
                                   Intercorrência
                                 </span>
                               )}
-                            </p>
-                            <p className="historico-colab-id">
-                              ID: #{item.emp_id.toString().padStart(4, '0')}
                             </p>
                             {(item.empresa || item.unidade) && (
                               <div className="historico-empresa-wrapper">

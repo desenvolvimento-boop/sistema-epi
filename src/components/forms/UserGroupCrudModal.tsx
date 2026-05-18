@@ -245,8 +245,8 @@ export const UserGroupCrudModal = ({ isOpen, onClose, onGroupCreated }: UserGrou
             <table className="usg-crud-table">
               <thead>
                 <tr className="usg-crud-thead-row">
+                  <th className="usg-crud-th table-col-id">ID</th>
                   <th className="usg-crud-th">Ativo</th>
-                  <th className="usg-crud-th">ID</th>
                   <th className="usg-crud-th">Descrição</th>
                   <th className="usg-crud-th">Identificador Alternativo</th>
                   <th className="usg-crud-th-right">Ações</th>
@@ -262,12 +262,12 @@ export const UserGroupCrudModal = ({ isOpen, onClose, onGroupCreated }: UserGrou
                 ) : (
                   paginated.map(g => (
                     <tr key={g.usg_id} className="usg-crud-row">
+                      <td className="usg-crud-cell table-cell-id">{g.usg_id}</td>
                       <td className="usg-crud-cell">
                         <span className={`usg-crud-status ${g.usg_active === 1 ? 'usg-crud-status--active' : 'usg-crud-status--inactive'}`}>
                           {g.usg_active === 1 ? 'Ativo' : 'Inativo'}
                         </span>
                       </td>
-                      <td className="usg-crud-cell usg-crud-cell-id">{g.usg_id}</td>
                       <td className="usg-crud-cell">{g.usg_description || '—'}</td>
                       <td className="usg-crud-cell">{g.usg_integrationid || '—'}</td>
                       <td className="usg-crud-cell-right">

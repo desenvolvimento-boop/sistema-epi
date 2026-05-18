@@ -124,6 +124,7 @@ const Consumo = () => {
           <table className="consumo-table">
             <thead>
               <tr className="consumo-table-head-row">
+                <th className="consumo-table-th table-col-id">ID</th>
                 <th className="consumo-table-th">Colaborador</th>
                 <th className="consumo-table-th">Tipo / Variante</th>
                 <th className="consumo-table-th">Data</th>
@@ -133,7 +134,7 @@ const Consumo = () => {
             <tbody className="consumo-table-body">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="consumo-table-td consumo-empty">
+                  <td colSpan={5} className="consumo-table-td consumo-empty">
                     Nenhum registro no período.
                   </td>
                 </tr>
@@ -145,6 +146,7 @@ const Consumo = () => {
                     : '';
                   return (
                     <tr key={item.dlv_id} className="consumo-table-row">
+                      <td className="consumo-table-td table-cell-id">{item.dlv_id}</td>
                       <td className="consumo-table-td">
                         <div className="consumo-colaborador-cell">
                           <div className="consumo-avatar">

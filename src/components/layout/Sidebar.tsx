@@ -7,6 +7,7 @@ import {
   ShieldCheck, 
   RefreshCw, 
   Layers,
+  Building2,
   Calendar, 
   History, 
   BarChart3, 
@@ -38,13 +39,22 @@ const navItems = [
   { path: '/intercorrencias', label: 'Intercorrências', icon: AlertTriangle },
   { path: '/agenda-trocas', label: 'Agenda de Trocas', icon: Calendar },
   { path: '/historico', label: 'Histórico', icon: History },
-  { path: '/relatorios', label: 'Relatórios', icon: BarChart3 },
   { path: '/usuarios', label: 'Usuários', icon: UserCog },
+  { path: '/nova-secao', label: 'Nova Seção', icon: Building2 },
+  { path: '/relatorios', label: 'Relatórios', icon: BarChart3 },
 ];
 
 interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
+}
+
+function canViewNovaSecao(canView: (path: string) => boolean) {
+  return (
+    canView('/nova-secao') ||
+    canView('/colaboradores') ||
+    canView('/configuracoes')
+  );
 }
 
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
@@ -120,7 +130,8 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             );
           }
 
-          if (item.path && !canView(item.path)) return null;
+          if (item.path === '/nova-secao' && !canViewNovaSecao(canView)) return null;
+          if (item.path && item.path !== '/nova-secao' && !canView(item.path)) return null;
 
           return (
             <NavLink

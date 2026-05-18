@@ -1,4 +1,5 @@
 import { API_BASE_URL } from './authService';
+import type { EpiTypeAPI } from './epiTypeService';
 
 export interface SectionAPI {
   sec_id: number;
@@ -13,6 +14,15 @@ export interface SectionAPI {
 
 export type SectionCreatePayload = Omit<SectionAPI, 'sec_id' | 'sec_datetimeinsert' | 'sec_datetimeupdate'>;
 export type SectionUpdatePayload = Partial<SectionCreatePayload>;
+
+export interface SectionEpiTypeLink {
+  ept_id: number;
+  sle_mandatory?: number;
+}
+
+export type SectionEpiTypeWithLink = EpiTypeAPI & {
+  sle_mandatory?: number;
+};
 
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem('token');
@@ -73,5 +83,21 @@ export const sectionService = {
       const body = await res.json().catch(() => ({}));
       throw new Error(body.error || `Erro ${res.status}`);
     }
+  },
+
+  async getEpiTypes(sectionId: number): Promise<SectionEpiTypeWithLink[]> {
+    const res = await fetch(`${API_BASE_URL}/section/${sectionId}/epi-types`, {
+      headers: getAuthHeaders(),
+    });
+    return handleResponse<SectionEpiTypeWithLink[]>(res);
+  },
+
+  async setEpiTypes(sectionId: number, items: SectionEpiTypeLink[]): Promise<SectionEpiTypeWithLink[]> {
+    const res = await fetch(`${API_BASE_URL}/section/${sectionId}/epi-types`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ items }),
+    });
+    return handleResponse<SectionEpiTypeWithLink[]>(res);
   },
 };

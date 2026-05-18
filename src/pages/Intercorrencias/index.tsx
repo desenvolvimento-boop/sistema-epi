@@ -373,6 +373,7 @@ const Intercorrencias = () => {
           <table className="intercorrencias-table">
             <thead>
               <tr className="intercorrencias-thead-row">
+                <th className="intercorrencias-th table-col-id">ID</th>
                 <th className="intercorrencias-th">Intercorrência</th>
                 <th className="intercorrencias-th">Colaborador / Data</th>
                 <th className="intercorrencias-th">Severidade</th>
@@ -387,6 +388,7 @@ const Intercorrencias = () => {
                   className="intercorrencias-row"
                   onClick={() => openIncident(item)}
                 >
+                  <td className="intercorrencias-cell table-cell-id">{item.inc_id}</td>
                   <td className="intercorrencias-cell">
                     <motion.div className="intercorrencias-cell-content">
                       <motion.div

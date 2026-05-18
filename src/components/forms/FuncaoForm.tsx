@@ -490,6 +490,7 @@ export const FuncaoForm = ({ onClose, onSaved, initialData }: FuncaoFormProps) =
             <table className="funcao-form-risks-table">
               <thead>
                 <tr>
+                  <th className="table-col-id">ID</th>
                   <th>Tipo</th>
                   <th>Agente</th>
                   <th>Origem</th>
@@ -504,6 +505,9 @@ export const FuncaoForm = ({ onClose, onSaved, initialData }: FuncaoFormProps) =
                   const source = r.rsk_integration_source || 'Manual';
                   return (
                     <tr key={key}>
+                      <td className="table-cell-id">
+                        {isPending ? '—' : (r as RoleRiskAPI).rsk_id}
+                      </td>
                       <td>{r.rsk_type}</td>
                       <td>{r.rsk_agent}</td>
                       <td>

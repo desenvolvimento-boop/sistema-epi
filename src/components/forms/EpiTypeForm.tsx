@@ -31,6 +31,7 @@ export const EpiTypeForm = ({ onClose, onSaved, initialData }: EpiTypeFormProps)
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [description, setDescription] = useState(initialData?.ept_description || '');
   const [ecaId, setEcaId] = useState<number | ''>(initialData?.eca_id ?? '');
+  const [lifespanDays, setLifespanDays] = useState(initialData?.ept_lifespan_days ?? 180);
   const [active, setActive] = useState(initialData ? initialData.ept_active === 1 : true);
 
   const reloadCategories = useCallback(async () => {
@@ -111,6 +112,11 @@ export const EpiTypeForm = ({ onClose, onSaved, initialData }: EpiTypeFormProps)
       alert('Selecione uma categoria.');
       return;
     }
+    const days = Number(lifespanDays);
+    if (!Number.isFinite(days) || days < 1) {
+      alert('Informe a vida útil em dias (mínimo 1).');
+      return;
+    }
 
     setSaving(true);
     try {
@@ -118,6 +124,7 @@ export const EpiTypeForm = ({ onClose, onSaved, initialData }: EpiTypeFormProps)
         ept_active: active ? 1 : 0,
         ept_description: description.trim(),
         eca_id: Number(ecaId),
+        ept_lifespan_days: days,
         usr_id_insert: null,
         usr_id_lastupdate: null,
       };
@@ -193,6 +200,20 @@ export const EpiTypeForm = ({ onClose, onSaved, initialData }: EpiTypeFormProps)
           />
         </div>
         <div className="epi-form-field">
+          <label className="epi-form-label">
+            Vida Útil (dias) <span className="epi-form-required">*</span>
+          </label>
+          <input
+            type="number"
+            min={1}
+            placeholder="Ex: 180"
+            className="epi-form-input"
+            value={lifespanDays}
+            onChange={(e) => setLifespanDays(Number(e.target.value))}
+            required
+          />
+        </div>
+        <div className="epi-form-field">
           <label className="epi-form-label">Status</label>
           <select className="epi-form-input" value={active ? '1' : '0'} onChange={(e) => setActive(e.target.value === '1')}>
             <option value="1">Ativo</option>
@@ -205,7 +226,7 @@ export const EpiTypeForm = ({ onClose, onSaved, initialData }: EpiTypeFormProps)
           Cancelar
         </button>
         <button type="submit" className="epi-form-submit" disabled={saving}>
-          {saving ? 'Salvando...' : initialData ? 'Salvar Altera??es' : 'Salvar Tipo'}
+          {saving ? 'Salvando...' : initialData ? 'Salvar Alterações' : 'Salvar Tipo'}
         </button>
       </div>
     </form>

@@ -88,7 +88,8 @@ const MatrizFuncaoEPI = () => {
             <table className="matriz-table">
               <thead>
                 <tr className="matriz-thead-row">
-                  <th className="matriz-th-sticky-left">Função</th>
+                  <th className="matriz-th-sticky-left table-col-id">ID</th>
+                  <th className="matriz-th-sticky-left matriz-th-funcao">Função</th>
                   {epiTypes.map((epi) => (
                     <th key={epi.ept_id} className="matriz-th" title={epi.ept_description}>
                       {epi.ept_description.split(' ')[0]}
@@ -100,7 +101,8 @@ const MatrizFuncaoEPI = () => {
               <tbody className="matriz-tbody">
                 {roles.map((role) => (
                   <tr key={role.rol_id} className="matriz-row">
-                    <td className="matriz-td-role">{role.rol_description}</td>
+                    <td className="matriz-td-id table-cell-id">{role.rol_id}</td>
+                    <td className="matriz-td-funcao">{role.rol_description}</td>
                     {epiTypes.map((epi) => {
                       const required = isLinked(role.rol_id, epi.ept_id);
                       return (

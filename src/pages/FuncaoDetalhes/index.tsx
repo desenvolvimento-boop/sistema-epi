@@ -181,6 +181,7 @@ const FuncaoDetalhes = () => {
               <table className="funcao-detalhes-riscos-table">
                 <thead>
                   <tr className="funcao-detalhes-riscos-thead-row">
+                    <th className="funcao-detalhes-riscos-th table-col-id">ID</th>
                     <th className="funcao-detalhes-riscos-th">Tipo</th>
                     <th className="funcao-detalhes-riscos-th">Agente</th>
                     <th className="funcao-detalhes-riscos-th">Origem</th>
@@ -190,11 +191,12 @@ const FuncaoDetalhes = () => {
                 <tbody className="funcao-detalhes-riscos-tbody">
                   {risks.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="funcao-detalhes-riscos-cell">Nenhum risco cadastrado.</td>
+                      <td colSpan={5} className="funcao-detalhes-riscos-cell">Nenhum risco cadastrado.</td>
                     </tr>
                   ) : (
                     risks.map((risco) => (
                       <tr key={risco.rsk_id} className="funcao-detalhes-riscos-row">
+                        <td className="funcao-detalhes-riscos-cell table-cell-id">{risco.rsk_id}</td>
                         <td className="funcao-detalhes-riscos-cell">
                           <span className="funcao-detalhes-riscos-tipo">{risco.rsk_type}</span>
                         </td>

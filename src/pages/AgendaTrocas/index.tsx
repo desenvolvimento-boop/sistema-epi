@@ -262,6 +262,7 @@ const AgendaTrocas = () => {
             <table className="agenda-table">
               <thead>
                 <tr className="agenda-table-head-row">
+                  <th className="agenda-th table-col-id">ID</th>
                   <th className="agenda-th">Colaborador</th>
                   <th className="agenda-th">Tipo de EPI</th>
                   <th className="agenda-th">Data Prevista</th>
@@ -274,13 +275,14 @@ const AgendaTrocas = () => {
               <tbody className="agenda-tbody">
                 {items.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="agenda-td agenda-empty">
+                    <td colSpan={8} className="agenda-td agenda-empty">
                       {error ? 'Não foi possível carregar a agenda.' : 'Nenhuma troca pendente na agenda.'}
                     </td>
                   </tr>
                 ) : (
                   items.map((item) => (
                     <tr key={`${item.emp_id}-${item.ept_id}`} className="agenda-row">
+                      <td className="agenda-td table-cell-id">{item.emp_id}</td>
                       <td className="agenda-td">
                         <div className="agenda-collaborator">
                           <div className="agenda-avatar">

@@ -3,7 +3,6 @@ import {
   exchangeRuleService,
   type ExchangeRuleAPI,
   type ExchangeRulePayload,
-  EXCHANGE_ACTION_LABELS,
   EXCHANGE_SCOPE_LABELS,
 } from '../../services/exchangeRuleService';
 import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
@@ -46,11 +45,10 @@ export const ExchangeRuleForm = ({
   const [scopeId, setScopeId] = useState<string>(
     initialData?.exr_scope_id != null ? String(initialData.exr_scope_id) : ''
   );
-  const [action, setAction] = useState<ExchangeRulePayload['exr_action']>(
-    initialData?.exr_action ?? 'SET_DAYS'
-  );
-  const [value, setValue] = useState(initialData?.exr_value ?? 30);
+  const [gatilho, setGatilho] = useState<number | ''>(initialData?.exr_value ?? '');
   const [reason, setReason] = useState(initialData?.exr_reason ?? '');
+
+  const selectedEpiType = types.find((t) => String(t.ept_id) === eptId) ?? null;
 
   useEffect(() => {
     Promise.all([
@@ -76,8 +74,7 @@ export const ExchangeRuleForm = ({
     setEptId(initialData.ept_id != null ? String(initialData.ept_id) : '');
     setScope(initialData.exr_scope);
     setScopeId(initialData.exr_scope_id != null ? String(initialData.exr_scope_id) : '');
-    setAction(initialData.exr_action);
-    setValue(initialData.exr_value);
+    setGatilho(initialData.exr_value);
     setReason(initialData.exr_reason ?? '');
     setError(null);
   }, [initialData]);
@@ -98,8 +95,8 @@ export const ExchangeRuleForm = ({
     ept_id: eptId ? Number(eptId) : null,
     exr_scope: scope,
     exr_scope_id: scope === 'GLOBAL' ? null : scopeId ? Number(scopeId) : null,
-    exr_action: action,
-    exr_value: Number(value) || 1,
+    exr_action: 'SET_DAYS',
+    exr_value: Number(gatilho) || 1,
     exr_priority: initialData?.exr_priority ?? 0,
     exr_valid_from: initialData?.exr_valid_from ?? null,
     exr_valid_to: initialData?.exr_valid_to ?? null,
@@ -114,6 +111,15 @@ export const ExchangeRuleForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (!eptId) {
+      setError('Selecione o tipo de EPI.');
+      return;
+    }
+    const gatilhoDays = Number(gatilho);
+    if (!Number.isFinite(gatilhoDays) || gatilhoDays < 1) {
+      setError('Informe o gatilho em dias (mínimo 1).');
+      return;
+    }
     if (scope !== 'GLOBAL' && !scopeId) {
       setError('Selecione o alvo do escopo.');
       return;
@@ -152,40 +158,70 @@ export const ExchangeRuleForm = ({
       </div>
 
       <div className="exchange-rule-form-grid">
-        <div className="exchange-rule-form-field">
-          <label className="exchange-rule-form-label">Tipo de EPI</label>
-          <select
-            className="exchange-rule-form-input"
-            value={eptId}
-            onChange={(e) => setEptId(e.target.value)}
-          >
-            <option value="">Todos os tipos</option>
-            {types.map((t) => (
-              <option key={t.ept_id} value={t.ept_id}>
-                {t.ept_description}
-              </option>
-            ))}
-          </select>
+        <div className="exchange-rule-form-row exchange-rule-form-row--top">
+          <div className="exchange-rule-form-field">
+            <label className="exchange-rule-form-label">Tipo de EPI</label>
+            <select
+              className="exchange-rule-form-input"
+              value={eptId}
+              onChange={(e) => setEptId(e.target.value)}
+              required
+            >
+              <option value="">Selecione...</option>
+              {types.map((t) => (
+                <option key={t.ept_id} value={t.ept_id}>
+                  {t.ept_description}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="exchange-rule-form-field">
+            <label className="exchange-rule-form-label">Escopo</label>
+            <select
+              className="exchange-rule-form-input"
+              value={scope}
+              onChange={(e) => {
+                setScope(e.target.value as ExchangeRulePayload['exr_scope']);
+                setScopeId('');
+              }}
+            >
+              {(Object.keys(EXCHANGE_SCOPE_LABELS) as ExchangeRulePayload['exr_scope'][]).map(
+                (k) => (
+                  <option key={k} value={k}>
+                    {EXCHANGE_SCOPE_LABELS[k]}
+                  </option>
+                )
+              )}
+            </select>
+          </div>
         </div>
 
-        <div className="exchange-rule-form-field">
-          <label className="exchange-rule-form-label">Escopo</label>
-          <select
-            className="exchange-rule-form-input"
-            value={scope}
-            onChange={(e) => {
-              setScope(e.target.value as ExchangeRulePayload['exr_scope']);
-              setScopeId('');
-            }}
-          >
-            {(Object.keys(EXCHANGE_SCOPE_LABELS) as ExchangeRulePayload['exr_scope'][]).map(
-              (k) => (
-                <option key={k} value={k}>
-                  {EXCHANGE_SCOPE_LABELS[k]}
-                </option>
-              )
-            )}
-          </select>
+        <div className="exchange-rule-form-row exchange-rule-form-row--bottom">
+          <div className="exchange-rule-form-field">
+            <label className="exchange-rule-form-label">Nome do EPI</label>
+            <div className="exchange-rule-form-static">
+              {selectedEpiType?.ept_description ?? '—'}
+            </div>
+          </div>
+          <div className="exchange-rule-form-field">
+            <label className="exchange-rule-form-label">Vida útil</label>
+            <div className="exchange-rule-form-static">
+              {selectedEpiType != null ? `${selectedEpiType.ept_lifespan_days} dias` : '—'}
+            </div>
+          </div>
+          <div className="exchange-rule-form-field">
+            <label className="exchange-rule-form-label">Gatilho</label>
+            <input
+              type="number"
+              min={1}
+              className="exchange-rule-form-input"
+              value={gatilho}
+              onChange={(e) => setGatilho(e.target.value === '' ? '' : Number(e.target.value))}
+              placeholder="Dias"
+              disabled={!eptId}
+              required
+            />
+          </div>
         </div>
 
         {scope !== 'GLOBAL' && (
@@ -206,35 +242,6 @@ export const ExchangeRuleForm = ({
             </select>
           </div>
         )}
-
-        <div className="exchange-rule-form-field">
-          <label className="exchange-rule-form-label">Ação</label>
-          <select
-            className="exchange-rule-form-input"
-            value={action}
-            onChange={(e) => setAction(e.target.value as ExchangeRulePayload['exr_action'])}
-          >
-            {(Object.keys(EXCHANGE_ACTION_LABELS) as ExchangeRulePayload['exr_action'][]).map(
-              (k) => (
-                <option key={k} value={k}>
-                  {EXCHANGE_ACTION_LABELS[k]}
-                </option>
-              )
-            )}
-          </select>
-        </div>
-
-        <div className="exchange-rule-form-field">
-          <label className="exchange-rule-form-label">Valor</label>
-          <input
-            type="number"
-            min={1}
-            className="exchange-rule-form-input"
-            value={value}
-            onChange={(e) => setValue(Number(e.target.value))}
-            required
-          />
-        </div>
 
         <div className="exchange-rule-form-field exchange-rule-form-field--full">
           <label className="exchange-rule-form-label">Motivo / observação</label>

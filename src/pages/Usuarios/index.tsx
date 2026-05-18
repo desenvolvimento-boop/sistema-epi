@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Eye, Edit2, Loader2, RefreshCw } from 'lucide-react';
 import { User } from '../../types/system.types';
 import { userService } from '../../services/userService';
@@ -9,14 +10,15 @@ import { useAuth } from '../../contexts/AuthContext';
 import './styles.css';
 
 const Usuarios = () => {
-  const { canEdit } = useAuth();
-  const allowCreate = canEdit('/configuracoes');
-  const allowEdit = canEdit('/configuracoes');
+  const navigate = useNavigate();
+  const { canCreate, canEdit } = useAuth();
+  const allowCreate = canCreate('/usuarios');
+  const allowEdit = canEdit('/usuarios');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -39,23 +41,18 @@ const Usuarios = () => {
     fetchUsers();
   }, [fetchUsers]);
 
-  const handleOpenCreate = () => {
-    setSelectedUser(null);
-    setIsModalOpen(true);
-  };
-
   const handleOpenEdit = (user: User) => {
     setSelectedUser(user);
-    setIsModalOpen(true);
+    setIsEditModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
     setSelectedUser(null);
   };
 
   const handleSaved = () => {
-    handleCloseModal();
+    handleCloseEditModal();
     fetchUsers();
   };
 
@@ -73,7 +70,7 @@ const Usuarios = () => {
             <RefreshCw className={`usuarios-icon-sm ${loading ? 'usuarios-spin' : ''}`} />
           </button>
           {allowCreate && (
-            <button onClick={handleOpenCreate} className="usuarios-add-btn">
+            <button onClick={() => navigate('/usuarios/novo')} className="usuarios-add-btn">
               <Plus className="usuarios-icon-sm" /> Novo Usuário
             </button>
           )}
@@ -81,15 +78,17 @@ const Usuarios = () => {
       </div>
 
       <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        title={selectedUser ? 'Editar Usuário' : 'Cadastrar Novo Usuário'}
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        title="Editar Usuário"
       >
-        <UsuarioForm
-          onClose={handleCloseModal}
-          onSaved={handleSaved}
-          initialData={selectedUser ?? undefined}
-        />
+        {selectedUser && (
+          <UsuarioForm
+            onClose={handleCloseEditModal}
+            onSaved={handleSaved}
+            initialData={selectedUser}
+          />
+        )}
       </Modal>
 
       <Modal
@@ -149,6 +148,7 @@ const Usuarios = () => {
           <table className="usuarios-table">
             <thead>
               <tr className="usuarios-thead-row">
+                <th className="usuarios-th table-col-id">ID</th>
                 <th className="usuarios-th">Usuário</th>
                 <th className="usuarios-th">Perfil / Permissão</th>
                 <th className="usuarios-th">Tipo</th>
@@ -159,11 +159,12 @@ const Usuarios = () => {
             <tbody className="usuarios-tbody">
               {users.length === 0 && !loading ? (
                 <tr>
-                  <td colSpan={5} className="usuarios-empty">Nenhum usuário encontrado.</td>
+                  <td colSpan={6} className="usuarios-empty">Nenhum usuário encontrado.</td>
                 </tr>
               ) : (
                 users.map(user => (
                   <tr key={user.usr_id} className="usuarios-row">
+                    <td className="usuarios-cell table-cell-id">{user.usr_id}</td>
                     <td className="usuarios-cell">
                       <p className="usuarios-name">{user.usr_full_name}</p>
                       <p className="usuarios-email">{user.usr_email}</p>

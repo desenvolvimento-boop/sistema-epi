@@ -334,6 +334,7 @@ const Configuracoes = () => {
                     <table className="config-table">
                       <thead>
                         <tr className="config-thead-row">
+                          <th className="config-th table-col-id">ID</th>
                           <th className="config-th">Nome do Perfil</th>
                           <th className="config-th">Status</th>
                           <th className="config-th">Permissões</th>
@@ -343,6 +344,7 @@ const Configuracoes = () => {
                       <tbody className="config-tbody">
                         {profiles.map(profile => (
                           <tr key={profile.acp_id} className="config-row">
+                            <td className="config-cell table-cell-id">{profile.acp_id}</td>
                             <td className="config-cell">
                               <span className="config-profile-name">{profile.acp_description}</span>
                             </td>
@@ -483,6 +485,7 @@ const Configuracoes = () => {
                   <table className="config-table">
                     <thead>
                       <tr className="config-thead-row">
+                        <th className="config-th table-col-id">ID</th>
                         <th className="config-th">Empresa</th>
                         <th className="config-th">Status</th>
                         <th className="config-th">Última Sincronização</th>
@@ -493,6 +496,7 @@ const Configuracoes = () => {
                     <tbody className="config-tbody">
                       {integratedCompanies.map(company => (
                         <tr key={company.id} className="config-row">
+                          <td className="config-cell table-cell-id">{company.id}</td>
                           <td className="config-cell">
                             <span className="config-company-name">{company.name}</span>
                           </td>

@@ -35,10 +35,7 @@ export const Topbar = ({ title, onMenuToggle }: TopbarProps) => {
         <div className="topbar-divider"></div>
         
         <div className="topbar-user-info">
-          <div className="topbar-user-info-inner">
-            <p className="topbar-company-name">Empresa Master S.A.</p>
-            <p className="topbar-session">Sessão: 02:45h</p>
-          </div>
+          <p className="topbar-company-name">Empresa Master S.A.</p>
         </div>
       </div>
     </header>

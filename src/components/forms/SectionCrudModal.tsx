@@ -1,43 +1,53 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Search, RefreshCw, Check, X, Loader2, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Plus, Edit2, Trash2, Search, Check, X, Loader2 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
+import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
+import { sectionService } from '../../services/sectionService';
+import type { SimpleCrudItem } from './SimpleCrudModal';
 import './SimpleCrudModal.css';
 
-export interface SimpleCrudItem {
-  id: number;
-  name: string;
-  description: string | null;
-  active: boolean;
-}
-
-interface SimpleCrudModalProps {
+interface SectionCrudModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  entityLabel: string;
   items: SimpleCrudItem[];
   onItemsChange: (items: SimpleCrudItem[]) => void;
-  onItemCreated?: (item: SimpleCrudItem) => void;
+  onItemCreated?: (item: SimpleCrudItem, eptIds: number[]) => void | Promise<void>;
+  onItemUpdated?: (item: SimpleCrudItem, eptIds: number[]) => void | Promise<void>;
 }
 
-export const SimpleCrudModal = ({
+export const SectionCrudModal = ({
   isOpen,
   onClose,
   title,
-  entityLabel,
   items,
   onItemsChange,
   onItemCreated,
-}: SimpleCrudModalProps) => {
+  onItemUpdated,
+}: SectionCrudModalProps) => {
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<SimpleCrudItem | null>(null);
   const [formName, setFormName] = useState('');
   const [formDesc, setFormDesc] = useState('');
   const [formActive, setFormActive] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [loadingEpis, setLoadingEpis] = useState(false);
+
+  const [episCatalog, setEpisCatalog] = useState<EpiTypeAPI[]>([]);
+  const [selectedEptIds, setSelectedEptIds] = useState<number[]>([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const perPage = 10;
+
+  const loadCatalog = useCallback(async () => {
+    try {
+      const catalog = await epiTypeService.getActive();
+      setEpisCatalog(catalog);
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -45,10 +55,12 @@ export const SimpleCrudModal = ({
       setEditingItem(null);
       setSearch('');
       setCurrentPage(1);
+      setSelectedEptIds([]);
+      loadCatalog();
     }
-  }, [isOpen]);
+  }, [isOpen, loadCatalog]);
 
-  const filtered = items.filter(item => {
+  const filtered = items.filter((item) => {
     if (!search.trim()) return true;
     const term = search.toLowerCase();
     return (
@@ -64,6 +76,7 @@ export const SimpleCrudModal = ({
     setFormName('');
     setFormDesc('');
     setFormActive(true);
+    setSelectedEptIds([]);
     setEditingItem(null);
     setShowForm(false);
   };
@@ -73,40 +86,61 @@ export const SimpleCrudModal = ({
     setShowForm(true);
   };
 
-  const handleOpenEdit = (item: SimpleCrudItem) => {
+  const handleOpenEdit = async (item: SimpleCrudItem) => {
     setEditingItem(item);
     setFormName(item.name);
     setFormDesc(item.description || '');
     setFormActive(item.active);
+    setSelectedEptIds([]);
     setShowForm(true);
+
+    setLoadingEpis(true);
+    try {
+      const linked = await sectionService.getEpiTypes(item.id);
+      setSelectedEptIds(linked.map((e) => e.ept_id));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingEpis(false);
+    }
   };
 
-  const handleSave = () => {
-    if (!formName.trim()) return;
+  const toggleEpt = (eptId: number) => {
+    setSelectedEptIds((prev) =>
+      prev.includes(eptId) ? prev.filter((id) => id !== eptId) : [...prev, eptId]
+    );
+  };
 
-    if (editingItem) {
-      const updated = items.map(i =>
-        i.id === editingItem.id
-          ? { ...i, name: formName.trim(), description: formDesc.trim() || null, active: formActive }
-          : i
-      );
-      onItemsChange(updated);
-    } else {
-      const newId = items.length > 0 ? Math.max(...items.map(i => i.id)) + 1 : 1;
-      const newItem: SimpleCrudItem = {
-        id: newId,
-        name: formName.trim(),
-        description: formDesc.trim() || null,
-        active: formActive,
-      };
-      onItemsChange([...items, newItem]);
-      onItemCreated?.(newItem);
+  const handleSave = async () => {
+    if (!formName.trim() || saving) return;
+
+    const payload: SimpleCrudItem = {
+      id: editingItem?.id ?? (items.length > 0 ? Math.max(...items.map((i) => i.id)) + 1 : 1),
+      name: formName.trim(),
+      description: formDesc.trim() || null,
+      active: formActive,
+    };
+
+    setSaving(true);
+    try {
+      if (editingItem) {
+        const updated = items.map((i) => (i.id === editingItem.id ? payload : i));
+        onItemsChange(updated);
+        await onItemUpdated?.(payload, selectedEptIds);
+      } else {
+        onItemsChange([...items, payload]);
+        await onItemCreated?.(payload, selectedEptIds);
+      }
+      resetForm();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao salvar setor');
+    } finally {
+      setSaving(false);
     }
-    resetForm();
   };
 
   const handleDelete = (id: number) => {
-    onItemsChange(items.filter(i => i.id !== id));
+    onItemsChange(items.filter((i) => i.id !== id));
   };
 
   return (
@@ -120,7 +154,7 @@ export const SimpleCrudModal = ({
               placeholder="Pesquisar"
               className="scrud-search-input"
               value={search}
-              onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
+              onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
             />
           </div>
           <div className="scrud-toolbar-actions">
@@ -128,7 +162,7 @@ export const SimpleCrudModal = ({
               type="button"
               className="scrud-toolbar-btn scrud-toolbar-btn--primary"
               onClick={handleOpenAdd}
-              title={`Adicionar ${entityLabel}`}
+              title="Adicionar setor"
             >
               <Plus className="scrud-icon-sm" />
             </button>
@@ -138,7 +172,7 @@ export const SimpleCrudModal = ({
         {showForm && (
           <div className="scrud-form-card">
             <div className="scrud-form-title">
-              {editingItem ? `Editar ${entityLabel}` : `Nov${entityLabel.endsWith('a') ? 'a' : 'o'} ${entityLabel}`}
+              {editingItem ? 'Editar Setor' : 'Novo Setor'}
             </div>
             <div className="scrud-form-grid">
               <div className="scrud-form-field">
@@ -146,9 +180,9 @@ export const SimpleCrudModal = ({
                 <input
                   type="text"
                   className="scrud-form-input"
-                  placeholder={`Nome d${entityLabel.endsWith('a') ? 'a' : 'o'} ${entityLabel.toLowerCase()}`}
+                  placeholder="Nome do setor"
                   value={formName}
-                  onChange={e => setFormName(e.target.value)}
+                  onChange={(e) => setFormName(e.target.value)}
                   autoFocus
                 />
               </div>
@@ -159,8 +193,38 @@ export const SimpleCrudModal = ({
                   className="scrud-form-input"
                   placeholder="Descrição"
                   value={formDesc}
-                  onChange={e => setFormDesc(e.target.value)}
+                  onChange={(e) => setFormDesc(e.target.value)}
                 />
+              </div>
+              <div className="scrud-form-field scrud-form-field--full">
+                <label className="scrud-form-label">EPIs do Setor / Seção</label>
+                {loadingEpis ? (
+                  <p className="scrud-epis-loading">
+                    <Loader2 className="scrud-icon-sm scrud-spin" />
+                    Carregando EPIs...
+                  </p>
+                ) : (
+                  <div className="scrud-epi-grid custom-scrollbar">
+                    {episCatalog.length === 0 ? (
+                      <p className="scrud-epis-empty">Cadastre EPIs no catálogo primeiro.</p>
+                    ) : (
+                      episCatalog.map((epi) => (
+                        <label key={epi.ept_id} className="scrud-epi-label">
+                          <input
+                            type="checkbox"
+                            className="scrud-epi-checkbox"
+                            checked={selectedEptIds.includes(epi.ept_id)}
+                            onChange={() => toggleEpt(epi.ept_id)}
+                          />
+                          <span>
+                            {epi.ept_description}
+                            <small> · {epi.ept_category}</small>
+                          </span>
+                        </label>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
             </div>
             <div className="scrud-form-footer">
@@ -179,15 +243,20 @@ export const SimpleCrudModal = ({
                   type="button"
                   className="scrud-form-save"
                   onClick={handleSave}
-                  disabled={!formName.trim()}
+                  disabled={!formName.trim() || saving}
                 >
-                  <Check className="scrud-icon-sm" />
+                  {saving ? (
+                    <Loader2 className="scrud-icon-sm scrud-spin" />
+                  ) : (
+                    <Check className="scrud-icon-sm" />
+                  )}
                   Salvar
                 </button>
                 <button
                   type="button"
                   className="scrud-form-cancel"
                   onClick={resetForm}
+                  disabled={saving}
                 >
                   <X className="scrud-icon-sm" />
                   Cancelar
@@ -212,11 +281,11 @@ export const SimpleCrudModal = ({
               {paginated.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="scrud-empty">
-                    {search ? 'Nenhum resultado encontrado.' : `Nenhum${entityLabel.endsWith('a') ? 'a' : ''} ${entityLabel.toLowerCase()} cadastrad${entityLabel.endsWith('a') ? 'a' : 'o'}.`}
+                    {search ? 'Nenhum resultado encontrado.' : 'Nenhum setor cadastrado.'}
                   </td>
                 </tr>
               ) : (
-                paginated.map(item => (
+                paginated.map((item) => (
                   <tr key={item.id} className="scrud-row">
                     <td className="scrud-cell table-cell-id">{item.id}</td>
                     <td className="scrud-cell">
@@ -263,7 +332,7 @@ export const SimpleCrudModal = ({
                 type="button"
                 className="scrud-pagination-btn"
                 disabled={currentPage <= 1}
-                onClick={() => setCurrentPage(p => p - 1)}
+                onClick={() => setCurrentPage((p) => p - 1)}
               >
                 Anterior
               </button>
@@ -271,7 +340,7 @@ export const SimpleCrudModal = ({
                 type="button"
                 className="scrud-pagination-btn"
                 disabled={currentPage >= totalPages}
-                onClick={() => setCurrentPage(p => p + 1)}
+                onClick={() => setCurrentPage((p) => p + 1)}
               >
                 Próxima
               </button>

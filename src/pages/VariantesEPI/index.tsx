@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Edit3, Loader2, Package } from 'lucide-react';
 import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
 import { epiVariantService, type EpiVariantAPI } from '../../services/epiVariantService';
@@ -12,11 +13,12 @@ import './styles.css';
 const ALL_TYPES_FILTER = '';
 
 const VariantesEPI = () => {
+  const navigate = useNavigate();
   const [types, setTypes] = useState<EpiTypeAPI[]>([]);
   const [variants, setVariants] = useState<EpiVariantAPI[]>([]);
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState(ALL_TYPES_FILTER);
-  const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingVariant, setEditingVariant] = useState<EpiVariantAPI | null>(null);
   const { canCreate, canEdit } = useAuth();
   const allowCreate = canCreate('/epis');
@@ -50,9 +52,19 @@ const VariantesEPI = () => {
     return variants.filter((v) => v.ept_id === eptId);
   }, [variants, typeFilter]);
 
-  const handleOpenVariantModal = (variant?: EpiVariantAPI) => {
-    setEditingVariant(variant || null);
-    setIsVariantModalOpen(true);
+  const handleOpenEditModal = (variant: EpiVariantAPI) => {
+    setEditingVariant(variant);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingVariant(null);
+  };
+
+  const handleNavigateCreate = () => {
+    const path = typeFilter ? `/variantes-epi/novo?tipo=${typeFilter}` : '/variantes-epi/novo';
+    navigate(path);
   };
 
   const variantLabel = (v: EpiVariantAPI) => {
@@ -72,7 +84,7 @@ const VariantesEPI = () => {
         {allowCreate && (
           <button
             type="button"
-            onClick={() => handleOpenVariantModal()}
+            onClick={handleNavigateCreate}
             className="btn-add"
             disabled={activeTypes.length === 0}
             title={activeTypes.length === 0 ? 'Cadastre um tipo de EPI primeiro' : undefined}
@@ -107,17 +119,22 @@ const VariantesEPI = () => {
       </div>
 
       <Modal
-        isOpen={isVariantModalOpen}
-        onClose={() => setIsVariantModalOpen(false)}
-        title={editingVariant ? 'Editar Variante' : 'Cadastrar Variante'}
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        title="Editar Variante"
       >
-        <EpiVariantForm
-          types={types}
-          eptId={editingVariant?.ept_id ?? (typeFilter ? Number(typeFilter) : undefined)}
-          onClose={() => setIsVariantModalOpen(false)}
-          onSaved={loadData}
-          initialData={editingVariant || undefined}
-        />
+        {editingVariant && (
+          <EpiVariantForm
+            types={types}
+            eptId={editingVariant.ept_id}
+            onClose={handleCloseEditModal}
+            onSaved={() => {
+              handleCloseEditModal();
+              loadData();
+            }}
+            initialData={editingVariant}
+          />
+        )}
       </Modal>
 
       <div className="table-container epis-catalog-panel">
@@ -138,6 +155,7 @@ const VariantesEPI = () => {
           <table className="data-table">
             <thead>
               <tr className="table-header-row">
+                <th className="table-header-cell table-col-id">ID</th>
                 <th className="table-header-cell">Tipo de EPI</th>
                 <th className="table-header-cell">Fabricante / Modelo</th>
                 <th className="table-header-cell">CA</th>
@@ -150,7 +168,7 @@ const VariantesEPI = () => {
             <tbody className="table-body">
               {filteredVariants.length === 0 ? (
                 <tr>
-                  <td colSpan={allowEdit ? 7 : 6} className="table-cell epis-empty-cell">
+                  <td colSpan={allowEdit ? 8 : 7} className="table-cell epis-empty-cell">
                     {typeFilter
                       ? 'Nenhuma variante para este tipo.'
                       : 'Nenhuma variante cadastrada.'}
@@ -162,6 +180,7 @@ const VariantesEPI = () => {
                   const tipo = getTypeForVariant(variant);
                   return (
                     <tr key={variant.epv_id} className="table-row epis-catalog-row">
+                      <td className="table-cell table-cell-id">{variant.epv_id}</td>
                       <td className="table-cell">
                         <span className="epi-name">{tipo?.ept_description ?? '—'}</span>
                         {tipo?.ept_category && (
@@ -197,7 +216,7 @@ const VariantesEPI = () => {
                           <button
                             type="button"
                             className="btn-edit"
-                            onClick={() => handleOpenVariantModal(variant)}
+                            onClick={() => handleOpenEditModal(variant)}
                             title="Editar variante"
                           >
                             <Edit3 className="icon-sm" />

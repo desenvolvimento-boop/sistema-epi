@@ -4,7 +4,6 @@ import { epiTypeService, epiTypeCategoryLabel, type EpiTypeAPI } from '../../ser
 import { epiVariantService } from '../../services/epiVariantService';
 import {
   exchangeRuleService,
-  EXCHANGE_ACTION_LABELS,
   EXCHANGE_SCOPE_LABELS,
   type ExchangeRuleAPI,
 } from '../../services/exchangeRuleService';
@@ -190,6 +189,7 @@ const RegrasTroca = () => {
             <table className="data-table">
               <thead>
                 <tr className="table-header-row">
+                  <th className="table-header-cell table-col-id">ID</th>
                   <th className="table-header-cell">Tipo de EPI</th>
                   <th className="table-header-cell">Categoria</th>
                   <th className="table-header-cell">Vida útil (dias)</th>
@@ -210,6 +210,7 @@ const RegrasTroca = () => {
                       onClick={() => allowEdit && handleOpenBaseModal(type)}
                       style={{ cursor: allowEdit ? 'pointer' : 'default' }}
                     >
+                      <td className="table-cell table-cell-id">{type.ept_id}</td>
                       <td className="table-cell">
                         <span className="rule-epi-name">{type.ept_description}</span>
                       </td>
@@ -277,9 +278,10 @@ const RegrasTroca = () => {
             <table className="data-table">
               <thead>
                 <tr className="table-header-row">
+                  <th className="table-header-cell table-col-id">ID</th>
                   <th className="table-header-cell">Tipo</th>
                   <th className="table-header-cell">Escopo</th>
-                  <th className="table-header-cell">Ação</th>
+                  <th className="table-header-cell">Gatilho (dias)</th>
                   <th className="table-header-cell">Motivo</th>
                   <th className="table-header-cell">Status</th>
                   {(allowEdit || allowDelete) && (
@@ -290,6 +292,7 @@ const RegrasTroca = () => {
               <tbody className="table-body">
                 {rules.map((rule) => (
                   <tr key={rule.exr_id} className="table-row">
+                    <td className="table-cell table-cell-id">{rule.exr_id}</td>
                     <td className="table-cell">
                       {rule.epiType?.ept_description ?? 'Todos os tipos'}
                     </td>
@@ -297,9 +300,7 @@ const RegrasTroca = () => {
                       {EXCHANGE_SCOPE_LABELS[rule.exr_scope]}
                       {rule.exr_scope_id != null ? ` #${rule.exr_scope_id}` : ''}
                     </td>
-                    <td className="table-cell">
-                      {EXCHANGE_ACTION_LABELS[rule.exr_action]} ({rule.exr_value})
-                    </td>
+                    <td className="table-cell">{rule.exr_value}</td>
                     <td className="table-cell">{rule.exr_reason ?? '—'}</td>
                     <td className="table-cell">{rule.exr_active === 1 ? 'Ativo' : 'Inativo'}</td>
                     {(allowEdit || allowDelete) && (

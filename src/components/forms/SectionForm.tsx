@@ -1,0 +1,230 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { Building2, ShieldCheck, Check, Loader2 } from 'lucide-react';
+import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
+import { sectionService } from '../../services/sectionService';
+import './SectionForm.css';
+import './SimpleCrudModal.css';
+import '../../pages/ColaboradorEditar/styles.css';
+
+interface SectionFormProps {
+  onClose: () => void;
+  onSaved?: () => void;
+  sectionId?: number;
+}
+
+export const SectionForm = ({ onClose, onSaved, sectionId }: SectionFormProps) => {
+  const isEditing = sectionId != null;
+  const [loading, setLoading] = useState(isEditing);
+  const [saving, setSaving] = useState(false);
+  const [loadingEpis, setLoadingEpis] = useState(false);
+
+  const [formName, setFormName] = useState('');
+  const [formDesc, setFormDesc] = useState('');
+  const [formActive, setFormActive] = useState(true);
+  const [episCatalog, setEpisCatalog] = useState<EpiTypeAPI[]>([]);
+  const [selectedEptIds, setSelectedEptIds] = useState<number[]>([]);
+
+  const loadCatalog = useCallback(async () => {
+    const catalog = await epiTypeService.getActive();
+    setEpisCatalog(catalog);
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        await loadCatalog();
+        if (!isEditing || sectionId == null) {
+          setLoading(false);
+          return;
+        }
+        const section = await sectionService.getById(sectionId);
+        setFormName(section.sec_description);
+        setFormDesc(section.sec_integration_id || '');
+        setFormActive(section.sec_active === 1);
+
+        setLoadingEpis(true);
+        const linked = await sectionService.getEpiTypes(sectionId);
+        setSelectedEptIds(linked.map((e) => e.ept_id));
+      } catch (err: unknown) {
+        alert(err instanceof Error ? err.message : 'Erro ao carregar setor');
+        onClose();
+      } finally {
+        setLoading(false);
+        setLoadingEpis(false);
+      }
+    };
+    load();
+  }, [isEditing, sectionId, loadCatalog, onClose]);
+
+  const hasRequiredEpis = selectedEptIds.length >= 1;
+
+  const toggleEpt = (eptId: number) => {
+    setSelectedEptIds((prev) =>
+      prev.includes(eptId) ? prev.filter((id) => id !== eptId) : [...prev, eptId]
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formName.trim() || saving) return;
+
+    if (!hasRequiredEpis) {
+      alert('Selecione pelo menos 1 EPI do Setor para salvar a seção.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = {
+        sec_active: formActive ? 1 : 0,
+        sec_description: formName.trim(),
+        sec_integration_id: formDesc.trim() || null,
+        usr_id_insert: null as number | null,
+        usr_id_lastupdate: null as number | null,
+      };
+      const epiLinks = selectedEptIds.map((ept_id) => ({ ept_id, sle_mandatory: 1 }));
+
+      if (isEditing && sectionId != null) {
+        await sectionService.update(sectionId, payload);
+        await sectionService.setEpiTypes(sectionId, epiLinks);
+      } else {
+        const created = await sectionService.create(payload);
+        await sectionService.setEpiTypes(created.sec_id, epiLinks);
+      }
+
+      onSaved?.();
+      onClose();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao salvar setor');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="section-form-loading">
+        <Loader2 className="editar-submit-icon section-form-spin" />
+        <span>Carregando...</span>
+      </div>
+    );
+  }
+
+  return (
+    <form className="editar-form section-form" onSubmit={handleSubmit}>
+      <div className="editar-form-grid section-form-grid">
+        <div className="editar-section">
+          <h3 className="editar-section-title">
+            <Building2 className="editar-section-icon" /> Dados do Setor
+          </h3>
+          <div className="editar-fields">
+            <div className="editar-field">
+              <label className="editar-label">
+                Nome <span className="scrud-form-required">*</span>
+              </label>
+              <input
+                type="text"
+                className="editar-input"
+                placeholder="Nome do setor / seção"
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="editar-field">
+              <label className="editar-label">Descrição / ID integração</label>
+              <input
+                type="text"
+                className="editar-input"
+                placeholder="Descrição ou código de integração"
+                value={formDesc}
+                onChange={(e) => setFormDesc(e.target.value)}
+              />
+            </div>
+            <div className="editar-field">
+              <div className="scrud-form-toggle-row">
+                <span className="scrud-form-toggle-label">Ativo</span>
+                <button
+                  type="button"
+                  className={`scrud-toggle ${formActive ? 'scrud-toggle--active' : ''}`}
+                  onClick={() => setFormActive(!formActive)}
+                >
+                  <span className="scrud-toggle-thumb" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="editar-section">
+          <h3 className="editar-section-title">
+            <ShieldCheck className="editar-section-icon" /> EPIs do Setor
+            <span className="scrud-form-required"> *</span>
+          </h3>
+          <p className="section-form-epis-hint">
+            Selecione no mínimo 1 tipo de EPI obrigatório para esta seção.
+          </p>
+          {!hasRequiredEpis && !loadingEpis && episCatalog.length > 0 && (
+            <p className="section-form-epis-error" role="alert">
+              Nenhum EPI selecionado. Marque ao menos um item abaixo.
+            </p>
+          )}
+          {loadingEpis ? (
+            <p className="scrud-epis-loading">
+              <Loader2 className="scrud-icon-sm scrud-spin" />
+              Carregando EPIs vinculados...
+            </p>
+          ) : (
+            <div className="scrud-epi-grid custom-scrollbar section-form-epi-grid">
+              {episCatalog.length === 0 ? (
+                <p className="scrud-epis-empty">Cadastre EPIs no catálogo primeiro.</p>
+              ) : (
+                episCatalog.map((epi) => (
+                  <label key={epi.ept_id} className="scrud-epi-label">
+                    <input
+                      type="checkbox"
+                      className="scrud-epi-checkbox"
+                      checked={selectedEptIds.includes(epi.ept_id)}
+                      onChange={() => toggleEpt(epi.ept_id)}
+                    />
+                    <span>
+                      {epi.ept_description}
+                      <small> · {epi.ept_category}</small>
+                    </span>
+                  </label>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="editar-footer">
+        <div />
+        <div className="editar-footer-actions">
+          <button type="button" onClick={onClose} className="editar-cancel-btn" disabled={saving}>
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            className="editar-submit-btn"
+            disabled={!formName.trim() || !hasRequiredEpis || saving}
+            title={!hasRequiredEpis ? 'Selecione pelo menos 1 EPI do Setor' : undefined}
+          >
+            {saving ? (
+              <>
+                <Loader2 className="editar-submit-icon section-form-spin" />
+                Salvando...
+              </>
+            ) : (
+              <>
+                <Check className="editar-submit-icon" />
+                {isEditing ? 'Salvar alterações' : 'Salvar seção'}
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+};

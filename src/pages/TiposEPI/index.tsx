@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, Plus, Edit3, Loader2 } from 'lucide-react';
 import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
 import { StatusBadge } from '../../components/StatusBadge';
@@ -8,9 +9,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import '../EPIs/styles.css';
 
 const TiposEPI = () => {
+  const navigate = useNavigate();
   const [types, setTypes] = useState<EpiTypeAPI[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isTypeModalOpen, setIsTypeModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingType, setEditingType] = useState<EpiTypeAPI | null>(null);
   const { canCreate, canEdit } = useAuth();
   const allowCreate = canCreate('/epis');
@@ -32,10 +34,15 @@ const TiposEPI = () => {
     loadTypes();
   }, [loadTypes]);
 
-  const handleOpenTypeModal = (type?: EpiTypeAPI, e?: React.MouseEvent) => {
+  const handleOpenEditModal = (type: EpiTypeAPI, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setEditingType(type || null);
-    setIsTypeModalOpen(true);
+    setEditingType(type);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingType(null);
   };
 
   return (
@@ -43,7 +50,7 @@ const TiposEPI = () => {
       <div className="page-header">
         <h2 className="page-title">Tipo de EPIs</h2>
         {allowCreate && (
-          <button onClick={() => handleOpenTypeModal()} className="btn-add" type="button">
+          <button onClick={() => navigate('/tipos-epi/novo')} className="btn-add" type="button">
             <Plus className="icon-sm" /> Novo Tipo
           </button>
         )}
@@ -55,15 +62,20 @@ const TiposEPI = () => {
       </p>
 
       <Modal
-        isOpen={isTypeModalOpen}
-        onClose={() => setIsTypeModalOpen(false)}
-        title={editingType ? 'Editar Tipo de EPI' : 'Cadastrar Tipo de EPI'}
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        title="Editar Tipo de EPI"
       >
-        <EpiTypeForm
-          onClose={() => setIsTypeModalOpen(false)}
-          onSaved={loadTypes}
-          initialData={editingType || undefined}
-        />
+        {editingType && (
+          <EpiTypeForm
+            onClose={handleCloseEditModal}
+            onSaved={() => {
+              handleCloseEditModal();
+              loadTypes();
+            }}
+            initialData={editingType}
+          />
+        )}
       </Modal>
 
       <div className="table-container epis-catalog-panel">
@@ -76,6 +88,7 @@ const TiposEPI = () => {
           <table className="data-table">
             <thead>
               <tr className="table-header-row">
+                <th className="table-header-cell table-col-id">ID</th>
                 <th className="table-header-cell">Tipo de EPI</th>
                 <th className="table-header-cell">Categoria</th>
                 <th className="table-header-cell">Vida útil (dias)</th>
@@ -86,13 +99,14 @@ const TiposEPI = () => {
             <tbody className="table-body">
               {types.length === 0 ? (
                 <tr>
-                  <td colSpan={allowEdit ? 5 : 4} className="table-cell epis-empty-cell">
+                  <td colSpan={allowEdit ? 6 : 5} className="table-cell epis-empty-cell">
                     Nenhum tipo cadastrado.
                   </td>
                 </tr>
               ) : (
                 types.map((type) => (
                   <tr key={type.ept_id} className="table-row epis-catalog-row">
+                    <td className="table-cell table-cell-id">{type.ept_id}</td>
                     <td className="table-cell">
                       <div className="epi-name-wrapper">
                         <div className="epi-icon-wrapper">
@@ -113,7 +127,7 @@ const TiposEPI = () => {
                         <button
                           type="button"
                           className="btn-edit"
-                          onClick={(e) => handleOpenTypeModal(type, e)}
+                          onClick={(e) => handleOpenEditModal(type, e)}
                           title="Editar tipo"
                         >
                           <Edit3 className="icon-sm" />

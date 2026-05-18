@@ -15,10 +15,13 @@ interface LayoutProps {
 const titles: Record<string, string> = {
   '/dashboard': 'Visão Geral do Sistema',
   '/colaboradores': 'Gestão de Colaboradores',
+  '/colaboradores/novo': 'Novo Colaborador',
   '/funcoes': 'Gestão de Funções',
   '/epis': 'Tipo de EPIs',
   '/tipos-epi': 'Tipo de EPIs',
+  '/tipos-epi/novo': 'Novo Tipo de EPI',
   '/variantes-epi': 'Variantes de EPIs',
+  '/variantes-epi/novo': 'Nova Variante de EPI',
   '/regras-troca': 'Regras de Substituição',
   '/intercorrencias': 'Intercorrências (Inconsistências e Fraudes)',
   '/agenda-trocas': 'Agenda de Trocas Programadas',
@@ -26,6 +29,9 @@ const titles: Record<string, string> = {
   '/historico': 'Histórico e Rastreabilidade Jurídica',
   '/relatorios': 'Relatórios e BI',
   '/usuarios': 'Usuários',
+  '/usuarios/novo': 'Novo Usuário',
+  '/nova-secao': 'Nova Seção',
+  '/nova-secao/novo': 'Cadastrar Setor',
   '/configuracoes': 'Configurações do Sistema',
 };
 
@@ -34,8 +40,10 @@ export const Layout = ({ children }: LayoutProps) => {
   const navigate = useNavigate();
   const { isAuthenticated, hasProfile } = useAuth();
   const reportMatch = location.pathname.match(/^\/relatorios\/([^/]+)$/);
+  const secaoEditMatch = location.pathname.match(/^\/nova-secao\/(\d+)\/editar$/);
   const title =
     titles[location.pathname] ||
+    (secaoEditMatch ? 'Editar Setor' : null) ||
     (reportMatch ? 'Relatório' : 'EPI Control');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
