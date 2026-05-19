@@ -30,8 +30,8 @@ const titles: Record<string, string> = {
   '/relatorios': 'Relatórios e BI',
   '/usuarios': 'Usuários',
   '/usuarios/novo': 'Novo Usuário',
-  '/nova-secao': 'Nova Seção',
-  '/nova-secao/novo': 'Cadastrar Setor',
+  '/nova-secao': 'Seção',
+  '/nova-secao/novo': 'Cadastrar Seção',
   '/configuracoes': 'Configurações do Sistema',
 };
 
@@ -43,7 +43,7 @@ export const Layout = ({ children }: LayoutProps) => {
   const secaoEditMatch = location.pathname.match(/^\/nova-secao\/(\d+)\/editar$/);
   const title =
     titles[location.pathname] ||
-    (secaoEditMatch ? 'Editar Setor' : null) ||
+    (secaoEditMatch ? 'Editar Seção' : null) ||
     (reportMatch ? 'Relatório' : 'EPI Control');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

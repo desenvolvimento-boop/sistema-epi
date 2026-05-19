@@ -96,7 +96,7 @@ const NovaSecao = () => {
             onClick={() => navigate('/nova-secao/novo')}
             className="nova-secao-add-btn"
           >
-            <Plus className="nova-secao-btn-icon" /> Novo Setor
+            <Plus className="nova-secao-btn-icon" /> Nova Seção
           </button>
         )}
       </div>

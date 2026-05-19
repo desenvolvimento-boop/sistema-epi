@@ -40,7 +40,7 @@ const navItems = [
   { path: '/agenda-trocas', label: 'Agenda de Trocas', icon: Calendar },
   { path: '/historico', label: 'Histórico', icon: History },
   { path: '/usuarios', label: 'Usuários', icon: UserCog },
-  { path: '/nova-secao', label: 'Nova Seção', icon: Building2 },
+  { path: '/nova-secao', label: 'Seção', icon: Building2 },
   { path: '/relatorios', label: 'Relatórios', icon: BarChart3 },
 ];
 

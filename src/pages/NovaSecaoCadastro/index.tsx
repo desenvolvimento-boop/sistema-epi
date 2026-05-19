@@ -17,7 +17,7 @@ const NovaSecaoCadastro = () => {
           <ArrowLeft className="editar-back-icon" />
         </button>
         <div>
-          <h2 className="editar-title">Cadastrar Setor</h2>
+          <h2 className="editar-title">Cadastrar Seção</h2>
           <p className="editar-subtitle">Informe os dados da seção e vincule os EPIs obrigatórios</p>
         </div>
       </div>

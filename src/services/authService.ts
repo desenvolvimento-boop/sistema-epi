@@ -1,4 +1,5 @@
-export const API_BASE_URL = 'http://192.168.5.111:3001';
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL;
 
 export interface AuthPermission {
   prm_id: number;

@@ -19,7 +19,7 @@ const NovaSecaoEditar = () => {
           <ArrowLeft className="editar-back-icon" />
         </button>
         <div>
-          <h2 className="editar-title">Editar Setor</h2>
+          <h2 className="editar-title">Editar Seção</h2>
           <p className="editar-subtitle">Atualize os dados da seção e os EPIs vinculados</p>
         </div>
       </div>
