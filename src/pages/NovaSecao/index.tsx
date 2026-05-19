@@ -4,6 +4,8 @@ import { Search, Plus, Edit2, Trash2, Loader2, RefreshCw } from 'lucide-react';
 import { sectionService, type SectionAPI } from '../../services/sectionService';
 import { StatusBadge } from '../../components/StatusBadge';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import './styles.css';
 
 function canAccessNovaSecao(canView: (path: string) => boolean) {
@@ -19,6 +21,7 @@ const NovaSecao = () => {
 
   const navigate = useNavigate();
   const { canCreate, canEdit, canDelete, canView } = useAuth();
+  const { t } = useNomenclature();
   const path = '/nova-secao';
   const allowCreate = canCreate(path) || canCreate('/colaboradores') || canCreate('/configuracoes');
   const allowEdit = canEdit(path) || canEdit('/colaboradores') || canEdit('/configuracoes');
@@ -32,7 +35,7 @@ const NovaSecao = () => {
       const data = await sectionService.getAll();
       setSections(data);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar setores');
+      setError(err instanceof Error ? err.message : `Erro ao carregar ${t(NOMENCLATURE_KEYS.entity.section_plural).toLowerCase()}`);
     } finally {
       setLoading(false);
     }
@@ -44,14 +47,14 @@ const NovaSecao = () => {
 
   const handleDelete = async (id: number) => {
     if (!allowDelete) return;
-    if (!window.confirm('Deseja excluir este setor / seção?')) return;
+    if (!window.confirm(`Deseja excluir este ${t(NOMENCLATURE_KEYS.entity.section_singular).toLowerCase()}?`)) return;
 
     setDeletingId(id);
     try {
       await sectionService.delete(id);
       await fetchSections();
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Erro ao excluir setor');
+      alert(err instanceof Error ? err.message : `Erro ao excluir ${t(NOMENCLATURE_KEYS.entity.section_singular).toLowerCase()}`);
     } finally {
       setDeletingId(null);
     }
@@ -96,7 +99,7 @@ const NovaSecao = () => {
             onClick={() => navigate('/nova-secao/novo')}
             className="nova-secao-add-btn"
           >
-            <Plus className="nova-secao-btn-icon" /> Nova Seção
+            <Plus className="nova-secao-btn-icon" /> {t(NOMENCLATURE_KEYS.action.new_section)}
           </button>
         )}
       </div>
@@ -113,7 +116,7 @@ const NovaSecao = () => {
       {loading && sections.length === 0 ? (
         <div className="nova-secao-loading">
           <Loader2 className="nova-secao-loading-icon nova-secao-spin" />
-          <p>Carregando setores...</p>
+          <p>{t(NOMENCLATURE_KEYS.message.section_loading)}</p>
         </div>
       ) : (
         <div className="nova-secao-table-wrapper">
@@ -121,7 +124,7 @@ const NovaSecao = () => {
             <thead>
               <tr className="nova-secao-thead-row">
                 <th className="nova-secao-th table-col-id">ID</th>
-                <th className="nova-secao-th">Setor / Seção</th>
+                <th className="nova-secao-th">{t(NOMENCLATURE_KEYS.entity.section_compound)}</th>
                 <th className="nova-secao-th">Descrição / Integração</th>
                 <th className="nova-secao-th">Status</th>
                 <th className="nova-secao-th--right">Ações</th>
@@ -131,7 +134,7 @@ const NovaSecao = () => {
               {filtered.length === 0 && !loading ? (
                 <tr>
                   <td colSpan={5} className="nova-secao-empty">
-                    Nenhum setor encontrado.
+                    {t(NOMENCLATURE_KEYS.message.section_empty)}
                   </td>
                 </tr>
               ) : (
@@ -183,7 +186,7 @@ const NovaSecao = () => {
           </table>
           <div className="nova-secao-pagination">
             <p className="nova-secao-pagination-info">
-              Mostrando {filtered.length} de {sections.length} setores
+              Mostrando {filtered.length} de {sections.length} {t(NOMENCLATURE_KEYS.entity.section_plural).toLowerCase()}
             </p>
           </div>
         </div>

@@ -6,6 +6,8 @@ import { StatusBadge } from '../../components/StatusBadge';
 import { Modal } from '../../components/ui/Modal';
 import { ColaboradorForm } from '../../components/forms/ColaboradorForm';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import './styles.css';
 
 function formatDate(dateStr: string): string {
@@ -19,6 +21,7 @@ function getStatusLabel(emp: EmployeeAPI): string {
 }
 
 const Colaboradores = () => {
+  const { t } = useNomenclature();
   const [employees, setEmployees] = useState<EmployeeAPI[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +101,7 @@ const Colaboradores = () => {
             className="colaboradores-add-btn"
             type="button"
           >
-            <Plus className="colaboradores-btn-icon" /> Novo Colaborador
+            <Plus className="colaboradores-btn-icon" /> {t(NOMENCLATURE_KEYS.action.new)} {t(NOMENCLATURE_KEYS.entity.colaborador_singular)}
           </button>
         )}
       </div>
@@ -107,7 +110,7 @@ const Colaboradores = () => {
         <Modal 
           isOpen={isEditModalOpen} 
           onClose={handleCloseEditModal} 
-          title="Editar Colaborador"
+          title={`${t(NOMENCLATURE_KEYS.action.edit)} ${t(NOMENCLATURE_KEYS.entity.colaborador_singular)}`}
         >
           <ColaboradorForm
             onClose={handleCloseEditModal}
@@ -135,9 +138,9 @@ const Colaboradores = () => {
             <thead>
               <tr className="colaboradores-thead-row">
                 <th className="colaboradores-th table-col-id">ID</th>
-                <th className="colaboradores-th">Colaborador</th>
+                <th className="colaboradores-th">{t(NOMENCLATURE_KEYS.entity.colaborador_singular)}</th>
                 <th className="colaboradores-th">Matrícula / CPF</th>
-                <th className="colaboradores-th">Função / Empresa</th>
+                <th className="colaboradores-th">{t(NOMENCLATURE_KEYS.entity.funcao_singular)} / Empresa</th>
                 <th className="colaboradores-th">Status</th>
                 <th className="colaboradores-th--right">Ações</th>
               </tr>

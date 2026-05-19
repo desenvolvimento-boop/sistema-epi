@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -16,32 +16,43 @@ import {
   LogOut,
   ChevronDown,
   AlertTriangle,
-  Settings as SettingsIcon
 } from 'lucide-react';
 import clsx from 'clsx';
 import { Modal } from '../ui/Modal';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import './Sidebar.css';
 
-const navItems = [
-  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/colaboradores', label: 'Colaboradores', icon: Users },
-  { path: '/funcoes', label: 'Gestão de Funções', icon: Briefcase },
-  { 
-    label: 'EPI', 
+type NavItem =
+  | { path: string; labelKey: string; icon: React.ComponentType<{ className?: string }> }
+  | {
+      id: string;
+      labelKey: string;
+      icon: React.ComponentType<{ className?: string }>;
+      children: { path: string; labelKey: string; icon: React.ComponentType<{ className?: string }> }[];
+    };
+
+const NAV_ITEMS: NavItem[] = [
+  { path: '/dashboard', labelKey: NOMENCLATURE_KEYS.menu.dashboard, icon: LayoutDashboard },
+  { path: '/colaboradores', labelKey: NOMENCLATURE_KEYS.menu.colaboradores, icon: Users },
+  { path: '/funcoes', labelKey: NOMENCLATURE_KEYS.menu.funcoes, icon: Briefcase },
+  {
+    id: 'epi',
+    labelKey: NOMENCLATURE_KEYS.menu.epi,
     icon: ShieldCheck,
     children: [
-      { path: '/tipos-epi', label: 'Tipo de EPIs', icon: ShieldCheck },
-      { path: '/variantes-epi', label: 'Variantes de EPIs', icon: Layers },
-      { path: '/regras-troca', label: 'Regras de Troca', icon: RefreshCw },
-    ]
+      { path: '/tipos-epi', labelKey: NOMENCLATURE_KEYS.menu.tipos_epi, icon: ShieldCheck },
+      { path: '/variantes-epi', labelKey: NOMENCLATURE_KEYS.menu.variantes_epi, icon: Layers },
+      { path: '/regras-troca', labelKey: NOMENCLATURE_KEYS.menu.regras_troca, icon: RefreshCw },
+    ],
   },
-  { path: '/intercorrencias', label: 'Intercorrências', icon: AlertTriangle },
-  { path: '/agenda-trocas', label: 'Agenda de Trocas', icon: Calendar },
-  { path: '/historico', label: 'Histórico', icon: History },
-  { path: '/usuarios', label: 'Usuários', icon: UserCog },
-  { path: '/nova-secao', label: 'Seção', icon: Building2 },
-  { path: '/relatorios', label: 'Relatórios', icon: BarChart3 },
+  { path: '/intercorrencias', labelKey: NOMENCLATURE_KEYS.menu.intercorrencias, icon: AlertTriangle },
+  { path: '/agenda-trocas', labelKey: NOMENCLATURE_KEYS.menu.agenda_trocas, icon: Calendar },
+  { path: '/historico', labelKey: NOMENCLATURE_KEYS.menu.historico, icon: History },
+  { path: '/usuarios', labelKey: NOMENCLATURE_KEYS.menu.usuarios, icon: UserCog },
+  { path: '/nova-secao', labelKey: NOMENCLATURE_KEYS.menu.section, icon: Building2 },
+  { path: '/relatorios', labelKey: NOMENCLATURE_KEYS.menu.relatorios, icon: BarChart3 },
 ];
 
 interface SidebarProps {
@@ -59,15 +70,31 @@ function canViewNovaSecao(canView: (path: string) => boolean) {
 
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { logout, user, canView } = useAuth();
+  const { t } = useNomenclature();
   const navigate = useNavigate();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
-  const [openSubmenus, setOpenSubmenus] = useState<string[]>(['EPI']);
+  const [openSubmenus, setOpenSubmenus] = useState<string[]>(['epi']);
 
-  const toggleSubmenu = (label: string) => {
+  const navItems = useMemo(
+    () =>
+      NAV_ITEMS.map((item) => {
+        if ('children' in item) {
+          return {
+            ...item,
+            label: t(item.labelKey),
+            children: item.children.map((c) => ({ ...c, label: t(c.labelKey) })),
+          };
+        }
+        return { ...item, label: t(item.labelKey) };
+      }),
+    [t]
+  );
+
+  const toggleSubmenu = (id: string) => {
     setOpenSubmenus(prev => 
-      prev.includes(label) 
-        ? prev.filter(item => item !== label) 
-        : [...prev, label]
+      prev.includes(id) 
+        ? prev.filter(item => item !== id) 
+        : [...prev, id]
     );
   };
 
@@ -79,33 +106,33 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             <ShieldCheck className="sidebar-logo-icon" fill="white" strokeWidth={2} />
           </div>
         </div>
-        <span className="sidebar-title">EPI Control</span>
+        <span className="sidebar-title">{t(NOMENCLATURE_KEYS.page.app_default)}</span>
       </div>
       
       <nav className="sidebar-nav custom-scrollbar">
         {navItems.map((item) => {
-          if (item.children) {
+          if ('children' in item && item.children) {
             const visibleChildren = item.children.filter(child => canView(child.path));
             if (visibleChildren.length === 0) return null;
 
-            const isOpen = openSubmenus.includes(item.label);
+            const isSubOpen = openSubmenus.includes(item.id);
             return (
-              <div key={item.label} className="sidebar-submenu-group">
+              <div key={item.id} className="sidebar-submenu-group">
                 <button
-                  onClick={() => toggleSubmenu(item.label)}
+                  onClick={() => toggleSubmenu(item.id)}
                   className={clsx(
                     "sidebar-submenu-toggle",
-                    isOpen ? "sidebar-submenu-toggle-active" : "sidebar-submenu-toggle-inactive"
+                    isSubOpen ? "sidebar-submenu-toggle-active" : "sidebar-submenu-toggle-inactive"
                   )}
                 >
                   <div className="sidebar-submenu-label">
                     <item.icon className="sidebar-submenu-icon" />
                     {item.label}
                   </div>
-                  <ChevronDown className={clsx("sidebar-chevron", isOpen && "sidebar-chevron-open")} />
+                  <ChevronDown className={clsx("sidebar-chevron", isSubOpen && "sidebar-chevron-open")} />
                 </button>
                 
-                {isOpen && (
+                {isSubOpen && (
                   <div className="sidebar-submenu-items">
                     {visibleChildren.map((child) => (
                       <NavLink
@@ -130,8 +157,8 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             );
           }
 
-          if (item.path === '/nova-secao' && !canViewNovaSecao(canView)) return null;
-          if (item.path && item.path !== '/nova-secao' && !canView(item.path)) return null;
+          if ('path' in item && item.path === '/nova-secao' && !canViewNovaSecao(canView)) return null;
+          if ('path' in item && item.path !== '/nova-secao' && !canView(item.path)) return null;
 
           return (
             <NavLink
@@ -158,13 +185,13 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           <button 
             onClick={() => canView('/configuracoes') ? navigate('/configuracoes') : undefined}
             className={clsx("sidebar-user-button", !canView('/configuracoes') && "sidebar-user-button-disabled")}
-            title={canView('/configuracoes') ? 'Configurações' : user?.usr_full_name || 'Usuário'}
+            title={canView('/configuracoes') ? t(NOMENCLATURE_KEYS.menu.configuracoes) : user?.usr_full_name || t(NOMENCLATURE_KEYS.entity.usuario_singular)}
           >
             <div className="sidebar-user-avatar">
               {user?.usr_full_name?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'US'}
             </div>
             <div className="sidebar-user-info">
-              <p className="sidebar-user-name">{user?.usr_full_name || 'Usuário'}</p>
+              <p className="sidebar-user-name">{user?.usr_full_name || t(NOMENCLATURE_KEYS.entity.usuario_singular)}</p>
               <p className="sidebar-user-email">{user?.usr_email || ''}</p>
             </div>
           </button>
@@ -178,7 +205,6 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         </div>
       </div>
 
-      {/* Modal de Confirmação de Logout */}
       <Modal 
         isOpen={isLogoutConfirmOpen} 
         onClose={() => setIsLogoutConfirmOpen(false)} 
@@ -197,7 +223,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
               onClick={() => setIsLogoutConfirmOpen(false)}
               className="sidebar-logout-cancel"
             >
-              Cancelar
+              {t(NOMENCLATURE_KEYS.action.cancel)}
             </button>
             <button 
               onClick={() => {

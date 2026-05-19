@@ -4,11 +4,14 @@ import { Plus, Shield, Info, Edit2, Loader2 } from 'lucide-react';
 import { roleService, type RoleAPI } from '../../services/roleService';
 import { FuncaoForm } from '../../components/forms/FuncaoForm';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import './styles.css';
 
 type TabId = 'lista' | 'cadastro';
 
 const Funcoes = () => {
+  const { t } = useNomenclature();
   const [roles, setRoles] = useState<RoleAPI[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>('lista');
@@ -67,7 +70,7 @@ const Funcoes = () => {
         <h2 className="funcoes-title">Definição de Funções e Riscos</h2>
         {activeTab === 'lista' && allowCreate && (
           <button onClick={handleOpenCreate} className="funcoes-add-btn" type="button">
-            <Plus className="funcoes-btn-icon" /> Nova Função
+            <Plus className="funcoes-btn-icon" /> {t(NOMENCLATURE_KEYS.action.new)} {t(NOMENCLATURE_KEYS.entity.funcao_singular)}
           </button>
         )}
       </div>
@@ -76,7 +79,7 @@ const Funcoes = () => {
         <div className="funcoes-form-panel">
           <div className="funcoes-form-panel-header">
             <h3 className="funcoes-form-panel-title">
-              {editRole ? 'Editar Função' : 'Cadastrar Nova Função'}
+              {editRole ? `${t(NOMENCLATURE_KEYS.action.edit)} ${t(NOMENCLATURE_KEYS.entity.funcao_singular)}` : `${t(NOMENCLATURE_KEYS.action.new)} ${t(NOMENCLATURE_KEYS.entity.funcao_singular)}`}
             </h3>
             <button type="button" className="funcoes-form-panel-back" onClick={handleCloseForm}>
               Voltar à lista
@@ -103,7 +106,7 @@ const Funcoes = () => {
               <thead>
                 <tr className="funcoes-table-header">
                   <th className="funcoes-table-th table-col-id">ID</th>
-                  <th className="funcoes-table-th">Função</th>
+                  <th className="funcoes-table-th">{t(NOMENCLATURE_KEYS.entity.funcao_singular)}</th>
                   <th className="funcoes-table-th">Status</th>
                   <th className="funcoes-table-th">Descrição</th>
                   <th className="funcoes-table-th">EPIs</th>

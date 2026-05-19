@@ -18,6 +18,8 @@ import { format, parseISO } from 'date-fns';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Modal } from '../../components/ui/Modal';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import {
   incidentService,
   INCIDENT_TYPE_LABELS,
@@ -64,6 +66,7 @@ const formatDetectedAt = (iso: string) => {
 };
 
 const Intercorrencias = () => {
+  const { t } = useNomenclature();
   const [searchParams, setSearchParams] = useSearchParams();
   const { canEdit } = useAuth();
   const allowResolve = canEdit('/intercorrencias');
@@ -230,7 +233,7 @@ const Intercorrencias = () => {
             <AlertOctagon className="intercorrencias-icon-lg" />
           </motion.div>
           <motion.div>
-            <h2 className="intercorrencias-title">Intercorrências</h2>
+            <h2 className="intercorrencias-title">{t(NOMENCLATURE_KEYS.entity.intercorrencia_plural)}</h2>
             <p className="intercorrencias-subtitle">
               Inconsistências e possíveis fraudes identificadas pela Inteligência de Dados.
             </p>
@@ -374,8 +377,8 @@ const Intercorrencias = () => {
             <thead>
               <tr className="intercorrencias-thead-row">
                 <th className="intercorrencias-th table-col-id">ID</th>
-                <th className="intercorrencias-th">Intercorrência</th>
-                <th className="intercorrencias-th">Colaborador / Data</th>
+                <th className="intercorrencias-th">{t(NOMENCLATURE_KEYS.entity.intercorrencia_singular)}</th>
+                <th className="intercorrencias-th">{t(NOMENCLATURE_KEYS.entity.colaborador_singular)} / Data</th>
                 <th className="intercorrencias-th">Severidade</th>
                 <th className="intercorrencias-th">Status</th>
                 <th className="intercorrencias-th--right">Ações</th>

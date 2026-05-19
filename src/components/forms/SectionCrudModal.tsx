@@ -4,6 +4,8 @@ import { Modal } from '../ui/Modal';
 import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
 import { sectionService } from '../../services/sectionService';
 import type { SimpleCrudItem } from './SimpleCrudModal';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import './SimpleCrudModal.css';
 
 interface SectionCrudModalProps {
@@ -25,6 +27,8 @@ export const SectionCrudModal = ({
   onItemCreated,
   onItemUpdated,
 }: SectionCrudModalProps) => {
+  const { t } = useNomenclature();
+  const sectionLabel = t(NOMENCLATURE_KEYS.entity.section_singular);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<SimpleCrudItem | null>(null);
@@ -172,7 +176,7 @@ export const SectionCrudModal = ({
         {showForm && (
           <div className="scrud-form-card">
             <div className="scrud-form-title">
-              {editingItem ? 'Editar Setor' : 'Novo Setor'}
+              {editingItem ? `${t(NOMENCLATURE_KEYS.action.edit)} ${sectionLabel}` : `${t(NOMENCLATURE_KEYS.action.new)} ${sectionLabel}`}
             </div>
             <div className="scrud-form-grid">
               <div className="scrud-form-field">
@@ -197,7 +201,7 @@ export const SectionCrudModal = ({
                 />
               </div>
               <div className="scrud-form-field scrud-form-field--full">
-                <label className="scrud-form-label">EPIs do Setor / Seção</label>
+                <label className="scrud-form-label">EPIs do {t(NOMENCLATURE_KEYS.entity.section_compound)}</label>
                 {loadingEpis ? (
                   <p className="scrud-epis-loading">
                     <Loader2 className="scrud-icon-sm scrud-spin" />

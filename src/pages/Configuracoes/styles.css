@@ -1115,3 +1115,243 @@
   accent-color: var(--color-primary-600);
   cursor: pointer;
 }
+
+/* —— Dicionário de termos —— */
+.config-tab-perfil.config-nom {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: min(70vh, calc(100vh - 10rem));
+  overflow: hidden;
+}
+
+.config-tab-perfil.config-nom > * + * {
+  margin-top: 0;
+}
+
+.config-nom-top {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.config-nom-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 12rem;
+  color: var(--color-slate-500);
+}
+
+.config-nom-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.config-nom-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 14rem;
+}
+
+.config-nom-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-slate-400);
+  pointer-events: none;
+}
+
+.config-nom-search-input {
+  padding-left: 2.25rem;
+  width: 100%;
+}
+
+.config-nom-modified-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-primary-700);
+  background: var(--color-primary-50);
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.5rem;
+}
+
+.config-nom-success {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 0.75rem;
+  color: #065f46;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.config-nom-readonly {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-slate-500);
+}
+
+.config-nom-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-right: 0.25rem;
+}
+
+.config-nom-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.config-nom-col-default {
+  width: 36%;
+}
+
+.config-nom-col-custom {
+  width: auto;
+}
+
+.config-nom-col-actions {
+  width: 4.5rem;
+}
+
+.config-nom-table .config-th,
+.config-nom-table .config-th-right {
+  padding: 0 0 0.75rem;
+  vertical-align: bottom;
+}
+
+.config-nom-table .config-cell,
+.config-nom-table .config-cell-right {
+  padding: 0.75rem 0;
+  vertical-align: middle;
+}
+
+.config-nom-cell-default {
+  padding-right: 1.5rem !important;
+}
+
+.config-nom-cell-custom {
+  padding-right: 1rem !important;
+}
+
+.config-nom-cell-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.config-nom-cell-actions {
+  width: 4.5rem;
+  padding-left: 0 !important;
+  text-align: center;
+}
+
+.config-nom-cell-actions .config-action-edit {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.config-nom-group-row td {
+  padding: 1.5rem 0 0.625rem;
+  border: none;
+  background: transparent;
+  vertical-align: bottom;
+}
+
+.config-nom-group-row:first-child td {
+  padding-top: 0.5rem;
+}
+
+.config-nom-group-label {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.config-nom-group-label-text {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-slate-800);
+}
+
+.config-nom-group-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-slate-200);
+}
+
+.config-nom-group-row + .config-row td {
+  padding-top: 0.5rem;
+}
+
+.config-nom-default-text {
+  display: block;
+  font-weight: 600;
+  color: var(--color-slate-700);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.config-nom-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+.config-nom-row--modified {
+  background-color: var(--color-primary-50);
+}
+
+.config-nom-modified-tag {
+  flex-shrink: 0;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-primary-600);
+  white-space: nowrap;
+}
+
+.config-nom-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--color-slate-500);
+  font-size: 0.875rem;
+  border: 1px dashed var(--color-slate-200);
+  border-radius: 0.75rem;
+  background: var(--color-slate-50);
+}
+
+.config-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

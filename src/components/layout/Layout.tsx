@@ -1,50 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { BarChart3 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import './Layout.css';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
-const titles: Record<string, string> = {
-  '/dashboard': 'Visão Geral do Sistema',
-  '/colaboradores': 'Gestão de Colaboradores',
-  '/colaboradores/novo': 'Novo Colaborador',
-  '/funcoes': 'Gestão de Funções',
-  '/epis': 'Tipo de EPIs',
-  '/tipos-epi': 'Tipo de EPIs',
-  '/tipos-epi/novo': 'Novo Tipo de EPI',
-  '/variantes-epi': 'Variantes de EPIs',
-  '/variantes-epi/novo': 'Nova Variante de EPI',
-  '/regras-troca': 'Regras de Substituição',
-  '/intercorrencias': 'Intercorrências (Inconsistências e Fraudes)',
-  '/agenda-trocas': 'Agenda de Trocas Programadas',
-  '/agenda-trocas/calendario': 'Calendário de Trocas',
-  '/historico': 'Histórico e Rastreabilidade Jurídica',
-  '/relatorios': 'Relatórios e BI',
-  '/usuarios': 'Usuários',
-  '/usuarios/novo': 'Novo Usuário',
-  '/nova-secao': 'Seção',
-  '/nova-secao/novo': 'Cadastrar Seção',
-  '/configuracoes': 'Configurações do Sistema',
+const PAGE_TITLE_KEYS: Record<string, string> = {
+  '/dashboard': NOMENCLATURE_KEYS.page.dashboard,
+  '/colaboradores': NOMENCLATURE_KEYS.page.colaboradores,
+  '/colaboradores/novo': NOMENCLATURE_KEYS.page.colaboradores_novo,
+  '/funcoes': NOMENCLATURE_KEYS.page.funcoes,
+  '/epis': NOMENCLATURE_KEYS.page.epis,
+  '/tipos-epi': NOMENCLATURE_KEYS.page.epis,
+  '/tipos-epi/novo': NOMENCLATURE_KEYS.page.tipos_epi_novo,
+  '/variantes-epi': NOMENCLATURE_KEYS.page.variantes_epi,
+  '/variantes-epi/novo': NOMENCLATURE_KEYS.page.variantes_epi_novo,
+  '/regras-troca': NOMENCLATURE_KEYS.page.regras_troca,
+  '/intercorrencias': NOMENCLATURE_KEYS.page.intercorrencias,
+  '/agenda-trocas': NOMENCLATURE_KEYS.page.agenda_trocas,
+  '/agenda-trocas/calendario': NOMENCLATURE_KEYS.page.agenda_trocas_calendario,
+  '/historico': NOMENCLATURE_KEYS.page.historico,
+  '/relatorios': NOMENCLATURE_KEYS.page.relatorios,
+  '/usuarios': NOMENCLATURE_KEYS.page.usuarios,
+  '/usuarios/novo': NOMENCLATURE_KEYS.page.usuarios_novo,
+  '/nova-secao': NOMENCLATURE_KEYS.page.section_list,
+  '/nova-secao/novo': NOMENCLATURE_KEYS.page.section_create,
+  '/configuracoes': NOMENCLATURE_KEYS.page.configuracoes,
 };
 
 export const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
-  const navigate = useNavigate();
   const { isAuthenticated, hasProfile } = useAuth();
+  const { t } = useNomenclature();
   const reportMatch = location.pathname.match(/^\/relatorios\/([^/]+)$/);
   const secaoEditMatch = location.pathname.match(/^\/nova-secao\/(\d+)\/editar$/);
-  const title =
-    titles[location.pathname] ||
-    (secaoEditMatch ? 'Editar Seção' : null) ||
-    (reportMatch ? 'Relatório' : 'EPI Control');
+
+  const title = useMemo(() => {
+    const key = PAGE_TITLE_KEYS[location.pathname];
+    if (key) return t(key);
+    if (secaoEditMatch) return t(NOMENCLATURE_KEYS.page.section_edit);
+    if (reportMatch) return t(NOMENCLATURE_KEYS.page.relatorios_detalhe);
+    return t(NOMENCLATURE_KEYS.page.app_default);
+  }, [location.pathname, secaoEditMatch, reportMatch, t]);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {

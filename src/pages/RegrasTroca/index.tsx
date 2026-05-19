@@ -4,9 +4,10 @@ import { epiTypeService, epiTypeCategoryLabel, type EpiTypeAPI } from '../../ser
 import { epiVariantService } from '../../services/epiVariantService';
 import {
   exchangeRuleService,
-  EXCHANGE_SCOPE_LABELS,
   type ExchangeRuleAPI,
 } from '../../services/exchangeRuleService';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { getExchangeScopeLabels } from '../../utils/exchangeScopeLabels';
 import clsx from 'clsx';
 import { Modal } from '../../components/ui/Modal';
 import { RegraTrocaForm } from '../../components/forms/RegraTrocaForm';
@@ -17,6 +18,8 @@ import './styles.css';
 type TabId = 'base' | 'triggers';
 
 const RegrasTroca = () => {
+  const { t } = useNomenclature();
+  const scopeLabels = React.useMemo(() => getExchangeScopeLabels(t), [t]);
   const [activeTab, setActiveTab] = useState<TabId>('base');
   const [types, setTypes] = useState<EpiTypeAPI[]>([]);
   const [variantOverrideCount, setVariantOverrideCount] = useState<Record<number, number>>({});
@@ -297,7 +300,7 @@ const RegrasTroca = () => {
                       {rule.epiType?.ept_description ?? 'Todos os tipos'}
                     </td>
                     <td className="table-cell">
-                      {EXCHANGE_SCOPE_LABELS[rule.exr_scope]}
+                      {scopeLabels[rule.exr_scope]}
                       {rule.exr_scope_id != null ? ` #${rule.exr_scope_id}` : ''}
                     </td>
                     <td className="table-cell">{rule.exr_value}</td>

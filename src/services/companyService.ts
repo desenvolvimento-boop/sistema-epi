@@ -1,74 +1,69 @@
 import { API_BASE_URL } from './authService';
+import { authFetch, handleResponse } from './httpClient';
+import type { SyncModule } from './integrationService';
 
 export interface CompanyAPI {
   com_id: number;
   com_active: number;
   com_description: string;
   com_integration_id: string | null;
+  com_integration_source?: string | null;
+  com_connection_status?: string;
+  com_last_sync_at?: string | null;
+  com_sync_modules?: SyncModule[];
+  com_erp_base_url?: string | null;
+  com_erp_client_id?: string | null;
   usr_id_insert: number | null;
   com_datetimeinsert?: string;
   usr_id_lastupdate: number | null;
   com_datetimeupdate?: string;
 }
 
+export interface CompanyIntegrationAPI extends CompanyAPI {
+  syncModuleLabels?: string[];
+  statusLabel?: string;
+  connectionStatusLabel?: string;
+  hasErpCredentials?: boolean;
+  erpConfigured?: boolean;
+}
+
 export type CompanyCreatePayload = Omit<CompanyAPI, 'com_id' | 'com_datetimeinsert' | 'com_datetimeupdate'>;
 export type CompanyUpdatePayload = Partial<CompanyCreatePayload>;
 
-function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-}
-
-async function handleResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(body.error || `Erro ${response.status}`);
-  }
-  return response.json();
-}
-
 export const companyService = {
-  async getAll(): Promise<CompanyAPI[]> {
-    const res = await fetch(`${API_BASE_URL}/company`, { headers: getAuthHeaders() });
-    return handleResponse<CompanyAPI[]>(res);
+  async getAll(): Promise<CompanyIntegrationAPI[]> {
+    const res = await authFetch(`${API_BASE_URL}/company`);
+    return handleResponse<CompanyIntegrationAPI[]>(res);
   },
 
-  async getActive(): Promise<CompanyAPI[]> {
-    const res = await fetch(`${API_BASE_URL}/company/active`, { headers: getAuthHeaders() });
-    return handleResponse<CompanyAPI[]>(res);
+  async getActive(): Promise<CompanyIntegrationAPI[]> {
+    const res = await authFetch(`${API_BASE_URL}/company/active`);
+    return handleResponse<CompanyIntegrationAPI[]>(res);
   },
 
-  async getById(id: number): Promise<CompanyAPI> {
-    const res = await fetch(`${API_BASE_URL}/company/${id}`, { headers: getAuthHeaders() });
-    return handleResponse<CompanyAPI>(res);
+  async getById(id: number): Promise<CompanyIntegrationAPI> {
+    const res = await authFetch(`${API_BASE_URL}/company/${id}`);
+    return handleResponse<CompanyIntegrationAPI>(res);
   },
 
-  async create(data: CompanyCreatePayload): Promise<CompanyAPI> {
-    const res = await fetch(`${API_BASE_URL}/company`, {
+  async create(data: CompanyCreatePayload): Promise<CompanyIntegrationAPI> {
+    const res = await authFetch(`${API_BASE_URL}/company`, {
       method: 'POST',
-      headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    return handleResponse<CompanyAPI>(res);
+    return handleResponse<CompanyIntegrationAPI>(res);
   },
 
-  async update(id: number, data: CompanyUpdatePayload): Promise<CompanyAPI> {
-    const res = await fetch(`${API_BASE_URL}/company/${id}`, {
+  async update(id: number, data: CompanyUpdatePayload): Promise<CompanyIntegrationAPI> {
+    const res = await authFetch(`${API_BASE_URL}/company/${id}`, {
       method: 'PUT',
-      headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    return handleResponse<CompanyAPI>(res);
+    return handleResponse<CompanyIntegrationAPI>(res);
   },
 
   async delete(id: number): Promise<void> {
-    const res = await fetch(`${API_BASE_URL}/company/${id}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders(),
-    });
+    const res = await authFetch(`${API_BASE_URL}/company/${id}`, { method: 'DELETE' });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       throw new Error(body.error || `Erro ${res.status}`);

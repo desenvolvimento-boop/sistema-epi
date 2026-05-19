@@ -28,13 +28,17 @@ export interface AuthUser {
 
 export interface AuthMeResponse extends AuthUser {
   permissions: AuthPermission[];
+  nomenclature?: Record<string, string>;
 }
 
 export interface LoginResponse {
   token: string;
   user: AuthUser;
   permissions: AuthPermission[];
+  nomenclature?: Record<string, string>;
 }
+
+export type NomenclatureMap = Record<string, string>;
 
 export const authService = {
   async login(username: string, password: string): Promise<LoginResponse> {
@@ -68,16 +72,34 @@ export const authService = {
     return res.json();
   },
 
-  saveSession(token: string, user: AuthUser, permissions: AuthPermission[]): void {
+  saveSession(
+    token: string,
+    user: AuthUser,
+    permissions: AuthPermission[],
+    nomenclature?: NomenclatureMap
+  ): void {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
     localStorage.setItem('permissions', JSON.stringify(permissions));
+    if (nomenclature) {
+      localStorage.setItem('nomenclature', JSON.stringify(nomenclature));
+    }
   },
 
   clearSession(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('permissions');
+    localStorage.removeItem('nomenclature');
+  },
+
+  getSavedNomenclature(): NomenclatureMap {
+    try {
+      const data = localStorage.getItem('nomenclature');
+      return data ? JSON.parse(data) : {};
+    } catch {
+      return {};
+    }
   },
 
   getToken(): string | null {

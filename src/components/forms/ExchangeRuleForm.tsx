@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   exchangeRuleService,
   type ExchangeRuleAPI,
   type ExchangeRulePayload,
-  EXCHANGE_SCOPE_LABELS,
 } from '../../services/exchangeRuleService';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { getExchangeScopeLabels } from '../../utils/exchangeScopeLabels';
 import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
 import { companyService } from '../../services/companyService';
 import { sectionService } from '../../services/sectionService';
@@ -27,6 +28,8 @@ export const ExchangeRuleForm = ({
   defaultEptId,
 }: ExchangeRuleFormProps) => {
   const { user } = useAuth();
+  const { t } = useNomenclature();
+  const scopeLabels = useMemo(() => getExchangeScopeLabels(t), [t]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [types, setTypes] = useState<EpiTypeAPI[]>([]);
@@ -185,10 +188,10 @@ export const ExchangeRuleForm = ({
                 setScopeId('');
               }}
             >
-              {(Object.keys(EXCHANGE_SCOPE_LABELS) as ExchangeRulePayload['exr_scope'][]).map(
+              {(Object.keys(scopeLabels) as ExchangeRulePayload['exr_scope'][]).map(
                 (k) => (
                   <option key={k} value={k}>
-                    {EXCHANGE_SCOPE_LABELS[k]}
+                    {scopeLabels[k]}
                   </option>
                 )
               )}

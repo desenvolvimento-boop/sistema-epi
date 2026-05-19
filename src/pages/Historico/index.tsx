@@ -13,6 +13,8 @@ import {
   MapPin,
   X,
 } from 'lucide-react';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import { format, parseISO } from 'date-fns';
 import clsx from 'clsx';
 import {
@@ -23,6 +25,7 @@ import {
 import './styles.css';
 
 const Historico = () => {
+  const { t } = useNomenclature();
   const navigate = useNavigate();
   const [rows, setRows] = useState<HistorySummaryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -115,7 +118,7 @@ const Historico = () => {
     <div className="historico-container">
       <div className="historico-header">
         <div>
-          <h2 className="historico-title">Histórico Geral</h2>
+          <h2 className="historico-title">{t(NOMENCLATURE_KEYS.menu.historico)} Geral</h2>
           <p className="historico-subtitle">Rastreabilidade completa de todas as movimentações de EPI</p>
         </div>
 
@@ -194,7 +197,7 @@ const Historico = () => {
               <thead>
                 <tr className="historico-thead-row">
                   <th className="historico-th table-col-id">ID</th>
-                  <th className="historico-th">Colaborador</th>
+                  <th className="historico-th">{t(NOMENCLATURE_KEYS.entity.colaborador_singular)}</th>
                   <th className="historico-th">Último Evento</th>
                   <th className="historico-th">Data</th>
                   <th className="historico-th">Status</th>

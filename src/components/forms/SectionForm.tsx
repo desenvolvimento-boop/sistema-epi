@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Building2, ShieldCheck, Check, Loader2 } from 'lucide-react';
 import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
 import { sectionService } from '../../services/sectionService';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import './SectionForm.css';
 import './SimpleCrudModal.css';
 import '../../pages/ColaboradorEditar/styles.css';
@@ -13,7 +15,9 @@ interface SectionFormProps {
 }
 
 export const SectionForm = ({ onClose, onSaved, sectionId }: SectionFormProps) => {
+  const { t } = useNomenclature();
   const isEditing = sectionId != null;
+  const sectionLabel = t(NOMENCLATURE_KEYS.entity.section_singular);
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [loadingEpis, setLoadingEpis] = useState(false);
@@ -69,7 +73,7 @@ export const SectionForm = ({ onClose, onSaved, sectionId }: SectionFormProps) =
     if (!formName.trim() || saving) return;
 
     if (!hasRequiredEpis) {
-      alert('Selecione pelo menos 1 EPI do Setor para salvar a seção.');
+      alert(`Selecione pelo menos 1 EPI do ${sectionLabel} para salvar.`);
       return;
     }
 
@@ -115,7 +119,7 @@ export const SectionForm = ({ onClose, onSaved, sectionId }: SectionFormProps) =
       <div className="editar-form-grid section-form-grid">
         <div className="editar-section">
           <h3 className="editar-section-title">
-            <Building2 className="editar-section-icon" /> Dados do Setor
+            <Building2 className="editar-section-icon" /> Dados do {sectionLabel}
           </h3>
           <div className="editar-fields">
             <div className="editar-field">
@@ -125,7 +129,7 @@ export const SectionForm = ({ onClose, onSaved, sectionId }: SectionFormProps) =
               <input
                 type="text"
                 className="editar-input"
-                placeholder="Nome do setor / seção"
+                placeholder={`Nome do ${t(NOMENCLATURE_KEYS.entity.section_compound).toLowerCase()}`}
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 required
@@ -158,11 +162,11 @@ export const SectionForm = ({ onClose, onSaved, sectionId }: SectionFormProps) =
 
         <div className="editar-section">
           <h3 className="editar-section-title">
-            <ShieldCheck className="editar-section-icon" /> EPIs do Setor
+            <ShieldCheck className="editar-section-icon" /> EPIs do {sectionLabel}
             <span className="scrud-form-required"> *</span>
           </h3>
           <p className="section-form-epis-hint">
-            Selecione no mínimo 1 tipo de EPI obrigatório para esta seção.
+            Selecione no mínimo 1 tipo de EPI obrigatório para este {sectionLabel.toLowerCase()}.
           </p>
           {!hasRequiredEpis && !loadingEpis && episCatalog.length > 0 && (
             <p className="section-form-epis-error" role="alert">
@@ -209,7 +213,7 @@ export const SectionForm = ({ onClose, onSaved, sectionId }: SectionFormProps) =
             type="submit"
             className="editar-submit-btn"
             disabled={!formName.trim() || !hasRequiredEpis || saving}
-            title={!hasRequiredEpis ? 'Selecione pelo menos 1 EPI do Setor' : undefined}
+            title={!hasRequiredEpis ? `Selecione pelo menos 1 EPI do ${sectionLabel}` : undefined}
           >
             {saving ? (
               <>
@@ -219,7 +223,7 @@ export const SectionForm = ({ onClose, onSaved, sectionId }: SectionFormProps) =
             ) : (
               <>
                 <Check className="editar-submit-icon" />
-                {isEditing ? 'Salvar alterações' : 'Salvar seção'}
+                {isEditing ? 'Salvar alterações' : `Salvar ${sectionLabel.toLowerCase()}`}
               </>
             )}
           </button>

@@ -5,6 +5,8 @@ import { roleService, type RoleAPI } from '../../services/roleService';
 import { sectionService, type SectionAPI } from '../../services/sectionService';
 import { companyService, type CompanyAPI } from '../../services/companyService';
 import { employeeService, type EmployeeAPI } from '../../services/employeeService';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import './ColaboradorForm.css';
 
 interface ColaboradorFormProps {
@@ -41,6 +43,7 @@ function mapCompaniesToCrud(companies: CompanyAPI[]): SimpleCrudItem[] {
 }
 
 export const ColaboradorForm = ({ onClose, onSaved, initialData }: ColaboradorFormProps) => {
+  const { t } = useNomenclature();
   const isEditing = !!initialData;
   const [saving, setSaving] = useState(false);
 
@@ -219,14 +222,14 @@ export const ColaboradorForm = ({ onClose, onSaved, initialData }: ColaboradorFo
         </div>
 
         <div className="colaborador-form-field">
-          <label className="colaborador-form-label">Setor / Seção <span className="colaborador-form-required">*</span></label>
+          <label className="colaborador-form-label">{t(NOMENCLATURE_KEYS.entity.section_compound)} <span className="colaborador-form-required">*</span></label>
           <select
             className="colaborador-form-input"
             value={selectedSetor}
             onChange={(e) => setSelectedSetor(e.target.value)}
             required
           >
-            <option value="" disabled>Selecione o setor</option>
+            <option value="" disabled>Selecione o {t(NOMENCLATURE_KEYS.entity.section_singular).toLowerCase()}</option>
             {activeSetores.map(s => (
               <option key={s.id} value={String(s.id)}>{s.name}</option>
             ))}

@@ -144,6 +144,7 @@ export const exchangeRuleService = {
   },
 };
 
+/** @deprecated Use getExchangeScopeLabels from utils/exchangeScopeLabels com useNomenclature */
 export const EXCHANGE_SCOPE_LABELS: Record<ExchangeRuleScope, string> = {
   GLOBAL: 'Global',
   COMPANY: 'Empresa',

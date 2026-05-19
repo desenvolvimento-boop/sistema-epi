@@ -11,8 +11,13 @@ import {
   AlertTriangle,
   Settings as SettingsIcon,
   X,
-  Loader2
+  Loader2,
+  BookOpen,
 } from 'lucide-react';
+import { NomenclaturaTab } from './NomenclaturaTab';
+import { OrigemTab } from './OrigemTab';
+import { IntegracaoTab } from './IntegracaoTab';
+import { FEATURE_PATHS } from '../../utils/permissionPaths';
 import { motion, AnimatePresence } from 'motion/react';
 import clsx from 'clsx';
 import { Modal } from '../../components/ui/Modal';
@@ -30,9 +35,11 @@ interface PermissionSet {
 }
 
 const Configuracoes = () => {
-  const { logout, canCreate, canEdit, user, refreshPermissions } = useAuth();
+  const { logout, canCreate, canEdit, canView, user, refreshPermissions } = useAuth();
   const allowCreate = canCreate('/configuracoes');
   const allowEdit = canEdit('/configuracoes');
+  const canViewNomenclatura = canView(FEATURE_PATHS.NOMENCLATURA);
+  const canEditNomenclatura = canEdit(FEATURE_PATHS.NOMENCLATURA);
   const [activeTab, setActiveTab] = useState('perfil');
 
   const [profiles, setProfiles] = useState<AccessProfileAPI[]>([]);
@@ -52,19 +59,14 @@ const Configuracoes = () => {
 
   const tabs = [
     { id: 'perfil', label: 'Perfil de Acesso', icon: Shield },
+    ...(canViewNomenclatura
+      ? [{ id: 'nomenclatura' as const, label: 'Dicionário de Termos', icon: BookOpen }]
+      : []),
     { id: 'origem', label: 'Origem dos Dados', icon: SettingsIcon },
     { id: 'integracao', label: 'Integração', icon: LinkIcon },
     { id: 'senha', label: 'Alterar Senha', icon: Key },
     { id: 'sair', label: 'Sair da Conta', icon: LogOut, color: 'config-tab-danger' },
   ];
-
-  const [dataSource, setDataSource] = useState('MANUAL');
-  const [integratedCompanies] = useState([
-    { id: '1', name: 'Adlim Serviços', status: 'Ativo', lastSync: '10/04/2024 14:30', modules: ['Colaboradores', 'Funções', 'EPIs'] },
-  ]);
-
-  const [isIntegracaoModalOpen, setIsIntegracaoModalOpen] = useState(false);
-  const [selectedCompany, setSelectedCompany] = useState<any>(null);
 
   const createEmptyPermissions = useCallback((): Record<string, PermissionSet> => {
     const perms: Record<string, PermissionSet> = {};
@@ -394,75 +396,25 @@ const Configuracoes = () => {
               </motion.div>
             )}
 
+            {activeTab === 'nomenclatura' && canViewNomenclatura && (
+              <motion.div
+                key="nomenclatura"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+              >
+                <NomenclaturaTab allowEdit={canEditNomenclatura} />
+              </motion.div>
+            )}
+
             {activeTab === 'origem' && (
               <motion.div
                 key="origem"
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                className="config-tab-origem"
               >
-                <div>
-                  <h3 className="config-section-title">Origem dos Dados</h3>
-                  <p className="config-section-desc">Defina como o sistema deve receber as informações principais.</p>
-                </div>
-
-                <div className="config-source-grid">
-                  <button 
-                    onClick={() => setDataSource('MANUAL')}
-                    className={clsx(
-                      "config-source-btn",
-                      dataSource === 'MANUAL' 
-                        ? "config-source-btn-active" 
-                        : "config-source-btn-inactive"
-                    )}
-                  >
-                    <div className={clsx(
-                      "config-source-icon",
-                      dataSource === 'MANUAL' ? "config-source-icon-active" : "config-source-icon-inactive"
-                    )}>
-                      <Edit2 className="config-icon-md" />
-                    </div>
-                    <div>
-                      <p className="config-source-title">Entrada Manual</p>
-                      <p className="config-source-desc">Dados inseridos pelos usuários.</p>
-                    </div>
-                  </button>
-
-                  <button 
-                    onClick={() => setDataSource('INTEGRACAO')}
-                    className={clsx(
-                      "config-source-btn",
-                      dataSource === 'INTEGRACAO' 
-                        ? "config-source-btn-active" 
-                        : "config-source-btn-inactive"
-                    )}
-                  >
-                    <div className={clsx(
-                      "config-source-icon",
-                      dataSource === 'INTEGRACAO' ? "config-source-icon-active" : "config-source-icon-inactive"
-                    )}>
-                      <LinkIcon className="config-icon-md" />
-                    </div>
-                    <div>
-                      <p className="config-source-title">Integração Automática</p>
-                      <p className="config-source-desc">Sincronização via API.</p>
-                    </div>
-                  </button>
-                </div>
-
-                {dataSource === 'INTEGRACAO' && (
-                  <div className="config-warning-card">
-                    <div className="config-warning-header">
-                      <AlertTriangle className="config-icon-md" />
-                      <p className="config-warning-title">Configuração de Sincronização</p>
-                    </div>
-                    <p className="config-warning-text">
-                      Ao selecionar Integração Automática, certifique-se de configurar quais módulos serão sincronizados na aba <strong>Integração</strong>. 
-                      Dados manuais podem ser sobrescritos durante a sincronização.
-                    </p>
-                  </div>
-                )}
+                <OrigemTab />
               </motion.div>
             )}
 
@@ -472,98 +424,8 @@ const Configuracoes = () => {
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                className="config-tab-integracao"
               >
-                <div className="config-section-header">
-                  <div>
-                    <h3 className="config-section-title">Integração Ativa</h3>
-                    <p className="config-section-desc">Gerencie a conexão do sistema com a sua empresa.</p>
-                  </div>
-                </div>
-
-                <div className="config-table-scroll">
-                  <table className="config-table">
-                    <thead>
-                      <tr className="config-thead-row">
-                        <th className="config-th table-col-id">ID</th>
-                        <th className="config-th">Empresa</th>
-                        <th className="config-th">Status</th>
-                        <th className="config-th">Última Sincronização</th>
-                        <th className="config-th">Módulos</th>
-                        <th className="config-th-right">Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody className="config-tbody">
-                      {integratedCompanies.map(company => (
-                        <tr key={company.id} className="config-row">
-                          <td className="config-cell table-cell-id">{company.id}</td>
-                          <td className="config-cell">
-                            <span className="config-company-name">{company.name}</span>
-                          </td>
-                          <td className="config-cell">
-                            <span className={clsx(
-                              "config-company-status",
-                              company.status === 'Ativo' ? "config-company-status-active" : "config-company-status-inactive"
-                            )}>
-                              {company.status}
-                            </span>
-                          </td>
-                          <td className="config-cell">
-                            <span className="config-company-sync">{company.lastSync}</span>
-                          </td>
-                          <td className="config-cell">
-                            <div className="config-modules-wrapper">
-                              {company.modules.map(mod => (
-                                <span key={mod} className="config-module-badge">
-                                  {mod}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="config-cell-right">
-                            <button 
-                              onClick={() => { setSelectedCompany(company); setIsIntegracaoModalOpen(true); }}
-                              className="config-action-settings"
-                              title="Configurar"
-                            >
-                              <SettingsIcon className="config-icon-sm" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="config-cards-grid">
-                  <div className="config-integration-card">
-                    <div className="config-card-header">
-                      <div className="config-card-title-wrapper">
-                        <div className="config-card-icon">
-                          <LinkIcon className="config-card-icon-inner" />
-                        </div>
-                        <span className="config-card-title">Webhooks Globais</span>
-                      </div>
-                      <span className="config-badge-active">Ativo</span>
-                    </div>
-                    <p className="config-card-desc">Receba notificações em tempo real sobre entregas e vencimentos.</p>
-                    <button className="config-card-link">Configurar Webhook</button>
-                  </div>
-
-                  <div className="config-integration-card">
-                    <div className="config-card-header">
-                      <div className="config-card-title-wrapper">
-                        <div className="config-card-icon">
-                          <Key className="config-card-icon-inner" />
-                        </div>
-                        <span className="config-card-title">Chaves de API</span>
-                      </div>
-                      <span className="config-badge-inactive">Inativo</span>
-                    </div>
-                    <p className="config-card-desc">Gere chaves de acesso para integração direta via REST API.</p>
-                    <button className="config-card-link">Gerar Nova Chave</button>
-                  </div>
-                </div>
+                <IntegracaoTab />
               </motion.div>
             )}
 
@@ -759,58 +621,7 @@ const Configuracoes = () => {
           </div>
         </div>
       </Modal>
-      <Modal
-        isOpen={isIntegracaoModalOpen}
-        onClose={() => setIsIntegracaoModalOpen(false)}
-        title={`Configurar Integração: ${selectedCompany?.name}`}
-      >
-        <div className="config-modal-content">
-          <div className="config-status-card">
-            <p className="config-status-label">Status da Conexão</p>
-            <div className="config-status-indicator">
-              <div className="config-status-dot" />
-              <span className="config-status-text">Sincronizado via REST API</span>
-            </div>
-          </div>
-
-          <div className="config-sync-section">
-            <label className="config-form-label">Módulos para Sincronização</label>
-            <div className="config-sync-modules">
-              {['Colaboradores', 'Funções', 'EPIs', 'Consumo', 'Unidades'].map(mod => (
-                <label key={mod} className="config-sync-module-item">
-                  <span className="config-sync-module-name">{mod}</span>
-                  <input 
-                    type="checkbox" 
-                    defaultChecked={selectedCompany?.modules.includes(mod)}
-                    className="config-checkbox" 
-                  />
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="config-note-card">
-            <p className="config-note-text">
-              <strong>Nota:</strong> Algumas empresas podem não enviar todos os dados. Por exemplo, a Adlim envia apenas dados de colaboradores e funções.
-            </p>
-          </div>
-
-          <div className="config-modal-actions">
-            <button 
-              onClick={() => setIsIntegracaoModalOpen(false)}
-              className="config-modal-cancel-btn"
-            >
-              Cancelar
-            </button>
-            <button 
-              onClick={() => setIsIntegracaoModalOpen(false)}
-              className="config-modal-save-btn"
-            >
-              Salvar Configurações
-            </button>
-          </div>
-        </div>
-      </Modal>
+      
     </div>
   );
 };

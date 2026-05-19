@@ -14,6 +14,7 @@ export const FEATURE_PATHS = {
   USUARIOS: '/usuarios',
   NOVA_SECAO: '/nova-secao',
   CONFIGURACOES: '/configuracoes',
+  NOMENCLATURA: '/configuracoes/nomenclatura',
 } as const;
 
 /**
@@ -28,6 +29,7 @@ export const PERMISSION_PATH_GROUPS: Record<string, string[]> = {
   'historico': ['historico'],
   'relatorios': ['relatorios'],
   'configuracoes': ['configuracoes'],
+  'configuracoes/nomenclatura': ['configuracoes/nomenclatura', 'configuracoes'],
   'usuarios': ['usuarios'],
   'nova-secao': ['nova-secao', 'colaboradores', 'configuracoes'],
   'intercorrencias': ['intercorrencias'],

@@ -7,6 +7,7 @@ import {
   pathMatchesPermission,
   resolveRoutePermissionPath,
 } from '../utils/permissionPaths';
+import { NOMENCLATURE_DEFAULTS } from '../config/nomenclatureKeys';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -69,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!token || !user?.acp_id) return;
 
     const meData = await authService.me(token);
-    const { permissions: mePermissions, ...userData } = meData;
+    const { permissions: mePermissions, nomenclature, ...userData } = meData;
     setUser(userData);
 
     const perms = mePermissions?.length
@@ -77,7 +78,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       : await fetchUserPermissions(userData.acp_id!);
 
     setPermissions(perms);
-    authService.saveSession(token, userData, perms);
+    const nom = nomenclature
+      ? { ...NOMENCLATURE_DEFAULTS, ...nomenclature }
+      : authService.getSavedNomenclature();
+    authService.saveSession(token, userData, perms, nom);
   }, [user?.acp_id]);
 
   useEffect(() => {
@@ -90,7 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       try {
         const meData = await authService.me(token);
-        const { permissions: mePermissions, ...userData } = meData;
+        const { permissions: mePermissions, nomenclature, ...userData } = meData;
         setUser(userData);
         setIsAuthenticated(true);
 
@@ -101,7 +105,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             : await fetchUserPermissions(userData.acp_id);
         }
         setPermissions(perms);
-        authService.saveSession(token, userData, perms);
+        const nom = nomenclature
+          ? { ...NOMENCLATURE_DEFAULTS, ...nomenclature }
+          : authService.getSavedNomenclature();
+        authService.saveSession(token, userData, perms, nom);
       } catch {
         logout();
       } finally {
@@ -123,7 +130,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ? response.permissions
           : await fetchUserPermissions(userData.acp_id);
       }
-      authService.saveSession(response.token, userData, perms);
+      const nom = response.nomenclature
+        ? { ...NOMENCLATURE_DEFAULTS, ...response.nomenclature }
+        : undefined;
+      authService.saveSession(response.token, userData, perms, nom);
       setUser(userData);
       setPermissions(perms);
       setIsAuthenticated(true);

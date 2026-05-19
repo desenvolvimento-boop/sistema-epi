@@ -4,6 +4,8 @@ import { ArrowLeft, MoreHorizontal, ShieldCheck, FileText, UserMinus, RefreshCw,
 import { employeeService, type EmployeeAPI } from '../../services/employeeService';
 import { StatusBadge } from '../../components/StatusBadge';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import './styles.css';
 
 function formatDate(dateStr: string): string {
@@ -20,6 +22,7 @@ const ColaboradorDetalhes = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { canEdit, canDelete } = useAuth();
+  const { t } = useNomenclature();
   const [loading, setLoading] = useState(true);
   const [employee, setEmployee] = useState<EmployeeAPI | null>(null);
 
@@ -106,7 +109,7 @@ const ColaboradorDetalhes = () => {
                   <p className="detalhes-info-value">{formatDate(employee.emp_admission_date)}</p>
                 </div>
                 <div>
-                  <p className="detalhes-info-label">Setor</p>
+                  <p className="detalhes-info-label">{t(NOMENCLATURE_KEYS.entity.section_singular)}</p>
                   <p className="detalhes-info-value">{employee.section?.sec_description || '—'}</p>
                 </div>
               </div>
