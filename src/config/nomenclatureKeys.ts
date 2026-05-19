@@ -5,6 +5,7 @@ export const NOMENCLATURE_KEYS = {
   menu: {
     dashboard: 'menu.dashboard',
     colaboradores: 'menu.colaboradores',
+    empresas: 'menu.empresas',
     funcoes: 'menu.funcoes',
     epi: 'menu.epi',
     tipos_epi: 'menu.tipos_epi',
@@ -22,6 +23,7 @@ export const NOMENCLATURE_KEYS = {
     dashboard: 'page.dashboard',
     colaboradores: 'page.colaboradores',
     colaboradores_novo: 'page.colaboradores.novo',
+    empresas: 'page.empresas',
     funcoes: 'page.funcoes',
     epis: 'page.epis',
     tipos_epi_novo: 'page.tipos_epi.novo',
@@ -90,6 +92,7 @@ export type NomenclatureKey = typeof NOMENCLATURE_KEYS[keyof typeof NOMENCLATURE
 export const NOMENCLATURE_DEFAULTS: Record<string, string> = {
   'menu.dashboard': 'Dashboard',
   'menu.colaboradores': 'Colaboradores',
+  'menu.empresas': 'Empresas',
   'menu.funcoes': 'Gestão de Funções',
   'menu.epi': 'EPI',
   'menu.tipos_epi': 'Tipo de EPIs',
@@ -105,6 +108,7 @@ export const NOMENCLATURE_DEFAULTS: Record<string, string> = {
   'page.dashboard': 'Visão Geral do Sistema',
   'page.colaboradores': 'Gestão de Colaboradores',
   'page.colaboradores.novo': 'Novo Colaborador',
+  'page.empresas': 'Cadastro de Empresas',
   'page.funcoes': 'Gestão de Funções',
   'page.epis': 'Tipo de EPIs',
   'page.tipos_epi.novo': 'Novo Tipo de EPI',

@@ -145,6 +145,40 @@
   box-shadow: 0 0 0 2px var(--color-primary-500);
 }
 
+.editar-select-with-action {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.editar-select-with-action .editar-select {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.editar-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.375rem;
+  background-color: #1e293b;
+  color: #fff;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.editar-add-btn:hover {
+  background-color: #334155;
+}
+
+.editar-add-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
 .editar-input-with-icon-wrapper {
   position: relative;
 }

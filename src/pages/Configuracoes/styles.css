@@ -1,7 +1,6 @@
 .config-container {
-  max-width: 72rem;
-  margin-left: auto;
-  margin-right: auto;
+  width: 100%;
+  max-width: none;
 }
 
 .config-container > * + * {

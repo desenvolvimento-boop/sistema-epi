@@ -2,10 +2,13 @@ import { API_BASE_URL } from './authService';
 import { authFetch, handleResponse } from './httpClient';
 import type { SyncModule } from './integrationService';
 
+export type CompanyKind = 'OPERACIONAL' | 'INTEGRACAO';
+
 export interface CompanyAPI {
   com_id: number;
   com_active: number;
   com_description: string;
+  com_kind?: CompanyKind;
   com_integration_id: string | null;
   com_integration_source?: string | null;
   com_connection_status?: string;

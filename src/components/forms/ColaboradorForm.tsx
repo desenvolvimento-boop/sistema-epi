@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Camera, X, Loader2 } from 'lucide-react';
-import type { SimpleCrudItem } from './SimpleCrudModal';
+import { Camera, X, Loader2, Plus } from 'lucide-react';
+import { SimpleCrudModal, type SimpleCrudItem } from './SimpleCrudModal';
 import { roleService, type RoleAPI } from '../../services/roleService';
 import { sectionService, type SectionAPI } from '../../services/sectionService';
-import { companyService, type CompanyAPI } from '../../services/companyService';
+import { employerService, type EmployerAPI } from '../../services/employerService';
 import { employeeService, type EmployeeAPI } from '../../services/employeeService';
 import { useNomenclature } from '../../hooks/useNomenclature';
 import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
@@ -33,13 +33,18 @@ function mapSectionsToCrud(sections: SectionAPI[]): SimpleCrudItem[] {
   }));
 }
 
-function mapCompaniesToCrud(companies: CompanyAPI[]): SimpleCrudItem[] {
-  return companies.map(c => ({
-    id: c.com_id,
-    name: c.com_description,
-    description: c.com_integration_id,
-    active: c.com_active === 1,
+function mapEmployersToCrud(employers: EmployerAPI[]): SimpleCrudItem[] {
+  return employers.map((e) => ({
+    id: e.emr_id,
+    name: e.emr_name || e.com_description || '',
+    description: e.emr_trade_name || e.emr_tax_id || null,
+    active: e.emr_active === 1,
   }));
+}
+
+function getDefaultEmployerId(items: SimpleCrudItem[]): string {
+  const first = items.find((e) => e.active);
+  return first ? String(first.id) : '';
 }
 
 export const ColaboradorForm = ({ onClose, onSaved, initialData }: ColaboradorFormProps) => {
@@ -61,29 +66,90 @@ export const ColaboradorForm = ({ onClose, onSaved, initialData }: ColaboradorFo
   const [selectedSetor, setSelectedSetor] = useState(initialData ? String(initialData.sec_id) : '');
 
   const [empresas, setEmpresas] = useState<SimpleCrudItem[]>([]);
+  const [isEmployerModalOpen, setIsEmployerModalOpen] = useState(false);
   const [selectedEmpresa, setSelectedEmpresa] = useState(initialData ? String(initialData.com_id) : '');
 
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const reloadEmployers = useCallback(async () => {
+    try {
+      const data = await employerService.getAll();
+      const mapped = mapEmployersToCrud(data);
+      setEmpresas(mapped);
+      setSelectedEmpresa((current) => {
+        if (initialData?.com_id && mapped.some((e) => e.id === initialData.com_id)) {
+          return String(initialData.com_id);
+        }
+        if (current && mapped.some((e) => e.active && String(e.id) === current)) return current;
+        return getDefaultEmployerId(mapped);
+      });
+    } catch (err) {
+      console.error('Erro ao carregar empresas:', err);
+    }
+  }, [initialData?.com_id]);
+
   const loadLookups = useCallback(async () => {
     try {
-      const [roles, sections, companies] = await Promise.all([
+      const [roles, sections] = await Promise.all([
         roleService.getAll(),
         sectionService.getAll(),
-        companyService.getAll(),
       ]);
       setFuncoes(mapRolesToCrud(roles));
       setSetores(mapSectionsToCrud(sections));
-      setEmpresas(mapCompaniesToCrud(companies));
+      await reloadEmployers();
     } catch (err) {
       console.error('Erro ao carregar dados auxiliares:', err);
     }
-  }, []);
+  }, [reloadEmployers]);
 
   useEffect(() => {
     loadLookups();
   }, [loadLookups]);
+
+  const activeEmpresas = empresas.filter((e) => e.active);
+
+  const handleEmployersChange = async (items: SimpleCrudItem[]) => {
+    const prevMap = new Map(empresas.map((e) => [e.id, e]));
+
+    for (const prev of empresas) {
+      if (!items.find((i) => i.id === prev.id)) {
+        await employerService.delete(prev.id);
+      }
+    }
+
+    for (const item of items) {
+      const prev = prevMap.get(item.id);
+      if (!prev) continue;
+      if (
+        prev.name !== item.name ||
+        prev.description !== item.description ||
+        prev.active !== item.active
+      ) {
+        await employerService.update(item.id, {
+          emr_active: item.active ? 1 : 0,
+          emr_name: item.name,
+          emr_trade_name: item.description,
+        });
+      }
+    }
+
+    await reloadEmployers();
+  };
+
+  const handleEmployerCreated = async (item: SimpleCrudItem) => {
+    try {
+      const created = await employerService.create({
+        emr_active: item.active ? 1 : 0,
+        emr_name: item.name,
+        emr_trade_name: item.description,
+      });
+      setSelectedEmpresa(String(created.emr_id));
+      await reloadEmployers();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao criar empresa');
+    }
+  };
 
   const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -140,8 +206,6 @@ export const ColaboradorForm = ({ onClose, onSaved, initialData }: ColaboradorFo
 
   const activeFuncoes = funcoes.filter(f => f.active);
   const activeSetores = setores.filter(s => s.active);
-  const activeEmpresas = empresas.filter(e => e.active);
-
   return (
     <form className="colaborador-form" onSubmit={handleSubmit}>
       <div className="colaborador-form-toggle-row">
@@ -240,17 +304,45 @@ export const ColaboradorForm = ({ onClose, onSaved, initialData }: ColaboradorFo
       <div className="colaborador-form-grid">
         <div className="colaborador-form-field">
           <label className="colaborador-form-label">Empresa <span className="colaborador-form-required">*</span></label>
-          <select
-            className="colaborador-form-input"
-            value={selectedEmpresa}
-            onChange={(e) => setSelectedEmpresa(e.target.value)}
-            required
-          >
-            <option value="" disabled>Selecione a empresa</option>
-            {activeEmpresas.map(emp => (
-              <option key={emp.id} value={String(emp.id)}>{emp.name}</option>
-            ))}
-          </select>
+          <div className="colaborador-form-select-with-action">
+            <select
+              className="colaborador-form-input"
+              value={selectedEmpresa}
+              onChange={(e) => setSelectedEmpresa(e.target.value)}
+              required
+              disabled={activeEmpresas.length === 0}
+            >
+              {activeEmpresas.length === 0 ? (
+                <option value="">Cadastre uma empresa</option>
+              ) : (
+                activeEmpresas.map((emp) => (
+                  <option key={emp.id} value={String(emp.id)}>
+                    {emp.description ? `${emp.name} (${emp.description})` : emp.name}
+                  </option>
+                ))
+              )}
+            </select>
+            <button
+              type="button"
+              className="colaborador-form-add-btn"
+              onClick={() => setIsEmployerModalOpen(true)}
+              title="Cadastrar empresa"
+            >
+              <Plus className="colaborador-form-add-icon" />
+            </button>
+          </div>
+          <SimpleCrudModal
+            isOpen={isEmployerModalOpen}
+            onClose={() => {
+              setIsEmployerModalOpen(false);
+              reloadEmployers();
+            }}
+            title="Cadastrar Empresa"
+            entityLabel="Empresa"
+            items={empresas}
+            onItemsChange={handleEmployersChange}
+            onItemCreated={handleEmployerCreated}
+          />
         </div>
 
         <div className="colaborador-form-field">

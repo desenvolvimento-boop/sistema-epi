@@ -7,7 +7,7 @@ import {
 import { useNomenclature } from '../../hooks/useNomenclature';
 import { getExchangeScopeLabels } from '../../utils/exchangeScopeLabels';
 import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
-import { companyService } from '../../services/companyService';
+import { employerService } from '../../services/employerService';
 import { sectionService } from '../../services/sectionService';
 import { roleService } from '../../services/roleService';
 import { employeeService } from '../../services/employeeService';
@@ -56,14 +56,14 @@ export const ExchangeRuleForm = ({
   useEffect(() => {
     Promise.all([
       epiTypeService.getActive(),
-      companyService.getActive(),
+      employerService.getActive(),
       sectionService.getActive(),
       roleService.getActive(),
       employeeService.getActive(),
     ])
       .then(([t, c, s, r, e]) => {
         setTypes(t);
-        setCompanies(c.map((x) => ({ id: x.com_id, label: x.com_description })));
+        setCompanies(c.map((x) => ({ id: x.emr_id, label: x.com_description || x.emr_name })));
         setSections(s.map((x) => ({ id: x.sec_id, label: x.sec_description })));
         setRoles(r.map((x) => ({ id: x.rol_id, label: x.rol_description })));
         setEmployees(e.map((emp) => ({ id: emp.emp_id, label: emp.emp_full_name })));

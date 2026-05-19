@@ -4,6 +4,40 @@
   gap: 1.25rem;
 }
 
+.colaborador-form-select-with-action {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.colaborador-form-select-with-action select {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.colaborador-form-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.375rem;
+  background-color: #1e293b;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.colaborador-form-add-btn:hover {
+  background-color: #334155;
+}
+
+.colaborador-form-add-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
 /* Toggle */
 .colaborador-form-toggle-row {
   display: flex;

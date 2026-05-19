@@ -10,7 +10,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2rem;
+  padding: 0 var(--layout-content-padding-x, 1rem);
   gap: 1rem;
 }
 

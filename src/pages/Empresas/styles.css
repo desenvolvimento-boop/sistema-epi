@@ -1,0 +1,139 @@
+.empresas-container > * + * {
+  margin-top: 1.5rem;
+}
+
+.empresas-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.empresas-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-slate-900);
+}
+
+.empresas-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-slate-500);
+  max-width: 36rem;
+}
+
+.empresas-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: var(--color-primary-600);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.empresas-card,
+.empresas-form-panel {
+  background: white;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.empresas-form-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-slate-100);
+}
+
+.empresas-form-panel-title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.empresas-form-panel-back {
+  background: none;
+  border: none;
+  color: var(--color-primary-600);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.empresas-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.empresas-table th,
+.empresas-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-slate-100);
+}
+
+.empresas-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.empresas-name-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-slate-400);
+}
+
+.empresas-name-secondary {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-slate-500);
+  margin-top: 0.125rem;
+}
+
+.empresas-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-slate-500);
+}
+
+.empresas-status--active {
+  color: #059669;
+}
+
+.empresas-edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-slate-500);
+}
+
+.empresas-loading,
+.empresas-empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-slate-500);
+}
+
+.empresas-btn-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.empresas-spin {
+  animation: empresas-spin 1s linear infinite;
+}
+
+@keyframes empresas-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

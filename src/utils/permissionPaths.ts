@@ -4,6 +4,7 @@ import type { AuthPermission } from '../services/authService';
 export const FEATURE_PATHS = {
   DASHBOARD: '/dashboard',
   COLABORADORES: '/colaboradores',
+  EMPRESAS: '/empresas',
   FUNCOES: '/funcoes',
   EPIS: '/epis',
   REGRAS_TROCA: '/regras-troca',
@@ -24,6 +25,7 @@ export const PERMISSION_PATH_GROUPS: Record<string, string[]> = {
   'tipos-epi': ['epis', 'tipos-epi'],
   'variantes-epi': ['epis', 'variantes-epi'],
   'colaboradores': ['colaboradores'],
+  'empresas': ['empresas'],
   'funcoes': ['funcoes'],
   'agenda-trocas': ['agenda-trocas'],
   'historico': ['historico'],

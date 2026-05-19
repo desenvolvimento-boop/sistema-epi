@@ -1,11 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, User, Briefcase, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, User, Briefcase, Loader2, Plus } from 'lucide-react';
+import { SimpleCrudModal, type SimpleCrudItem } from '../../components/forms/SimpleCrudModal';
 import { employeeService, type EmployeeAPI } from '../../services/employeeService';
 import { roleService, type RoleAPI } from '../../services/roleService';
 import { sectionService, type SectionAPI } from '../../services/sectionService';
-import { companyService, type CompanyAPI } from '../../services/companyService';
+import { employerService, type EmployerAPI } from '../../services/employerService';
 import './styles.css';
+
+function mapEmployersToCrud(employers: EmployerAPI[]): SimpleCrudItem[] {
+  return employers.map((e) => ({
+    id: e.emr_id,
+    name: e.emr_name || e.com_description || '',
+    description: e.emr_trade_name || e.emr_tax_id || null,
+    active: e.emr_active === 1,
+  }));
+}
 
 const ColaboradorEditar = () => {
   const { id } = useParams();
@@ -17,7 +27,8 @@ const ColaboradorEditar = () => {
 
   const [roles, setRoles] = useState<RoleAPI[]>([]);
   const [sections, setSections] = useState<SectionAPI[]>([]);
-  const [companies, setCompanies] = useState<CompanyAPI[]>([]);
+  const [empresas, setEmpresas] = useState<SimpleCrudItem[]>([]);
+  const [isEmployerModalOpen, setIsEmployerModalOpen] = useState(false);
 
   const [nomeCompleto, setNomeCompleto] = useState('');
   const [cpfValue, setCpfValue] = useState('');
@@ -27,19 +38,30 @@ const ColaboradorEditar = () => {
   const [secId, setSecId] = useState('');
   const [comId, setComId] = useState('');
 
+  const reloadEmployers = useCallback(async () => {
+    const data = await employerService.getAll();
+    const mapped = mapEmployersToCrud(data);
+    setEmpresas(mapped);
+    setComId((current) => {
+      if (current && mapped.some((e) => e.active && String(e.id) === current)) return current;
+      const first = mapped.find((e) => e.active);
+      return first ? String(first.id) : current;
+    });
+  }, []);
+
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [emp, rolesData, sectionsData, companiesData] = await Promise.all([
+        const [emp, rolesData, sectionsData, employersData] = await Promise.all([
           employeeService.getById(Number(id)),
           roleService.getActive(),
           sectionService.getActive(),
-          companyService.getActive(),
+          employerService.getAll(),
         ]);
         setEmployee(emp);
         setRoles(rolesData);
         setSections(sectionsData);
-        setCompanies(companiesData);
+        setEmpresas(mapEmployersToCrud(employersData));
 
         setNomeCompleto(emp.emp_full_name);
         setCpfValue(emp.emp_cpf);
@@ -48,8 +70,8 @@ const ColaboradorEditar = () => {
         setRolId(String(emp.rol_id));
         setSecId(String(emp.sec_id));
         setComId(String(emp.com_id));
-      } catch (err: any) {
-        alert(err.message || 'Erro ao carregar colaborador');
+      } catch (err: unknown) {
+        alert(err instanceof Error ? err.message : 'Erro ao carregar colaborador');
         navigate('/colaboradores');
       } finally {
         setLoading(false);
@@ -57,6 +79,50 @@ const ColaboradorEditar = () => {
     };
     loadData();
   }, [id, navigate]);
+
+  const activeEmpresas = empresas.filter((e) => e.active);
+
+  const handleEmployersChange = async (items: SimpleCrudItem[]) => {
+    const prevMap = new Map(empresas.map((e) => [e.id, e]));
+
+    for (const prev of empresas) {
+      if (!items.find((i) => i.id === prev.id)) {
+        await employerService.delete(prev.id);
+      }
+    }
+
+    for (const item of items) {
+      const prev = prevMap.get(item.id);
+      if (!prev) continue;
+      if (
+        prev.name !== item.name ||
+        prev.description !== item.description ||
+        prev.active !== item.active
+      ) {
+        await employerService.update(item.id, {
+          emr_active: item.active ? 1 : 0,
+          emr_name: item.name,
+          emr_trade_name: item.description,
+        });
+      }
+    }
+
+    await reloadEmployers();
+  };
+
+  const handleEmployerCreated = async (item: SimpleCrudItem) => {
+    try {
+      const created = await employerService.create({
+        emr_active: item.active ? 1 : 0,
+        emr_name: item.name,
+        emr_trade_name: item.description,
+      });
+      setComId(String(created.emr_id));
+      await reloadEmployers();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao criar empresa');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,8 +139,8 @@ const ColaboradorEditar = () => {
         com_id: Number(comId),
       });
       navigate('/colaboradores');
-    } catch (err: any) {
-      alert(err.message || 'Erro ao salvar alterações');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao salvar alterações');
     } finally {
       setSaving(false);
     }
@@ -168,7 +234,7 @@ const ColaboradorEditar = () => {
                       required
                     >
                       <option value="" disabled>Selecione</option>
-                      {roles.map(r => (
+                      {roles.map((r) => (
                         <option key={r.rol_id} value={String(r.rol_id)}>{r.rol_description}</option>
                       ))}
                     </select>
@@ -182,24 +248,52 @@ const ColaboradorEditar = () => {
                       required
                     >
                       <option value="" disabled>Selecione</option>
-                      {sections.map(s => (
+                      {sections.map((s) => (
                         <option key={s.sec_id} value={String(s.sec_id)}>{s.sec_description}</option>
                       ))}
                     </select>
                   </div>
                   <div className="editar-field">
                     <label className="editar-label">Empresa</label>
-                    <select
-                      className="editar-select"
-                      value={comId}
-                      onChange={(e) => setComId(e.target.value)}
-                      required
-                    >
-                      <option value="" disabled>Selecione</option>
-                      {companies.map(c => (
-                        <option key={c.com_id} value={String(c.com_id)}>{c.com_description}</option>
-                      ))}
-                    </select>
+                    <div className="editar-select-with-action">
+                      <select
+                        className="editar-select"
+                        value={comId}
+                        onChange={(e) => setComId(e.target.value)}
+                        required
+                        disabled={activeEmpresas.length === 0}
+                      >
+                        {activeEmpresas.length === 0 ? (
+                          <option value="">Cadastre uma empresa</option>
+                        ) : (
+                          activeEmpresas.map((c) => (
+                            <option key={c.id} value={String(c.id)}>
+                              {c.description ? `${c.name} (${c.description})` : c.name}
+                            </option>
+                          ))
+                        )}
+                      </select>
+                      <button
+                        type="button"
+                        className="editar-add-btn"
+                        onClick={() => setIsEmployerModalOpen(true)}
+                        title="Cadastrar empresa"
+                      >
+                        <Plus className="editar-add-icon" />
+                      </button>
+                    </div>
+                    <SimpleCrudModal
+                      isOpen={isEmployerModalOpen}
+                      onClose={() => {
+                        setIsEmployerModalOpen(false);
+                        reloadEmployers();
+                      }}
+                      title="Cadastrar Empresa"
+                      entityLabel="Empresa"
+                      items={empresas}
+                      onItemsChange={handleEmployersChange}
+                      onItemCreated={handleEmployerCreated}
+                    />
                   </div>
                 </div>
               </div>

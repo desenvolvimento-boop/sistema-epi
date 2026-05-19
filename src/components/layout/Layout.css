@@ -11,10 +11,11 @@
 }
 
 .layout-content {
-  padding: 2rem;
-  max-width: 80rem;
-  margin-left: auto;
-  margin-right: auto;
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  padding: var(--layout-content-padding-y) var(--layout-content-padding-x);
 }
 
 .sidebar-overlay {
@@ -27,7 +28,7 @@
   }
 
   .layout-content {
-    padding: 1rem;
+    padding: 0.875rem;
   }
 
   .sidebar-overlay {
