@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Filter, Search, X } from 'lucide-react';
 import type { ReportCatalogItem, ReportFilters } from '../../types/report.types';
 import { sectionService, type SectionAPI } from '../../services/sectionService';
@@ -21,10 +22,15 @@ export const ReportFiltersBar: React.FC<ReportFiltersBarProps> = ({
   searchValue,
   onSearchChange,
 }) => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
+  const location = useLocation();
   const [sections, setSections] = useState<SectionAPI[]>([]);
   const [employees, setEmployees] = useState<EmployeeAPI[]>([]);
   const [roles, setRoles] = useState<RoleAPI[]>([]);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     Promise.all([

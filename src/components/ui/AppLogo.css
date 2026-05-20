@@ -1,0 +1,21 @@
+.app-logo {
+  display: block;
+  object-fit: contain;
+  object-position: left center;
+}
+
+/* Mesma altura do ícone circular da sidebar (2.5rem) + texto ao lado */
+.app-logo--sidebar {
+  height: 4rem;
+  width: auto;
+  max-width: 100%;
+}
+
+/* Mesma área visual do ícone + título + subtítulo na tela de login */
+.app-logo--auth {
+  height: 11.5rem;
+  width: auto;
+  max-width: 100%;
+  margin: 0 auto;
+  object-position: center;
+}

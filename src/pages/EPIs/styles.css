@@ -131,17 +131,17 @@
   font-weight: 600;
   padding: 0.125rem 0.5rem;
   border-radius: 9999px;
-  background: #e2e8f0;
-  color: #475569;
+  background: #dee2e6;
+  color: #5a6268;
 }
 
 .epi-origin-totvs {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: #d6e5f7;
+  color: #1a54b8;
 }
 
 .epi-origin-senior {
-  background: #fef3c7;
+  background: #fff3cd;
   color: #b45309;
 }
 

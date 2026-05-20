@@ -5,6 +5,7 @@ import {
   type EpiVariantAPI,
 } from '../../services/epiVariantService';
 import type { EpiTypeAPI } from '../../services/epiTypeService';
+import { validateEpiVariantCaUniqueness } from '../../utils/uniqueness';
 import './EPIForm.css';
 
 interface EpiVariantFormProps {
@@ -13,9 +14,10 @@ interface EpiVariantFormProps {
   onClose: () => void;
   onSaved?: () => void;
   initialData?: EpiVariantAPI;
+  existingVariants?: EpiVariantAPI[];
 }
 
-export const EpiVariantForm = ({ eptId, types = [], onClose, onSaved, initialData }: EpiVariantFormProps) => {
+export const EpiVariantForm = ({ eptId, types = [], onClose, onSaved, initialData, existingVariants }: EpiVariantFormProps) => {
   const activeTypes = types.filter((t) => t.ept_active === 1);
   const [selectedEptId, setSelectedEptId] = useState<number>(
     initialData?.ept_id ?? eptId ?? activeTypes[0]?.ept_id ?? 0
@@ -56,6 +58,22 @@ export const EpiVariantForm = ({ eptId, types = [], onClose, onSaved, initialDat
     if (!resolvedEptId) {
       alert('Selecione o tipo de EPI.');
       return;
+    }
+
+    try {
+      const variantsForCheck = existingVariants ?? await epiVariantService.getAll();
+      const duplicateMsg = validateEpiVariantCaUniqueness(
+        variantsForCheck,
+        resolvedEptId,
+        ca,
+        initialData?.epv_id,
+      );
+      if (duplicateMsg) {
+        alert(duplicateMsg);
+        return;
+      }
+    } catch {
+      /* segue para API */
     }
 
     setSaving(true);

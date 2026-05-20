@@ -94,7 +94,7 @@ export const IntegracaoModal: React.FC<IntegracaoModalProps> = ({
               className="config-status-dot"
               style={{
                 background:
-                  company?.com_connection_status === 'CONNECTED' ? '#10b981' : '#94a3b8',
+                  company?.com_connection_status === 'CONNECTED' ? '#28a745' : '#adb5bd',
               }}
             />
             <span className="config-status-text">{connectionLabel}</span>

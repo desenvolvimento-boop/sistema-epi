@@ -10,6 +10,7 @@ import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
 import { INTEGRATION_SOURCES } from '../../services/epiVariantService';
 import { riskTypeService, type RiskTypeAPI } from '../../services/riskTypeService';
 import { SimpleCrudModal, type SimpleCrudItem } from './SimpleCrudModal';
+import { validateRoleUniqueness, validateRiskTypeUniqueness } from '../../utils/uniqueness';
 import './FuncaoForm.css';
 
 function mapRiskTypesToCrud(types: RiskTypeAPI[]): SimpleCrudItem[] {
@@ -30,6 +31,7 @@ interface FuncaoFormProps {
   onClose: () => void;
   onSaved?: () => void;
   initialData?: RoleAPI;
+  existingRoles?: RoleAPI[];
 }
 
 interface RiskDraft {
@@ -65,7 +67,7 @@ function buildRiskPayload(
   };
 }
 
-export const FuncaoForm = ({ onClose, onSaved, initialData }: FuncaoFormProps) => {
+export const FuncaoForm = ({ onClose, onSaved, initialData, existingRoles }: FuncaoFormProps) => {
   const isIntegrated = initialData?.rol_integration_source && initialData.rol_integration_source !== 'Manual';
   const [saving, setSaving] = useState(false);
   const [episCatalog, setEpisCatalog] = useState<EpiTypeAPI[]>([]);
@@ -135,6 +137,16 @@ export const FuncaoForm = ({ onClose, onSaved, initialData }: FuncaoFormProps) =
   const activeRiskTypes = riskTypes.filter((t) => t.active);
 
   const handleRiskTypeCreated = async (item: SimpleCrudItem) => {
+    const allTypes = await riskTypeService.getAll();
+    const duplicateMsg = validateRiskTypeUniqueness(
+      allTypes,
+      item.name,
+      item.description || '',
+    );
+    if (duplicateMsg) {
+      alert(duplicateMsg);
+      return;
+    }
     try {
       const created = await riskTypeService.create({
         rty_active: item.active ? 1 : 0,
@@ -236,6 +248,22 @@ export const FuncaoForm = ({ onClose, onSaved, initialData }: FuncaoFormProps) =
     if (!description.trim() || !activities.trim()) {
       alert('Preencha nome e descrição das atividades.');
       return;
+    }
+
+    try {
+      const rolesForCheck = existingRoles ?? await roleService.getAll();
+      const duplicateMsg = validateRoleUniqueness(
+        rolesForCheck,
+        description,
+        code,
+        initialData?.rol_id,
+      );
+      if (duplicateMsg) {
+        alert(duplicateMsg);
+        return;
+      }
+    } catch {
+      /* segue para API */
     }
 
     setSaving(true);

@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { ListFiltersBar } from '../../components/list/ListFiltersBar';
+import { activeStatusMatcher, filterListRows } from '../../utils/listFilters';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Eye, Edit2, Loader2, RefreshCw } from 'lucide-react';
 import { User } from '../../types/system.types';
@@ -23,6 +25,8 @@ const Usuarios = () => {
 
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [viewUser, setViewUser] = useState<User | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -61,6 +65,34 @@ const Usuarios = () => {
     setIsViewModalOpen(true);
   };
 
+  const agentTypes = useMemo(() => {
+    const set = new Set(users.map((u) => u.usr_agent_type).filter(Boolean));
+    return Array.from(set).map((value) => ({ value, label: value }));
+  }, [users]);
+
+  const filteredUsers = useMemo(
+    () =>
+      filterListRows(users, searchTerm, filterValues, {
+        searchText: (user) =>
+          [
+            user.usr_full_name,
+            user.usr_username,
+            user.usr_email,
+            user.usr_access_profile,
+            (user as { accessProfile?: { acp_description?: string } }).accessProfile?.acp_description,
+            user.usr_agent_type,
+            String(user.usr_id),
+          ]
+            .filter(Boolean)
+            .join(' '),
+        fields: {
+          status: activeStatusMatcher((user) => user.usr_active),
+          agent_type: (user, value) => user.usr_agent_type === value,
+        },
+      }),
+    [users, searchTerm, filterValues],
+  );
+
   return (
     <div className="usuarios-container">
       <div className="usuarios-header">
@@ -87,6 +119,7 @@ const Usuarios = () => {
             onClose={handleCloseEditModal}
             onSaved={handleSaved}
             initialData={selectedUser}
+            existingUsers={users}
           />
         )}
       </Modal>
@@ -138,6 +171,32 @@ const Usuarios = () => {
         </div>
       )}
 
+      <ListFiltersBar
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Buscar por nome, login, e-mail ou perfil..."
+        fields={[
+          {
+            id: 'status',
+            label: 'Status',
+            type: 'select',
+            options: [
+              { value: '1', label: 'Ativo' },
+              { value: '0', label: 'Inativo' },
+            ],
+          },
+          {
+            id: 'agent_type',
+            label: 'Tipo',
+            type: 'select',
+            options: agentTypes,
+          },
+        ]}
+        values={filterValues}
+        onFieldChange={(id, value) => setFilterValues((prev) => ({ ...prev, [id]: value }))}
+        onClear={() => setFilterValues({})}
+      />
+
       {loading && users.length === 0 ? (
         <div className="usuarios-loading">
           <Loader2 className="usuarios-loading-icon usuarios-spin" />
@@ -157,12 +216,12 @@ const Usuarios = () => {
               </tr>
             </thead>
             <tbody className="usuarios-tbody">
-              {users.length === 0 && !loading ? (
+              {filteredUsers.length === 0 && !loading ? (
                 <tr>
                   <td colSpan={6} className="usuarios-empty">Nenhum usuário encontrado.</td>
                 </tr>
               ) : (
-                users.map(user => (
+                filteredUsers.map(user => (
                   <tr key={user.usr_id} className="usuarios-row">
                     <td className="usuarios-cell table-cell-id">{user.usr_id}</td>
                     <td className="usuarios-cell">

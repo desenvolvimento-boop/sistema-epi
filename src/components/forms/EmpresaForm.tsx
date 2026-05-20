@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { employerService, type EmployerAPI } from '../../services/employerService';
+import { validateEmployerCnpjUniqueness } from '../../utils/uniqueness';
 import './EmpresaForm.css';
 
 interface EmpresaFormProps {
   onClose: () => void;
   onSaved?: () => void;
   initialData?: EmployerAPI;
+  existingEmployers?: EmployerAPI[];
 }
 
-export const EmpresaForm = ({ onClose, onSaved, initialData }: EmpresaFormProps) => {
+export const EmpresaForm = ({ onClose, onSaved, initialData, existingEmployers }: EmpresaFormProps) => {
   const isEditing = !!initialData;
   const [saving, setSaving] = useState(false);
   const [ativo, setAtivo] = useState(initialData ? initialData.emr_active === 1 : true);
@@ -23,6 +25,21 @@ export const EmpresaForm = ({ onClose, onSaved, initialData }: EmpresaFormProps)
       alert('Informe a razão social ou nome da empresa.');
       return;
     }
+    try {
+      const employersForCheck = existingEmployers ?? await employerService.getAll();
+      const duplicateMsg = validateEmployerCnpjUniqueness(
+        employersForCheck,
+        cnpj,
+        isEditing ? initialData?.emr_id : undefined,
+      );
+      if (duplicateMsg) {
+        alert(duplicateMsg);
+        return;
+      }
+    } catch {
+      /* segue para API */
+    }
+
     setSaving(true);
     try {
       const payload = {

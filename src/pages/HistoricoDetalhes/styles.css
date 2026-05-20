@@ -376,8 +376,8 @@
 }
 
 .detalhes-stat-icon--emerald {
-  background: #ecfdf5;
-  color: #059669;
+  background: #e6f7ef;
+  color: #28a745;
 }
 
 .detalhes-error {
@@ -386,10 +386,10 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.75rem 1rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: #fdf0f1;
+  border: 1px solid #f1aeb5;
   border-radius: 0.75rem;
-  color: #b91c1c;
+  color: #c82333;
   font-size: 0.875rem;
 }
 
@@ -398,9 +398,9 @@
   font-size: 0.75rem;
   font-weight: 600;
   background: white;
-  border: 1px solid #fecaca;
+  border: 1px solid #f1aeb5;
   border-radius: 0.5rem;
-  color: #b91c1c;
+  color: #c82333;
 }
 
 .detalhes-timeline-header-right {

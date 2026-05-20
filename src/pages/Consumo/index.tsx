@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Search,
-  Filter,
   Download,
   Package,
   User,
   Loader2,
 } from 'lucide-react';
+import { ListFiltersBar } from '../../components/list/ListFiltersBar';
+import { filterListRows } from '../../utils/listFilters';
 import { format, parseISO } from 'date-fns';
 import { deliveryService, type DeliveryAPI, type DeliveryStatsItem } from '../../services/deliveryService';
 import './styles.css';
@@ -16,6 +16,7 @@ const Consumo = () => {
   const [stats, setStats] = useState<DeliveryStatsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -54,12 +55,33 @@ const Consumo = () => {
     }
   };
 
-  const filtered = deliveries.filter((d) => {
-    const name = d.employee?.emp_full_name?.toLowerCase() ?? '';
-    const epi = d.variant?.epiType?.ept_description?.toLowerCase() ?? '';
-    const q = searchTerm.toLowerCase();
-    return name.includes(q) || epi.includes(q);
-  });
+  const filtered = useMemo(
+    () =>
+      filterListRows(deliveries, searchTerm, filterValues, {
+        searchText: (d) => {
+          const typeName = d.variant?.epiType?.ept_description ?? '';
+          const variantName = d.variant
+            ? [d.variant.epv_manufacturer, d.variant.epv_model].filter(Boolean).join(' ')
+            : '';
+          return [
+            d.employee?.emp_full_name,
+            typeName,
+            variantName,
+            d.dlv_kind,
+            d.dlv_notes,
+            String(d.dlv_id),
+          ]
+            .filter(Boolean)
+            .join(' ');
+        },
+        fields: {
+          kind: (d, value) => d.dlv_kind === value,
+          from: (d, value) => !value || d.dlv_date >= value,
+          to: (d, value) => !value || d.dlv_date <= value,
+        },
+      }),
+    [deliveries, searchTerm, filterValues],
+  );
 
   return (
     <div className="consumo-page">
@@ -97,24 +119,29 @@ const Consumo = () => {
         </div>
       </div>
 
+      <ListFiltersBar
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Buscar colaborador, EPI ou motivo..."
+        fields={[
+          {
+            id: 'kind',
+            label: 'Tipo',
+            type: 'select',
+            options: [
+              { value: 'Entrega', label: 'Entrega' },
+              { value: 'Troca', label: 'Troca' },
+            ],
+          },
+          { id: 'from', label: 'Data de', type: 'date' },
+          { id: 'to', label: 'Data até', type: 'date' },
+        ]}
+        values={filterValues}
+        onFieldChange={(id, value) => setFilterValues((prev) => ({ ...prev, [id]: value }))}
+        onClear={() => setFilterValues({})}
+      />
+
       <div className="consumo-table-wrapper">
-        <div className="consumo-table-toolbar">
-          <div className="consumo-table-toolbar-left">
-            <div className="consumo-search-wrapper">
-              <Search className="consumo-search-icon" />
-              <input
-                type="text"
-                placeholder="Filtrar consumo..."
-                className="consumo-search-input"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <button className="consumo-filter-btn" type="button">
-              <Filter className="consumo-filter-icon" />
-            </button>
-          </div>
-        </div>
         {loading ? (
           <div className="consumo-loading">
             <Loader2 className="consumo-filter-icon consumo-spin" />

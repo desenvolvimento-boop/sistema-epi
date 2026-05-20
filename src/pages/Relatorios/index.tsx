@@ -28,7 +28,7 @@ import { defaultReportFilters, reportService } from '../../services/reportServic
 import type { ReportCatalogItem, ReportDashboard, ReportFilters } from '../../types/report.types';
 import './styles.css';
 
-const COLORS = ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe'];
+const COLORS = ['#1e60d2', '#4a82d7', '#7aa5e3', '#adc8ef', '#d6e5f7'];
 
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
   operacional: FileText,
@@ -194,11 +194,11 @@ const Relatorios = () => {
                 {topEpis.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={topEpis}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="name" tick={{ fill: '#64748b', fontSize: 11 }} />
-                      <YAxis tick={{ fill: '#64748b', fontSize: 12 }} />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eef2f9" />
+                      <XAxis dataKey="name" tick={{ fill: '#6c757d', fontSize: 11 }} />
+                      <YAxis tick={{ fill: '#6c757d', fontSize: 12 }} />
                       <Tooltip />
-                      <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="value" fill="#1e60d2" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (

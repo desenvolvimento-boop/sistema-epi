@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import { Modal } from '../ui/Modal';
+import { AppLogo } from '../ui/AppLogo';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNomenclature } from '../../hooks/useNomenclature';
 import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
@@ -73,7 +74,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { t } = useNomenclature();
   const navigate = useNavigate();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
-  const [openSubmenus, setOpenSubmenus] = useState<string[]>(['epi']);
+  const [openSubmenus, setOpenSubmenus] = useState<string[]>([]);
 
   const navItems = useMemo(
     () =>
@@ -101,12 +102,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   return (
     <aside className={clsx("sidebar", isOpen && "sidebar-open")}>
       <div className="sidebar-header">
-        <div className="sidebar-logo-wrapper">
-          <div className="sidebar-logo">
-            <ShieldCheck className="sidebar-logo-icon" fill="white" strokeWidth={2} />
-          </div>
-        </div>
-        <span className="sidebar-title">{t(NOMENCLATURE_KEYS.page.app_default)}</span>
+        <AppLogo variant="sidebar" />
       </div>
       
       <nav className="sidebar-nav custom-scrollbar">

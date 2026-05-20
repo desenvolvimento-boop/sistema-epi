@@ -594,24 +594,24 @@
   gap: 0.75rem;
   padding: 1rem;
   background: #fff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dee2e6;
   border-radius: 12px;
 }
 
 .relatorios-kpi-warning {
-  border-color: #fcd34d;
-  background: #fffbeb;
+  border-color: #ffc107;
+  background: #fff8e1;
 }
 
 .relatorios-kpi-danger {
-  border-color: #fca5a5;
-  background: #fef2f2;
+  border-color: #ea868f;
+  background: #fdf0f1;
 }
 
 .relatorios-kpi-icon {
   width: 1.25rem;
   height: 1.25rem;
-  color: #3b82f6;
+  color: #1e60d2;
   flex-shrink: 0;
   margin-top: 0.15rem;
 }
@@ -620,29 +620,29 @@
   display: block;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #1a1a1a;
 }
 
 .relatorios-kpi-label {
   display: block;
   font-size: 0.75rem;
-  color: #64748b;
+  color: #6c757d;
   margin-top: 0.15rem;
 }
 
 .relatorios-section-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #334155;
+  color: #495057;
   margin-bottom: 1rem;
 }
 
 .relatorios-error {
   padding: 0.75rem 1rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: #fdf0f1;
+  border: 1px solid #f1aeb5;
   border-radius: 8px;
-  color: #b91c1c;
+  color: #c82333;
   font-size: 0.875rem;
 }
 
@@ -652,7 +652,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 3rem;
-  color: #64748b;
+  color: #6c757d;
 }
 
 .relatorios-loading-icon {
@@ -665,14 +665,14 @@
 
 .relatorios-date-input {
   padding: 0.45rem 0.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
   font-size: 0.8125rem;
 }
 
 .relatorios-filter-label {
   font-size: 0.7rem;
-  color: #64748b;
+  color: #6c757d;
   display: block;
   margin-bottom: 0.15rem;
 }
@@ -682,6 +682,6 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #94a3b8;
+  color: #adb5bd;
   font-size: 0.875rem;
 }

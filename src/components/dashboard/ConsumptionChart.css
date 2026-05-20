@@ -1,5 +1,4 @@
 .consumption-chart {
-  grid-column: span 2 / span 2;
   background-color: var(--color-white, #fff);
   padding: 1.5rem;
   border-radius: 1rem;
@@ -36,12 +35,6 @@
 
 .consumption-chart-body {
   height: 20rem;
-}
-
-@media (max-width: 1023px) {
-  .consumption-chart {
-    grid-column: span 1 / span 1;
-  }
 }
 
 @media (max-width: 639px) {

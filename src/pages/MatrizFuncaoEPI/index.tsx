@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { ListFiltersBar } from '../../components/list/ListFiltersBar';
+import { filterListRows } from '../../utils/listFilters';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Plus, Edit3, Eye, Loader2 } from 'lucide-react';
 import { roleService, type RoleAPI, type RoleMatrixResponse } from '../../services/roleService';
@@ -12,6 +14,8 @@ const MatrizFuncaoEPI = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<RoleAPI | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
   const navigate = useNavigate();
   const { canCreate, canEdit } = useAuth();
   const allowCreate = canCreate('/matriz-funcao-epi');
@@ -50,6 +54,26 @@ const MatrizFuncaoEPI = () => {
   const roles = matrixData?.roles ?? [];
   const epiTypes = matrixData?.epiTypes ?? [];
 
+  const filteredRoles = useMemo(
+    () =>
+      filterListRows(roles, searchTerm, filterValues, {
+        searchText: (role) => [role.rol_description, String(role.rol_id)].join(' '),
+        fields: {
+          ept_id: (role, value) => isLinked(role.rol_id, Number(value)),
+        },
+      }),
+    [roles, searchTerm, filterValues, matrixData],
+  );
+
+  const epiColumnOptions = useMemo(
+    () =>
+      epiTypes.map((epi) => ({
+        value: String(epi.ept_id),
+        label: epi.ept_description,
+      })),
+    [epiTypes],
+  );
+
   return (
     <div className="matriz-page">
       <div className="matriz-header">
@@ -72,6 +96,24 @@ const MatrizFuncaoEPI = () => {
           initialRole={selectedRole || undefined}
         />
       </Modal>
+
+      <ListFiltersBar
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Buscar função..."
+        fields={[
+          {
+            id: 'ept_id',
+            label: 'Vinculado ao EPI',
+            type: 'select',
+            allOptionLabel: 'Qualquer EPI',
+            options: epiColumnOptions,
+          },
+        ]}
+        values={filterValues}
+        onFieldChange={(id, value) => setFilterValues((prev) => ({ ...prev, [id]: value }))}
+        onClear={() => setFilterValues({})}
+      />
 
       <div className="matriz-card">
         <div className="matriz-card-header">
@@ -99,7 +141,14 @@ const MatrizFuncaoEPI = () => {
                 </tr>
               </thead>
               <tbody className="matriz-tbody">
-                {roles.map((role) => (
+                {filteredRoles.length === 0 ? (
+                  <tr>
+                    <td colSpan={epiTypes.length + 3} className="matriz-td-funcao" style={{ textAlign: 'center' }}>
+                      Nenhuma função encontrada com os filtros aplicados.
+                    </td>
+                  </tr>
+                ) : (
+                filteredRoles.map((role) => (
                   <tr key={role.rol_id} className="matriz-row">
                     <td className="matriz-td-id table-cell-id">{role.rol_id}</td>
                     <td className="matriz-td-funcao">{role.rol_description}</td>
@@ -142,7 +191,8 @@ const MatrizFuncaoEPI = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                ))
+                )}
               </tbody>
             </table>
           )}

@@ -589,7 +589,7 @@
 }
 
 .agenda-required {
-  color: #dc2626;
+  color: #dc3545;
 }
 
 .agenda-empty {
@@ -653,9 +653,9 @@
 }
 
 .agenda-error-banner {
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #b91c1c;
+  background-color: #fdf0f1;
+  border: 1px solid #f1aeb5;
+  color: #c82333;
 }
 
 .agenda-success-banner {
@@ -702,18 +702,18 @@
 }
 
 .agenda-priority-critica {
-  background-color: #fef2f2;
-  color: #b91c1c;
+  background-color: #fdf0f1;
+  color: #c82333;
 }
 
 .agenda-priority-alta {
-  background-color: #fff7ed;
-  color: #c2410c;
+  background-color: #fff3e0;
+  color: #e65100;
 }
 
 .agenda-priority-media {
-  background-color: #fefce8;
-  color: #a16207;
+  background-color: #fffde7;
+  color: #b8860b;
 }
 
 .agenda-priority-default {
@@ -730,13 +730,13 @@
 }
 
 .agenda-status-atrasado {
-  background-color: #fef2f2;
-  color: #b91c1c;
+  background-color: #fdf0f1;
+  color: #c82333;
 }
 
 .agenda-status-pendente {
-  background-color: #eff6ff;
-  color: #1d4ed8;
+  background-color: #eef4fc;
+  color: #1a54b8;
 }
 
 .agenda-btn-register:disabled {

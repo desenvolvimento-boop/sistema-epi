@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Edit2, Trash2, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, Edit2, Trash2, Loader2 } from 'lucide-react';
+import { ListFiltersBar } from '../../components/list/ListFiltersBar';
+import { activeStatusMatcher, filterListRows } from '../../utils/listFilters';
 import { sectionService, type SectionAPI } from '../../services/sectionService';
 import { StatusBadge } from '../../components/StatusBadge';
 import { useAuth } from '../../contexts/AuthContext';
@@ -17,6 +19,7 @@ const NovaSecao = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const navigate = useNavigate();
@@ -60,39 +63,28 @@ const NovaSecao = () => {
     }
   };
 
-  const filtered = sections.filter((sec) => {
-    if (!searchTerm.trim()) return true;
-    const term = searchTerm.toLowerCase();
-    return (
-      sec.sec_description.toLowerCase().includes(term) ||
-      (sec.sec_integration_id || '').toLowerCase().includes(term)
-    );
-  });
+  const filtered = useMemo(
+    () =>
+      filterListRows(sections, searchTerm, filterValues, {
+        searchText: (sec) =>
+          [
+            sec.sec_description,
+            sec.sec_integration_id,
+            sec.sec_integration_source,
+            String(sec.sec_id),
+          ]
+            .filter(Boolean)
+            .join(' '),
+        fields: {
+          status: activeStatusMatcher((sec) => sec.sec_active),
+        },
+      }),
+    [sections, searchTerm, filterValues],
+  );
 
   return (
     <div className="nova-secao-container">
       <div className="nova-secao-header">
-        <div className="nova-secao-search-group">
-          <div className="nova-secao-search-wrapper">
-            <Search className="nova-secao-search-icon" />
-            <input
-              type="text"
-              placeholder="Filtrar por nome ou descrição..."
-              className="nova-secao-search-input"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <button
-            type="button"
-            onClick={fetchSections}
-            className="nova-secao-filter-btn"
-            disabled={loading}
-          >
-            <RefreshCw className={`nova-secao-btn-icon ${loading ? 'nova-secao-spin' : ''}`} />
-            Atualizar
-          </button>
-        </div>
         {allowCreate && (
           <button
             type="button"
@@ -103,6 +95,26 @@ const NovaSecao = () => {
           </button>
         )}
       </div>
+
+      <ListFiltersBar
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder={`Buscar ${t(NOMENCLATURE_KEYS.entity.section_singular).toLowerCase()} ou integração...`}
+        fields={[
+          {
+            id: 'status',
+            label: 'Status',
+            type: 'select',
+            options: [
+              { value: '1', label: 'Ativo' },
+              { value: '0', label: 'Inativo' },
+            ],
+          },
+        ]}
+        values={filterValues}
+        onFieldChange={(id, value) => setFilterValues((prev) => ({ ...prev, [id]: value }))}
+        onClear={() => setFilterValues({})}
+      />
 
       {error && (
         <div className="nova-secao-error-banner">

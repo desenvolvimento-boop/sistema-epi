@@ -20,7 +20,7 @@
   align-items: center;
   justify-content: center;
   width: 2.375rem;
-  background-color: #1e293b;
+  background-color: #1e60d2;
   color: #fff;
   border: none;
   border-radius: 0.5rem;
@@ -30,7 +30,7 @@
 }
 
 .colaborador-form-add-btn:hover {
-  background-color: #334155;
+  background-color: #1a54b8;
 }
 
 .colaborador-form-add-icon {
@@ -64,7 +64,7 @@
 }
 
 .colaborador-form-toggle--active {
-  background-color: #1E293B;
+  background-color: #1e60d2;
 }
 
 .colaborador-form-toggle-thumb {
@@ -168,8 +168,8 @@
 }
 
 .colaborador-form-foto-upload:hover {
-  border-color: #1E293B;
-  color: #1E293B;
+  border-color: #1e60d2;
+  color: #1e60d2;
   background-color: var(--color-slate-100);
 }
 

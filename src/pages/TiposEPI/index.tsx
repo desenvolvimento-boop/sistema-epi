@@ -1,4 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { ListFiltersBar } from '../../components/list/ListFiltersBar';
+import { activeStatusMatcher, filterListRows } from '../../utils/listFilters';
+import { epiTypeCategoryLabel } from '../../services/epiTypeService';
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, Plus, Edit3, Loader2 } from 'lucide-react';
 import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
@@ -14,6 +17,8 @@ const TiposEPI = () => {
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingType, setEditingType] = useState<EpiTypeAPI | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
   const { canCreate, canEdit } = useAuth();
   const allowCreate = canCreate('/epis');
   const allowEdit = canEdit('/epis');
@@ -45,6 +50,28 @@ const TiposEPI = () => {
     setEditingType(null);
   };
 
+  const categoryOptions = useMemo(() => {
+    const set = new Set(types.map((t) => epiTypeCategoryLabel(t)));
+    return Array.from(set)
+      .filter((c) => c !== '—')
+      .map((label) => ({ value: label, label }));
+  }, [types]);
+
+  const filteredTypes = useMemo(
+    () =>
+      filterListRows(types, searchTerm, filterValues, {
+        searchText: (type) =>
+          [type.ept_description, epiTypeCategoryLabel(type), String(type.ept_id), String(type.ept_lifespan_days)]
+            .filter(Boolean)
+            .join(' '),
+        fields: {
+          status: activeStatusMatcher((type) => type.ept_active),
+          category: (type, value) => epiTypeCategoryLabel(type) === value,
+        },
+      }),
+    [types, searchTerm, filterValues],
+  );
+
   return (
     <div className="epis-page">
       <div className="page-header">
@@ -74,9 +101,36 @@ const TiposEPI = () => {
               loadTypes();
             }}
             initialData={editingType}
+            existingTypes={types}
           />
         )}
       </Modal>
+
+      <ListFiltersBar
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Buscar tipo de EPI ou categoria..."
+        fields={[
+          {
+            id: 'category',
+            label: 'Categoria',
+            type: 'select',
+            options: categoryOptions,
+          },
+          {
+            id: 'status',
+            label: 'Status',
+            type: 'select',
+            options: [
+              { value: '1', label: 'Ativo' },
+              { value: '0', label: 'Inativo' },
+            ],
+          },
+        ]}
+        values={filterValues}
+        onFieldChange={(id, value) => setFilterValues((prev) => ({ ...prev, [id]: value }))}
+        onClear={() => setFilterValues({})}
+      />
 
       <div className="table-container epis-catalog-panel">
         {loading ? (
@@ -103,8 +157,14 @@ const TiposEPI = () => {
                     Nenhum tipo cadastrado.
                   </td>
                 </tr>
+              ) : filteredTypes.length === 0 ? (
+                <tr>
+                  <td colSpan={allowEdit ? 6 : 5} className="table-cell epis-empty-cell">
+                    Nenhum tipo encontrado com os filtros aplicados.
+                  </td>
+                </tr>
               ) : (
-                types.map((type) => (
+                filteredTypes.map((type) => (
                   <tr key={type.ept_id} className="table-row epis-catalog-row">
                     <td className="table-cell table-cell-id">{type.ept_id}</td>
                     <td className="table-cell">

@@ -24,7 +24,7 @@
   left: -10%;
   width: 40%;
   height: 40%;
-  background-color: rgb(59 130 246 / 0.1);
+  background-color: rgb(30 96 210 / 0.1);
   border-radius: 9999px;
   filter: blur(120px);
 }
@@ -35,7 +35,7 @@
   right: -10%;
   width: 40%;
   height: 40%;
-  background-color: rgb(59 130 246 / 0.1);
+  background-color: rgb(30 96 210 / 0.1);
   border-radius: 9999px;
   filter: blur(120px);
 }
@@ -47,7 +47,7 @@
 }
 
 .login-card {
-  background-color: rgb(15 23 42 / 0.5);
+  background-color: rgb(10 17 40 / 0.5);
   backdrop-filter: blur(24px);
   border: 1px solid var(--color-slate-800);
   border-radius: 1.5rem;
@@ -68,7 +68,7 @@
   background-color: var(--color-primary-500);
   border-radius: 1rem;
   margin-bottom: 1rem;
-  box-shadow: var(--shadow-lg), 0 4px 6px -1px rgb(59 130 246 / 0.2);
+  box-shadow: var(--shadow-lg), 0 4px 6px -1px rgb(30 96 210 / 0.2);
 }
 
 .login-icon {
@@ -175,7 +175,7 @@
   font-size: 0.875rem;
   line-height: 1.25rem;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-lg), 0 4px 6px -1px rgb(59 130 246 / 0.2);
+  box-shadow: var(--shadow-lg), 0 4px 6px -1px rgb(30 96 210 / 0.2);
   margin-top: 1rem;
 }
 

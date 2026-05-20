@@ -46,7 +46,7 @@
 
 .usg-crud-search-input:focus {
   outline: none;
-  border-color: #1E293B;
+  border-color: #1e60d2;
   box-shadow: 0 0 0 2px rgba(30, 41, 59, 0.1);
 }
 
@@ -82,12 +82,12 @@
 }
 
 .usg-crud-toolbar-btn--primary {
-  background-color: #1E293B;
+  background-color: #1e60d2;
   color: #fff;
 }
 
 .usg-crud-toolbar-btn--primary:hover {
-  background-color: #334155;
+  background-color: #1a54b8;
   color: #fff;
 }
 
@@ -174,7 +174,7 @@
 
 .usg-crud-form-input:focus {
   outline: none;
-  border-color: #1E293B;
+  border-color: #1e60d2;
   box-shadow: 0 0 0 2px rgba(30, 41, 59, 0.1);
 }
 
@@ -212,7 +212,7 @@
 }
 
 .usg-crud-toggle--active {
-  background-color: #1E293B;
+  background-color: #1e60d2;
 }
 
 .usg-crud-toggle-thumb {
@@ -242,7 +242,7 @@
   align-items: center;
   gap: 0.375rem;
   padding: 0.4375rem 0.875rem;
-  background-color: #1E293B;
+  background-color: #1e60d2;
   color: #fff;
   border-radius: 0.5rem;
   font-size: 0.75rem;
@@ -253,7 +253,7 @@
 }
 
 .usg-crud-form-save:hover {
-  background-color: #334155;
+  background-color: #1a54b8;
 }
 
 .usg-crud-form-save:disabled {
@@ -393,9 +393,9 @@
 }
 
 .usg-crud-status--active {
-  background-color: var(--color-green-50, #f0fdf4);
-  color: var(--color-green-700, #15803d);
-  border: 1px solid var(--color-green-200, #bbf7d0);
+  background-color: var(--color-green-50, #e6f7ef);
+  color: var(--color-green-700, #218838);
+  border: 1px solid var(--color-green-200, #b8e6cf);
 }
 
 .usg-crud-status--inactive {

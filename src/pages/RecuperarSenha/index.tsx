@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Mail, AlertCircle, Loader2, CheckCircle } from 'lucide-react';
+import { Mail, AlertCircle, Loader2, CheckCircle } from 'lucide-react';
+import { AppLogo } from '../../components/ui/AppLogo';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import './styles.css';
@@ -40,11 +41,7 @@ const RecuperarSenha = () => {
       >
         <div className="login-card">
           <div className="login-header">
-            <div className="login-icon-wrapper">
-              <ShieldCheck className="login-icon" strokeWidth={2.5} />
-            </div>
-            <h1 className="login-title">EPI Control</h1>
-            <p className="login-subtitle">Gestão Inteligente de Segurança do Trabalho</p>
+            <AppLogo variant="auth" />
           </div>
 
           {success ? (

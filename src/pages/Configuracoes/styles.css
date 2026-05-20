@@ -1115,7 +1115,7 @@
 
 .config-perm-td-path {
   font-size: 0.75rem;
-  color: #64748b;
+  color: #6c757d;
   font-family: ui-monospace, monospace;
 }
 
@@ -1216,10 +1216,10 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
+  background: #e6f7ef;
+  border: 1px solid #b8e6cf;
   border-radius: 0.75rem;
-  color: #065f46;
+  color: #218838;
   font-size: 0.875rem;
   font-weight: 500;
 }

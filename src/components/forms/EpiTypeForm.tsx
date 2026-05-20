@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Plus } from 'lucide-react';
 import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
 import { epiCategoryService, type EpiCategoryAPI } from '../../services/epiCategoryService';
+import { validateEpiTypeUniqueness, validateEpiCategoryUniqueness } from '../../utils/uniqueness';
 import { SimpleCrudModal, type SimpleCrudItem } from './SimpleCrudModal';
 import './EPIForm.css';
 
@@ -9,6 +10,7 @@ interface EpiTypeFormProps {
   onClose: () => void;
   onSaved?: () => void;
   initialData?: EpiTypeAPI;
+  existingTypes?: EpiTypeAPI[];
 }
 
 function mapCategoriesToCrud(types: EpiCategoryAPI[]): SimpleCrudItem[] {
@@ -25,7 +27,7 @@ function getDefaultCategoryId(items: SimpleCrudItem[]): number | '' {
   return first?.id ?? '';
 }
 
-export const EpiTypeForm = ({ onClose, onSaved, initialData }: EpiTypeFormProps) => {
+export const EpiTypeForm = ({ onClose, onSaved, initialData, existingTypes }: EpiTypeFormProps) => {
   const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState<SimpleCrudItem[]>([]);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -87,6 +89,15 @@ export const EpiTypeForm = ({ onClose, onSaved, initialData }: EpiTypeFormProps)
   };
 
   const handleCategoryCreated = async (item: SimpleCrudItem) => {
+    const duplicateMsg = validateEpiCategoryUniqueness(
+      categories,
+      item.name,
+      item.description || '',
+    );
+    if (duplicateMsg) {
+      alert(duplicateMsg);
+      return;
+    }
     try {
       const created = await epiCategoryService.create({
         eca_active: item.active ? 1 : 0,
@@ -116,6 +127,21 @@ export const EpiTypeForm = ({ onClose, onSaved, initialData }: EpiTypeFormProps)
     if (!Number.isFinite(days) || days < 1) {
       alert('Informe a vida útil em dias (mínimo 1).');
       return;
+    }
+
+    try {
+      const typesForCheck = existingTypes ?? await epiTypeService.getAll();
+      const duplicateMsg = validateEpiTypeUniqueness(
+        typesForCheck,
+        description,
+        initialData?.ept_id,
+      );
+      if (duplicateMsg) {
+        alert(duplicateMsg);
+        return;
+      }
+    } catch {
+      /* segue para API */
     }
 
     setSaving(true);

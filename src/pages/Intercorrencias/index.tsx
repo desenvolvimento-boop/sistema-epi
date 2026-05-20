@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   AlertOctagon,
-  Search,
   Download,
   AlertTriangle,
   CheckCircle2,
@@ -10,8 +9,8 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
-  X,
 } from 'lucide-react';
+import { ListFiltersBar } from '../../components/list/ListFiltersBar';
 import clsx from 'clsx';
 import { motion } from 'motion/react';
 import { format, parseISO } from 'date-fns';
@@ -82,9 +81,10 @@ const Intercorrencias = () => {
 
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
-  const [severityFilter, setSeverityFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
+  const severityFilter = filterValues.severity ?? '';
+  const statusFilter = filterValues.status ?? '';
+  const typeFilter = filterValues.type ?? '';
 
   const [selectedItem, setSelectedItem] = useState<IncidentAPI | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -215,13 +215,13 @@ const Intercorrencias = () => {
   const clearFilters = () => {
     setSearchInput('');
     setSearch('');
-    setSeverityFilter('');
-    setStatusFilter('');
-    setTypeFilter('');
+    setFilterValues({});
     setPage(1);
   };
 
-  const hasActiveFilters = Boolean(search || severityFilter || statusFilter || typeFilter);
+  const hasActiveFilters = Boolean(
+    search || severityFilter || statusFilter || typeFilter,
+  );
   const from = total === 0 ? 0 : (page - 1) * limit + 1;
   const to = Math.min(page * limit, total);
 
@@ -295,57 +295,46 @@ const Intercorrencias = () => {
         </motion.div>
       </motion.div>
 
-      <motion.div className="intercorrencias-filter-bar">
-        <motion.div className="intercorrencias-search-wrapper">
-          <Search className="intercorrencias-search-icon" />
-          <input
-            type="text"
-            placeholder="Buscar por colaborador ou tipo de alerta..."
-            className="intercorrencias-search-input"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-          />
-        </motion.div>
-        <motion.div className="intercorrencias-filter-group">
-          <select
-            className="intercorrencias-select"
-            value={severityFilter}
-            onChange={(e) => setSeverityFilter(e.target.value)}
-          >
-            <option value="">Severidade: Todas</option>
-            <option value="ALTA">Alta</option>
-            <option value="MEDIA">Média</option>
-            <option value="BAIXA">Baixa</option>
-          </select>
-          <select
-            className="intercorrencias-select"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">Status: Todos</option>
-            <option value="PENDENTE">Pendente</option>
-            <option value="ANALISADO">Analisado</option>
-            <option value="DESCARTADO">Descartado</option>
-          </select>
-          <select
-            className="intercorrencias-select"
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-          >
-            <option value="">Tipo: Todos</option>
-            {(Object.keys(INCIDENT_TYPE_LABELS) as IncidentType[]).map((t) => (
-              <option key={t} value={t}>
-                {INCIDENT_TYPE_LABELS[t]}
-              </option>
-            ))}
-          </select>
-          {hasActiveFilters && (
-            <button type="button" className="intercorrencias-clear-filters" onClick={clearFilters}>
-              <X className="intercorrencias-btn-icon" /> Limpar
-            </button>
-          )}
-        </motion.div>
-      </motion.div>
+      <ListFiltersBar
+        searchValue={searchInput}
+        onSearchChange={setSearchInput}
+        searchPlaceholder="Buscar por colaborador ou tipo de alerta..."
+        fields={[
+          {
+            id: 'severity',
+            label: 'Severidade',
+            type: 'select',
+            allOptionLabel: 'Todas',
+            options: [
+              { value: 'ALTA', label: 'Alta' },
+              { value: 'MEDIA', label: 'Média' },
+              { value: 'BAIXA', label: 'Baixa' },
+            ],
+          },
+          {
+            id: 'status',
+            label: 'Status',
+            type: 'select',
+            options: [
+              { value: 'PENDENTE', label: 'Pendente' },
+              { value: 'ANALISADO', label: 'Analisado' },
+              { value: 'DESCARTADO', label: 'Descartado' },
+            ],
+          },
+          {
+            id: 'type',
+            label: 'Tipo',
+            type: 'select',
+            options: (Object.keys(INCIDENT_TYPE_LABELS) as IncidentType[]).map((key) => ({
+              value: key,
+              label: INCIDENT_TYPE_LABELS[key],
+            })),
+          },
+        ]}
+        values={filterValues}
+        onFieldChange={(id, value) => setFilterValues((prev) => ({ ...prev, [id]: value }))}
+        onClear={clearFilters}
+      />
 
       {error && (
         <div className="intercorrencias-error">

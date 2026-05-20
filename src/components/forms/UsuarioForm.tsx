@@ -5,15 +5,17 @@ import { userService } from '../../services/userService';
 import { accessProfileService, type AccessProfileAPI } from '../../services/accessProfileService';
 import { userGroupService, type UserGroupAPI } from '../../services/userGroupService';
 import { UserGroupCrudModal } from './UserGroupCrudModal';
+import { validateUserUniqueness } from '../../utils/uniqueness';
 import './UsuarioForm.css';
 
 interface UsuarioFormProps {
   onClose: () => void;
   onSaved: () => void;
   initialData?: User;
+  existingUsers?: User[];
 }
 
-export const UsuarioForm = ({ onClose, onSaved, initialData }: UsuarioFormProps) => {
+export const UsuarioForm = ({ onClose, onSaved, initialData, existingUsers }: UsuarioFormProps) => {
   const [ativo, setAtivo] = useState(initialData ? initialData.usr_active === 1 : true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -109,6 +111,25 @@ export const UsuarioForm = ({ onClose, onSaved, initialData }: UsuarioFormProps)
     const password = fd.get('usr_password') as string;
     if (password) {
       payload.usr_password = password;
+    }
+
+    const username = (payload.usr_username as string) || '';
+    const email = (payload.usr_email as string) || '';
+    try {
+      const usersForCheck = existingUsers ?? await userService.getAll();
+      const duplicateMsg = validateUserUniqueness(
+        usersForCheck,
+        username,
+        email,
+        isEdit ? initialData.usr_id : undefined,
+      );
+      if (duplicateMsg) {
+        setError(duplicateMsg);
+        setLoading(false);
+        return;
+      }
+    } catch {
+      /* segue para API se falhar carregar lista */
     }
 
     try {

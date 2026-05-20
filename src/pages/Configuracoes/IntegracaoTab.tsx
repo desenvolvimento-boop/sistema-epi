@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { ListFiltersBar } from '../../components/list/ListFiltersBar';
+import { filterListRows } from '../../utils/listFilters';
 import {
   Key,
   Link as LinkIcon,
@@ -38,6 +40,8 @@ export const IntegracaoTab: React.FC = () => {
   const [isIntegracaoModalOpen, setIsIntegracaoModalOpen] = useState(false);
   const [isWebhookModalOpen, setIsWebhookModalOpen] = useState(false);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -78,6 +82,27 @@ export const IntegracaoTab: React.FC = () => {
   const activeWebhooks = webhooks.filter((w) => w.whk_active === 1).length;
   const activeApiKeys = apiKeys.filter((k) => k.apk_active === 1).length;
 
+  const filteredCompanies = useMemo(
+    () =>
+      filterListRows(companies, searchTerm, filterValues, {
+        searchText: (c) =>
+          [
+            c.com_description,
+            c.com_integration_source,
+            c.statusLabel,
+            (c.syncModuleLabels || []).join(' '),
+            String(c.com_id),
+          ]
+            .filter(Boolean)
+            .join(' '),
+        fields: {
+          status: (c, value) =>
+            value === '1' ? Boolean(c.com_active) : !c.com_active,
+        },
+      }),
+    [companies, searchTerm, filterValues],
+  );
+
   if (loading) {
     return (
       <div className="config-tab-integracao config-nom-loading">
@@ -102,6 +127,26 @@ export const IntegracaoTab: React.FC = () => {
 
       {error && <p className="config-warning-title">{error}</p>}
 
+      <ListFiltersBar
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Buscar empresa ou módulo de integração..."
+        fields={[
+          {
+            id: 'status',
+            label: 'Status',
+            type: 'select',
+            options: [
+              { value: '1', label: 'Ativo' },
+              { value: '0', label: 'Inativo' },
+            ],
+          },
+        ]}
+        values={filterValues}
+        onFieldChange={(id, value) => setFilterValues((prev) => ({ ...prev, [id]: value }))}
+        onClear={() => setFilterValues({})}
+      />
+
       <div className="config-table-scroll">
         <table className="config-table">
           <thead>
@@ -121,8 +166,14 @@ export const IntegracaoTab: React.FC = () => {
                   Nenhuma empresa cadastrada.
                 </td>
               </tr>
+            ) : filteredCompanies.length === 0 ? (
+              <tr className="config-row">
+                <td colSpan={6} className="config-cell">
+                  Nenhuma empresa encontrada com os filtros aplicados.
+                </td>
+              </tr>
             ) : (
-              companies.map((company) => (
+              filteredCompanies.map((company) => (
                 <tr key={company.com_id} className="config-row">
                   <td className="config-cell table-cell-id">{company.com_id}</td>
                   <td className="config-cell">

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit2, Trash2, Search, RefreshCw, Check, X, Loader2, AlertTriangle } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { userGroupService, type UserGroupAPI } from '../../services/userGroupService';
+import { validateUserGroupUniqueness } from '../../utils/uniqueness';
 import './UserGroupCrudModal.css';
 
 interface UserGroupCrudModalProps {
@@ -87,6 +88,16 @@ export const UserGroupCrudModal = ({ isOpen, onClose, onGroupCreated }: UserGrou
 
   const handleSave = async () => {
     if (!formName.trim()) return;
+    const duplicateMsg = validateUserGroupUniqueness(
+      groups,
+      formName,
+      formDesc,
+      editingGroup?.usg_id,
+    );
+    if (duplicateMsg) {
+      setError(duplicateMsg);
+      return;
+    }
     setSaving(true);
     setError(null);
     try {

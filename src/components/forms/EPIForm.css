@@ -24,7 +24,7 @@
 }
 
 .epi-form-required {
-  color: #dc2626;
+  color: #dc3545;
 }
 
 .epi-form-integration-toggle {
@@ -34,7 +34,7 @@
 .epi-form-link-btn {
   background: none;
   border: none;
-  color: #2563eb;
+  color: #1e60d2;
   font-size: 0.875rem;
   cursor: pointer;
   padding: 0;
@@ -42,14 +42,14 @@
 
 .epi-form-integration {
   padding: 1rem;
-  background: #f8fafc;
+  background: #f4f7fe;
   border-radius: 0.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dee2e6;
 }
 
 .epi-form-integration-note {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: #6c757d;
   margin-bottom: 1rem;
 }
 
@@ -102,7 +102,7 @@
   align-items: center;
   justify-content: center;
   width: 2.375rem;
-  background-color: #1e293b;
+  background-color: #1e60d2;
   color: #fff;
   border: none;
   border-radius: 0.5rem;
@@ -112,7 +112,7 @@
 }
 
 .epi-form-add-btn:hover {
-  background-color: #334155;
+  background-color: #1a54b8;
 }
 
 .epi-form-add-icon {

@@ -1,6 +1,6 @@
 .report-filters {
   background: #fff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dee2e6;
   border-radius: 12px;
   padding: 1rem;
   margin-bottom: 1.25rem;
@@ -21,14 +21,14 @@
   flex: 1;
   min-width: 200px;
   max-width: 360px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
   padding: 0.5rem 0.75rem;
-  background: #f8fafc;
+  background: #f4f7fe;
 }
 
 .report-filters-search-icon {
-  color: #94a3b8;
+  color: #adb5bd;
   flex-shrink: 0;
 }
 
@@ -45,7 +45,7 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.5rem 0.85rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
   background: #fff;
   font-size: 0.8125rem;
@@ -58,7 +58,7 @@
   gap: 0.75rem;
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid #eef2f9;
 }
 
 .report-filters-field {
@@ -66,13 +66,13 @@
   flex-direction: column;
   gap: 0.25rem;
   font-size: 0.75rem;
-  color: #64748b;
+  color: #6c757d;
 }
 
 .report-filters-field input,
 .report-filters-field select {
   padding: 0.45rem 0.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dee2e6;
   border-radius: 6px;
   font-size: 0.8125rem;
 }
@@ -84,11 +84,11 @@
   gap: 0.25rem;
   padding: 0.45rem 0.75rem;
   border: none;
-  background: #f1f5f9;
+  background: #eef2f9;
   border-radius: 6px;
   font-size: 0.8125rem;
   cursor: pointer;
-  color: #475569;
+  color: #5a6268;
 }
 
 @media (max-width: 640px) {

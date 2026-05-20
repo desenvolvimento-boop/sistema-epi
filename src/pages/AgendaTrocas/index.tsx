@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Calendar,
   Clock,
@@ -20,6 +20,8 @@ import {
   type ExchangeAgendaResponse,
 } from '../../services/deliveryService';
 import { sectionService, type SectionAPI } from '../../services/sectionService';
+import { ListFiltersBar } from '../../components/list/ListFiltersBar';
+import { filterListRows } from '../../utils/listFilters';
 import './styles.css';
 
 const AgendaTrocas = () => {
@@ -33,10 +35,13 @@ const AgendaTrocas = () => {
   const [selectedEpvId, setSelectedEpvId] = useState<string>('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
-  const [priorityFilter, setPriorityFilter] = useState('');
-  const [secFilter, setSecFilter] = useState('');
-  const [fromFilter, setFromFilter] = useState('');
-  const [toFilter, setToFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
+  const priorityFilter = filterValues.prioridade ?? '';
+  const secFilter = filterValues.sec_id ?? '';
+  const fromFilter = filterValues.from ?? '';
+  const toFilter = filterValues.to ?? '';
+  const statusFilter = filterValues.status ?? '';
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { canCreate } = useAuth();
 
@@ -122,8 +127,32 @@ const AgendaTrocas = () => {
     }
   };
 
-  const items = agenda?.items ?? [];
+  const rawItems = agenda?.items ?? [];
   const stats = agenda?.stats;
+
+  const items = useMemo(
+    () =>
+      filterListRows(
+        rawItems,
+        searchTerm,
+        { status: statusFilter },
+        {
+          searchText: (item) =>
+            [item.colaborador, item.epi, item.status, item.prioridade, String(item.emp_id)]
+              .filter(Boolean)
+              .join(' '),
+          fields: {
+            status: (item, value) => item.status === value,
+          },
+        },
+      ),
+    [rawItems, searchTerm, statusFilter],
+  );
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setFilterValues({});
+  };
 
   return (
     <div className="agenda-container">
@@ -204,53 +233,53 @@ const AgendaTrocas = () => {
         </div>
       </div>
 
+      <ListFiltersBar
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Buscar colaborador, EPI ou ID..."
+        fields={[
+          {
+            id: 'sec_id',
+            label: 'Setor',
+            type: 'select',
+            allOptionLabel: 'Todos os setores',
+            options: sections.map((s) => ({
+              value: String(s.sec_id),
+              label: s.sec_description,
+            })),
+          },
+          {
+            id: 'prioridade',
+            label: 'Prioridade',
+            type: 'select',
+            allOptionLabel: 'Todas',
+            options: [
+              { value: 'Crítica', label: 'Crítica' },
+              { value: 'Alta', label: 'Alta' },
+              { value: 'Média', label: 'Média' },
+              { value: 'Baixa', label: 'Baixa' },
+            ],
+          },
+          {
+            id: 'status',
+            label: 'Status',
+            type: 'select',
+            options: [
+              { value: 'Pendente', label: 'Pendente' },
+              { value: 'Atrasado', label: 'Atrasado' },
+            ],
+          },
+          { id: 'from', label: 'Vencimento de', type: 'date' },
+          { id: 'to', label: 'Vencimento até', type: 'date' },
+        ]}
+        values={filterValues}
+        onFieldChange={(id, value) => setFilterValues((prev) => ({ ...prev, [id]: value }))}
+        onClear={clearFilters}
+      />
+
       <div className="agenda-table-container">
         <div className="agenda-table-header">
           <h3 className="agenda-table-title">Cronograma de Substituição</h3>
-          <div className="agenda-filter-row">
-            <span className="agenda-filter-label">Filtrar:</span>
-            <select
-              className="agenda-filter-select"
-              value={secFilter}
-              onChange={(e) => setSecFilter(e.target.value)}
-              aria-label="Setor"
-            >
-              <option value="">Todos os setores</option>
-              {sections.map((s) => (
-                <option key={s.sec_id} value={s.sec_id}>
-                  {s.sec_description}
-                </option>
-              ))}
-            </select>
-            <select
-              className="agenda-filter-select"
-              value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value)}
-              aria-label="Prioridade"
-            >
-              <option value="">Todas as prioridades</option>
-              <option value="Crítica">Crítica</option>
-              <option value="Alta">Alta</option>
-              <option value="Média">Média</option>
-              <option value="Baixa">Baixa</option>
-            </select>
-            <input
-              type="date"
-              className="agenda-filter-date"
-              value={fromFilter}
-              onChange={(e) => setFromFilter(e.target.value)}
-              aria-label="Data inicial"
-              title="Vencimento a partir de"
-            />
-            <input
-              type="date"
-              className="agenda-filter-date"
-              value={toFilter}
-              onChange={(e) => setToFilter(e.target.value)}
-              aria-label="Data final"
-              title="Vencimento até"
-            />
-          </div>
         </div>
         <div className="agenda-table-scroll">
           {loading ? (

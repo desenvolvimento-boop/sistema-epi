@@ -30,7 +30,7 @@
 }
 
 .usuario-form-toggle--active {
-  background-color: #1E293B;
+  background-color: #1e60d2;
 }
 
 .usuario-form-toggle-thumb {
@@ -80,7 +80,7 @@
 }
 
 .usuario-form-required {
-  color: #1E293B;
+  color: #1e60d2;
 }
 
 .usuario-form-input {
@@ -100,7 +100,7 @@
 
 .usuario-form-input:focus {
   outline: none;
-  border-color: #1E293B;
+  border-color: #1e60d2;
   box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.15);
 }
 
@@ -124,7 +124,7 @@
 
 .usuario-form-textarea:focus {
   outline: none;
-  border-color: #1E293B;
+  border-color: #1e60d2;
   box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.15);
 }
 
@@ -166,7 +166,7 @@
   align-items: center;
   justify-content: center;
   width: 2.5rem;
-  background-color: #1E293B;
+  background-color: #1e60d2;
   color: #fff;
   border: none;
   border-radius: 0.5rem;
@@ -176,7 +176,7 @@
 }
 
 .usuario-form-cep-btn:hover {
-  background-color: #1E293B;
+  background-color: #1e60d2;
 }
 
 .usuario-form-cep-icon {
@@ -201,7 +201,7 @@
   align-items: center;
   justify-content: center;
   width: 2.375rem;
-  background-color: #1E293B;
+  background-color: #1e60d2;
   color: #fff;
   border: none;
   border-radius: 0.5rem;
@@ -211,7 +211,7 @@
 }
 
 .usuario-form-add-type-btn:hover {
-  background-color: #334155;
+  background-color: #1a54b8;
 }
 
 .usuario-form-add-type-icon {
@@ -237,7 +237,7 @@
   align-items: center;
   gap: 0.375rem;
   padding: 0.625rem 1.5rem;
-  background-color: #1E293B;
+  background-color: #1e60d2;
   color: #fff;
   border-radius: 0.5rem;
   font-size: 0.875rem;
@@ -249,7 +249,7 @@
 }
 
 .usuario-form-submit:hover {
-  background-color: #1E293B;
+  background-color: #1e60d2;
 }
 
 .usuario-form-cancel {

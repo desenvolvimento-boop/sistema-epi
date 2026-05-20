@@ -7,12 +7,14 @@ import { employerService, type EmployerAPI } from '../../services/employerServic
 import { employeeService, type EmployeeAPI } from '../../services/employeeService';
 import { useNomenclature } from '../../hooks/useNomenclature';
 import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
+import { validateEmployeeUniqueness } from '../../utils/uniqueness';
 import './ColaboradorForm.css';
 
 interface ColaboradorFormProps {
   onClose: () => void;
   onSaved?: () => void;
   initialData?: EmployeeAPI;
+  existingEmployees?: EmployeeAPI[];
 }
 
 function mapRolesToCrud(roles: RoleAPI[]): SimpleCrudItem[] {
@@ -47,7 +49,7 @@ function getDefaultEmployerId(items: SimpleCrudItem[]): string {
   return first ? String(first.id) : '';
 }
 
-export const ColaboradorForm = ({ onClose, onSaved, initialData }: ColaboradorFormProps) => {
+export const ColaboradorForm = ({ onClose, onSaved, initialData, existingEmployees }: ColaboradorFormProps) => {
   const { t } = useNomenclature();
   const isEditing = !!initialData;
   const [saving, setSaving] = useState(false);
@@ -170,6 +172,22 @@ export const ColaboradorForm = ({ onClose, onSaved, initialData }: ColaboradorFo
     if (!nomeCompleto.trim() || !cpf.trim() || !matricula.trim() || !dataAdmissao || !selectedFuncao || !selectedSetor || !selectedEmpresa) {
       alert('Preencha todos os campos obrigatórios.');
       return;
+    }
+
+    try {
+      const employeesForCheck = existingEmployees ?? await employeeService.getAll();
+      const duplicateMsg = validateEmployeeUniqueness(
+        employeesForCheck,
+        cpf,
+        matricula,
+        isEditing ? initialData?.emp_id : undefined,
+      );
+      if (duplicateMsg) {
+        alert(duplicateMsg);
+        return;
+      }
+    } catch {
+      /* segue para API */
     }
 
     setSaving(true);

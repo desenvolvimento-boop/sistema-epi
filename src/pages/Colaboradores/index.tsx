@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, History, UserCog, MoreVertical, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, History, UserCog, MoreVertical, Loader2 } from 'lucide-react';
+import { ListFiltersBar } from '../../components/list/ListFiltersBar';
+import { activeStatusMatcher, filterListRows } from '../../utils/listFilters';
 import { employeeService, type EmployeeAPI } from '../../services/employeeService';
 import { StatusBadge } from '../../components/StatusBadge';
 import { Modal } from '../../components/ui/Modal';
@@ -26,6 +28,7 @@ const Colaboradores = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeeAPI | null>(null);
@@ -67,34 +70,42 @@ const Colaboradores = () => {
     fetchEmployees();
   };
 
-  const filtered = employees.filter(emp => {
-    if (!searchTerm.trim()) return true;
-    const term = searchTerm.toLowerCase();
-    return (
-      emp.emp_full_name.toLowerCase().includes(term) ||
-      emp.emp_cpf.toLowerCase().includes(term) ||
-      emp.emp_registration.toLowerCase().includes(term)
-    );
-  });
+  const roleOptions = useMemo(() => {
+    const map = new Map<number, string>();
+    employees.forEach((e) => {
+      if (e.role?.rol_id) map.set(e.role.rol_id, e.role.rol_description);
+    });
+    return Array.from(map.entries())
+      .map(([value, label]) => ({ value: String(value), label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [employees]);
+
+  const filtered = useMemo(
+    () =>
+      filterListRows(employees, searchTerm, filterValues, {
+        searchText: (emp) =>
+          [
+            emp.emp_full_name,
+            emp.emp_cpf,
+            emp.emp_registration,
+            emp.role?.rol_description,
+            emp.company?.com_description,
+            emp.section?.sec_description,
+            String(emp.emp_id),
+          ]
+            .filter(Boolean)
+            .join(' '),
+        fields: {
+          status: activeStatusMatcher((emp) => emp.emp_active),
+          rol_id: (emp, value) => String(emp.rol_id) === value,
+        },
+      }),
+    [employees, searchTerm, filterValues],
+  );
 
   return (
     <div className="colaboradores-container">
       <div className="colaboradores-header">
-        <div className="colaboradores-search-group">
-          <div className="colaboradores-search-wrapper">
-            <Search className="colaboradores-search-icon" />
-            <input 
-              type="text" 
-              placeholder="Filtrar por nome, CPF ou matrícula..." 
-              className="colaboradores-search-input"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <button onClick={fetchEmployees} className="colaboradores-filter-btn" disabled={loading}>
-            <RefreshCw className={`colaboradores-btn-icon ${loading ? 'colaboradores-spin' : ''}`} /> Atualizar
-          </button>
-        </div>
         {allowCreate && (
           <button 
             onClick={() => navigate('/colaboradores/novo')}
@@ -106,6 +117,32 @@ const Colaboradores = () => {
         )}
       </div>
 
+      <ListFiltersBar
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Buscar por nome, CPF, matrícula ou função..."
+        fields={[
+          {
+            id: 'status',
+            label: 'Status',
+            type: 'select',
+            options: [
+              { value: '1', label: 'Ativo' },
+              { value: '0', label: 'Inativo' },
+            ],
+          },
+          {
+            id: 'rol_id',
+            label: t(NOMENCLATURE_KEYS.entity.funcao_singular),
+            type: 'select',
+            options: roleOptions,
+          },
+        ]}
+        values={filterValues}
+        onFieldChange={(id, value) => setFilterValues((prev) => ({ ...prev, [id]: value }))}
+        onClear={() => setFilterValues({})}
+      />
+
       {selectedEmployee && (
         <Modal 
           isOpen={isEditModalOpen} 
@@ -116,6 +153,7 @@ const Colaboradores = () => {
             onClose={handleCloseEditModal}
             onSaved={handleEditSaved}
             initialData={selectedEmployee}
+            existingEmployees={employees}
           />
         </Modal>
       )}

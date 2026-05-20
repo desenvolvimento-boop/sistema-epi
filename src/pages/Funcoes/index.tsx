@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Shield, Info, Edit2, Loader2 } from 'lucide-react';
 import { roleService, type RoleAPI } from '../../services/roleService';
@@ -6,6 +6,8 @@ import { FuncaoForm } from '../../components/forms/FuncaoForm';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNomenclature } from '../../hooks/useNomenclature';
 import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
+import { ListFiltersBar } from '../../components/list/ListFiltersBar';
+import { activeStatusMatcher, filterListRows } from '../../utils/listFilters';
 import './styles.css';
 
 type TabId = 'lista' | 'cadastro';
@@ -16,6 +18,8 @@ const Funcoes = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>('lista');
   const [editRole, setEditRole] = useState<RoleAPI | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
   const navigate = useNavigate();
   const { canCreate, canEdit } = useAuth();
   const allowCreate = canCreate('/funcoes');
@@ -64,6 +68,26 @@ const Funcoes = () => {
 
   const canShowFormTab = allowCreate || (editRole && allowEdit);
 
+  const filteredRoles = useMemo(
+    () =>
+      filterListRows(roles, searchTerm, filterValues, {
+        searchText: (role) =>
+          [
+            role.rol_description,
+            role.rol_activities,
+            role.rol_integration_source,
+            String(role.rol_id),
+            String(role.epi_count ?? ''),
+          ]
+            .filter(Boolean)
+            .join(' '),
+        fields: {
+          status: activeStatusMatcher((role) => role.rol_active),
+        },
+      }),
+    [roles, searchTerm, filterValues],
+  );
+
   return (
     <div className="funcoes-container">
       <div className="funcoes-header">
@@ -90,11 +114,32 @@ const Funcoes = () => {
             onClose={handleCloseForm}
             onSaved={handleSaved}
             initialData={editRole ?? undefined}
+            existingRoles={roles}
           />
         </div>
       )}
 
       {activeTab === 'lista' && (
+        <>
+        <ListFiltersBar
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Buscar função, descrição ou origem..."
+          fields={[
+            {
+              id: 'status',
+              label: 'Status',
+              type: 'select',
+              options: [
+                { value: '1', label: 'Ativo' },
+                { value: '0', label: 'Inativo' },
+              ],
+            },
+          ]}
+          values={filterValues}
+          onFieldChange={(id, value) => setFilterValues((prev) => ({ ...prev, [id]: value }))}
+          onClear={() => setFilterValues({})}
+        />
         <div className="funcoes-table-container">
           {loading ? (
             <div className="funcoes-loading">
@@ -115,7 +160,14 @@ const Funcoes = () => {
                 </tr>
               </thead>
               <tbody className="funcoes-table-body">
-                {roles.map((role) => (
+                {filteredRoles.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="funcoes-table-cell" style={{ textAlign: 'center' }}>
+                      Nenhuma função encontrada.
+                    </td>
+                  </tr>
+                ) : (
+                filteredRoles.map((role) => (
                   <tr key={role.rol_id} className="funcoes-table-row">
                     <td className="funcoes-table-cell table-cell-id">{role.rol_id}</td>
                     <td className="funcoes-table-cell">
@@ -165,11 +217,13 @@ const Funcoes = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                ))
+                )}
               </tbody>
             </table>
           )}
         </div>
+        </>
       )}
     </div>
   );

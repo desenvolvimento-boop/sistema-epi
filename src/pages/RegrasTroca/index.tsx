@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { ListFiltersBar } from '../../components/list/ListFiltersBar';
+import { activeStatusMatcher, filterListRows } from '../../utils/listFilters';
 import { Edit3, Loader2, Plus, Trash2 } from 'lucide-react';
 import { epiTypeService, epiTypeCategoryLabel, type EpiTypeAPI } from '../../services/epiTypeService';
 import { epiVariantService } from '../../services/epiVariantService';
@@ -32,6 +34,8 @@ const RegrasTroca = () => {
   const [selectedType, setSelectedType] = useState<EpiTypeAPI | null>(null);
   const [selectedRule, setSelectedRule] = useState<ExchangeRuleAPI | null>(null);
   const [ruleDefaultEptId, setRuleDefaultEptId] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
 
   const { canEdit, canCreate, canDelete } = useAuth();
   const allowEdit = canEdit('/regras-troca');
@@ -108,6 +112,92 @@ const RegrasTroca = () => {
     return 'Baixa';
   };
 
+  const filteredTypes = useMemo(
+    () =>
+      filterListRows(types, searchTerm, filterValues, {
+        searchText: (type) =>
+          [
+            type.ept_description,
+            epiTypeCategoryLabel(type),
+            getConfigCriticidade(type.ept_lifespan_days),
+            String(type.ept_id),
+            String(type.ept_lifespan_days),
+          ].join(' '),
+        fields: {
+          status: activeStatusMatcher((type) => type.ept_active),
+          criticidade: (type, value) => getConfigCriticidade(type.ept_lifespan_days) === value,
+        },
+      }),
+    [types, searchTerm, filterValues],
+  );
+
+  const filteredRules = useMemo(
+    () =>
+      filterListRows(rules, searchTerm, filterValues, {
+        searchText: (rule) =>
+          [
+            rule.epiType?.ept_description,
+            scopeLabels[rule.exr_scope],
+            rule.exr_reason,
+            String(rule.exr_id),
+            String(rule.exr_value),
+          ]
+            .filter(Boolean)
+            .join(' '),
+        fields: {
+          status: activeStatusMatcher((rule) => rule.exr_active),
+          scope: (rule, value) => rule.exr_scope === value,
+        },
+      }),
+    [rules, searchTerm, filterValues, scopeLabels],
+  );
+
+  const baseFilterFields = useMemo(
+    () => [
+      {
+        id: 'criticidade',
+        label: 'Criticidade',
+        type: 'select' as const,
+        options: [
+          { value: 'Alta', label: 'Alta' },
+          { value: 'Média', label: 'Média' },
+          { value: 'Baixa', label: 'Baixa' },
+        ],
+      },
+      {
+        id: 'status',
+        label: 'Status',
+        type: 'select' as const,
+        options: [
+          { value: '1', label: 'Ativo' },
+          { value: '0', label: 'Inativo' },
+        ],
+      },
+    ],
+    [],
+  );
+
+  const triggerFilterFields = useMemo(
+    () => [
+      {
+        id: 'scope',
+        label: 'Escopo',
+        type: 'select' as const,
+        options: Object.entries(scopeLabels).map(([value, label]) => ({ value, label })),
+      },
+      {
+        id: 'status',
+        label: 'Status',
+        type: 'select' as const,
+        options: [
+          { value: '1', label: 'Ativo' },
+          { value: '0', label: 'Inativo' },
+        ],
+      },
+    ],
+    [scopeLabels],
+  );
+
   return (
     <div className="regras-page">
       <div className="page-header">
@@ -130,14 +220,22 @@ const RegrasTroca = () => {
         <button
           type="button"
           className={clsx('regras-tab', activeTab === 'base' && 'regras-tab--active')}
-          onClick={() => setActiveTab('base')}
+          onClick={() => {
+          setActiveTab('base');
+          setSearchTerm('');
+          setFilterValues({});
+        }}
         >
           Vida útil padrão
         </button>
         <button
           type="button"
           className={clsx('regras-tab', activeTab === 'triggers' && 'regras-tab--active')}
-          onClick={() => setActiveTab('triggers')}
+          onClick={() => {
+          setActiveTab('triggers');
+          setSearchTerm('');
+          setFilterValues({});
+        }}
         >
           Gatilhos condicionais
         </button>
@@ -179,6 +277,21 @@ const RegrasTroca = () => {
         />
       </Modal>
 
+      <ListFiltersBar
+        key={activeTab}
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder={
+          activeTab === 'base'
+            ? 'Buscar tipo de EPI, categoria ou vida útil...'
+            : 'Buscar gatilho, escopo ou motivo...'
+        }
+        fields={activeTab === 'base' ? baseFilterFields : triggerFilterFields}
+        values={filterValues}
+        onFieldChange={(id, value) => setFilterValues((prev) => ({ ...prev, [id]: value }))}
+        onClear={() => setFilterValues({})}
+      />
+
       {activeTab === 'base' && (
         <div className="table-container">
           {loading ? (
@@ -203,7 +316,14 @@ const RegrasTroca = () => {
                 </tr>
               </thead>
               <tbody className="table-body">
-                {types.map((type) => {
+                {filteredTypes.length === 0 ? (
+                  <tr>
+                    <td colSpan={allowEdit ? 8 : 7} className="table-cell epis-empty-cell">
+                      Nenhum tipo encontrado com os filtros aplicados.
+                    </td>
+                  </tr>
+                ) : (
+                filteredTypes.map((type) => {
                   const criticidade = getConfigCriticidade(type.ept_lifespan_days);
                   const overrides = variantOverrideCount[type.ept_id] || 0;
                   return (
@@ -259,7 +379,8 @@ const RegrasTroca = () => {
                       )}
                     </tr>
                   );
-                })}
+                })
+                )}
               </tbody>
             </table>
           )}
@@ -293,7 +414,17 @@ const RegrasTroca = () => {
                 </tr>
               </thead>
               <tbody className="table-body">
-                {rules.map((rule) => (
+                {filteredRules.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={allowEdit || allowDelete ? 7 : 6}
+                      className="table-cell epis-empty-cell"
+                    >
+                      Nenhum gatilho encontrado com os filtros aplicados.
+                    </td>
+                  </tr>
+                ) : (
+                filteredRules.map((rule) => (
                   <tr key={rule.exr_id} className="table-row">
                     <td className="table-cell table-cell-id">{rule.exr_id}</td>
                     <td className="table-cell">
@@ -329,7 +460,8 @@ const RegrasTroca = () => {
                       </td>
                     )}
                   </tr>
-                ))}
+                ))
+                )}
               </tbody>
             </table>
           )}

@@ -720,28 +720,28 @@
 }
 
 .calendario-detail-status-atrasado {
-  background-color: #fef2f2;
-  color: #b91c1c;
+  background-color: #fdf0f1;
+  color: #c82333;
 }
 
 .calendario-detail-status-pendente {
-  background-color: #eff6ff;
-  color: #1d4ed8;
+  background-color: #eef4fc;
+  color: #1a54b8;
 }
 
 .calendario-detail-priority-critica {
-  background-color: #fef2f2;
-  color: #b91c1c;
+  background-color: #fdf0f1;
+  color: #c82333;
 }
 
 .calendario-detail-priority-alta {
-  background-color: #fff7ed;
-  color: #c2410c;
+  background-color: #fff3e0;
+  color: #e65100;
 }
 
 .calendario-detail-priority-media {
-  background-color: #fefce8;
-  color: #a16207;
+  background-color: #fffde7;
+  color: #b8860b;
 }
 
 .calendario-detail-priority-default {

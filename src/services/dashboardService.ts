@@ -15,6 +15,8 @@ function buildQuery(filters: ReportFilters = {}): string {
   if (filters.from) params.set('from', filters.from);
   if (filters.to) params.set('to', filters.to);
   if (filters.sec_id) params.set('sec_id', String(filters.sec_id));
+  if (filters.emp_id) params.set('emp_id', String(filters.emp_id));
+  if (filters.rol_id) params.set('rol_id', String(filters.rol_id));
   const qs = params.toString();
   return qs ? `?${qs}` : '';
 }

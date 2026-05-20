@@ -74,6 +74,7 @@ export interface ReportDashboard {
     top_epis: { name: string; value: number }[];
     by_section: { name: string; value: number }[];
     monthly_consumption: { name: string; valor: number }[];
+    exchange_status: { name: string; value: number }[];
   };
 }
 

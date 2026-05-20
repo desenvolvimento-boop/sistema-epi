@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Search,
-  Filter,
   Eye,
   History,
   Calendar,
@@ -11,12 +9,11 @@ import {
   Loader2,
   Building2,
   MapPin,
-  X,
 } from 'lucide-react';
+import { ListFiltersBar } from '../../components/list/ListFiltersBar';
 import { useNomenclature } from '../../hooks/useNomenclature';
 import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import { format, parseISO } from 'date-fns';
-import clsx from 'clsx';
 import {
   deliveryService,
   type HistorySummaryItem,
@@ -32,25 +29,14 @@ const Historico = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [tipoFilter, setTipoFilter] = useState<'' | 'Entrega' | 'Troca'>('');
-  const [statusFilter, setStatusFilter] = useState<'' | HistoryStatus>('');
-  const [filterOpen, setFilterOpen] = useState(false);
-  const filterRef = useRef<HTMLDivElement>(null);
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
+  const tipoFilter = (filterValues.tipo ?? '') as '' | 'Entrega' | 'Troca';
+  const statusFilter = (filterValues.status ?? '') as '' | HistoryStatus;
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchTerm), 300);
     return () => clearTimeout(t);
   }, [searchTerm]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
-        setFilterOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const loadHistory = useCallback(async () => {
     setLoading(true);
@@ -106,12 +92,8 @@ const Historico = () => {
     }
   };
 
-  const hasActiveFilters = Boolean(tipoFilter || statusFilter);
-
   const clearFilters = () => {
-    setTipoFilter('');
-    setStatusFilter('');
-    setFilterOpen(false);
+    setFilterValues({});
   };
 
   return (
@@ -121,60 +103,37 @@ const Historico = () => {
           <h2 className="historico-title">{t(NOMENCLATURE_KEYS.menu.historico)} Geral</h2>
           <p className="historico-subtitle">Rastreabilidade completa de todas as movimentações de EPI</p>
         </div>
-
-        <div className="historico-actions">
-          <div className="historico-search-wrapper">
-            <Search className="historico-search-icon" />
-            <input
-              type="text"
-              placeholder="Buscar colaborador..."
-              className="historico-search-input"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <div className="historico-filter-wrapper" ref={filterRef}>
-            <button
-              className={clsx('historico-filter-btn', hasActiveFilters && 'historico-filter-btn-active')}
-              type="button"
-              onClick={() => setFilterOpen((o) => !o)}
-              title="Filtros"
-            >
-              <Filter className="historico-icon-md" />
-            </button>
-            {filterOpen && (
-              <div className="historico-filter-panel">
-                <p className="historico-filter-label">Tipo</p>
-                <select
-                  className="historico-filter-select"
-                  value={tipoFilter}
-                  onChange={(e) => setTipoFilter(e.target.value as '' | 'Entrega' | 'Troca')}
-                >
-                  <option value="">Todos</option>
-                  <option value="Entrega">Entrega</option>
-                  <option value="Troca">Troca</option>
-                </select>
-                <p className="historico-filter-label">Status</p>
-                <select
-                  className="historico-filter-select"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as '' | HistoryStatus)}
-                >
-                  <option value="">Todos</option>
-                  <option value="Validado">Validado</option>
-                  <option value="Concluído">Concluído</option>
-                  <option value="Pendente">Pendente</option>
-                </select>
-                {hasActiveFilters && (
-                  <button type="button" className="historico-filter-clear" onClick={clearFilters}>
-                    <X className="historico-icon-xs" /> Limpar filtros
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
       </div>
+
+      <ListFiltersBar
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Buscar colaborador, empresa ou unidade..."
+        fields={[
+          {
+            id: 'tipo',
+            label: 'Tipo de evento',
+            type: 'select',
+            options: [
+              { value: 'Entrega', label: 'Entrega' },
+              { value: 'Troca', label: 'Troca' },
+            ],
+          },
+          {
+            id: 'status',
+            label: 'Status',
+            type: 'select',
+            options: [
+              { value: 'Validado', label: 'Validado' },
+              { value: 'Concluído', label: 'Concluído' },
+              { value: 'Pendente', label: 'Pendente' },
+            ],
+          },
+        ]}
+        values={filterValues}
+        onFieldChange={(id, value) => setFilterValues((prev) => ({ ...prev, [id]: value }))}
+        onClear={clearFilters}
+      />
 
       {error && (
         <div className="historico-error">

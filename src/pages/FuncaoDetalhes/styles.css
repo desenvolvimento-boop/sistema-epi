@@ -412,7 +412,7 @@
   padding: 2rem;
   border-radius: 1.5rem;
   color: white;
-  box-shadow: 0 20px 25px -5px rgb(15 23 42 / 0.2), 0 8px 10px -6px rgb(15 23 42 / 0.2);
+  box-shadow: 0 20px 25px -5px rgb(10 17 40 / 0.2), 0 8px 10px -6px rgb(10 17 40 / 0.2);
 }
 
 .funcao-detalhes-stats-header {
@@ -437,7 +437,7 @@
 .funcao-detalhes-stats-badge {
   font-size: 10px;
   font-weight: 700;
-  background-color: rgb(59 130 246 / 0.2);
+  background-color: rgb(30 96 210 / 0.2);
   color: var(--color-primary-400);
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
@@ -580,13 +580,13 @@
   font-weight: 600;
   padding: 0.125rem 0.5rem;
   border-radius: 9999px;
-  background: #e2e8f0;
-  color: #475569;
+  background: #dee2e6;
+  color: #5a6268;
 }
 
 .funcao-detalhes-origin-totvs {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: #d6e5f7;
+  color: #1a54b8;
 }
 
 .funcao-detalhes-empty {

@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { ListFiltersBar } from '../../components/list/ListFiltersBar';
+import { activeStatusMatcher, filterListRows } from '../../utils/listFilters';
 import { Plus, Edit2, Loader2, Building2 } from 'lucide-react';
 import { employerService, type EmployerAPI } from '../../services/employerService';
 import { EmpresaForm } from '../../components/forms/EmpresaForm';
@@ -12,6 +14,8 @@ const Empresas = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>('lista');
   const [editEmpresa, setEditEmpresa] = useState<EmployerAPI | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
   const { canCreate, canEdit } = useAuth();
   const allowCreate = canCreate('/empresas');
   const allowEdit = canEdit('/empresas');
@@ -49,6 +53,18 @@ const Empresas = () => {
 
   const canShowFormTab = allowCreate || (editEmpresa && allowEdit);
 
+  const filteredEmpresas = useMemo(
+    () =>
+      filterListRows(empresas, searchTerm, filterValues, {
+        searchText: (e) =>
+          [e.emr_name, e.emr_trade_name, e.emr_tax_id, String(e.emr_id)].filter(Boolean).join(' '),
+        fields: {
+          status: activeStatusMatcher((e) => e.emr_active),
+        },
+      }),
+    [empresas, searchTerm, filterValues],
+  );
+
   return (
     <div className="empresas-container">
       <div className="empresas-header">
@@ -79,11 +95,32 @@ const Empresas = () => {
             initialData={editEmpresa ?? undefined}
             onClose={handleCloseForm}
             onSaved={load}
+            existingEmployers={empresas}
           />
         </div>
       )}
 
       {activeTab === 'lista' && (
+        <>
+        <ListFiltersBar
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Buscar por nome, razão social ou CNPJ..."
+          fields={[
+            {
+              id: 'status',
+              label: 'Status',
+              type: 'select',
+              options: [
+                { value: '1', label: 'Ativo' },
+                { value: '0', label: 'Inativo' },
+              ],
+            },
+          ]}
+          values={filterValues}
+          onFieldChange={(id, value) => setFilterValues((prev) => ({ ...prev, [id]: value }))}
+          onClear={() => setFilterValues({})}
+        />
         <div className="empresas-card">
           {loading ? (
             <div className="empresas-loading">
@@ -93,6 +130,8 @@ const Empresas = () => {
             <p className="empresas-empty">
               Nenhuma empresa cadastrada. Crie a primeira para usar em colaboradores.
             </p>
+          ) : filteredEmpresas.length === 0 ? (
+            <p className="empresas-empty">Nenhuma empresa encontrada com os filtros aplicados.</p>
           ) : (
             <table className="empresas-table">
               <thead>
@@ -105,7 +144,7 @@ const Empresas = () => {
                 </tr>
               </thead>
               <tbody>
-                {empresas.map((e) => (
+                {filteredEmpresas.map((e) => (
                   <tr key={e.emr_id}>
                     <td>{e.emr_id}</td>
                     <td>
@@ -143,6 +182,7 @@ const Empresas = () => {
             </table>
           )}
         </div>
+        </>
       )}
     </div>
   );

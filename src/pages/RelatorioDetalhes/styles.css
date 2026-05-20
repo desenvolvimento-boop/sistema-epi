@@ -364,12 +364,12 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
   background: #fff;
   font-size: 0.8125rem;
   cursor: pointer;
-  color: #475569;
+  color: #5a6268;
 }
 
 .rel-detalhes-header-text {
@@ -388,9 +388,9 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.5rem 0.85rem;
-  border: 1px solid #3b82f6;
+  border: 1px solid #1e60d2;
   border-radius: 8px;
-  background: #3b82f6;
+  background: #1e60d2;
   color: #fff;
   font-size: 0.8125rem;
   cursor: pointer;
@@ -402,16 +402,16 @@
 }
 
 .rel-detalhes-export-excel {
-  background: #059669;
-  border-color: #059669;
+  background: #28a745;
+  border-color: #28a745;
 }
 
 .rel-detalhes-error {
   padding: 0.75rem 1rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: #fdf0f1;
+  border: 1px solid #f1aeb5;
   border-radius: 8px;
-  color: #b91c1c;
+  color: #c82333;
   font-size: 0.875rem;
 }
 

@@ -1,6 +1,6 @@
 .report-table-wrap {
   background: #fff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dee2e6;
   border-radius: 12px;
   overflow: hidden;
 }
@@ -18,21 +18,21 @@
 .report-table th {
   text-align: left;
   padding: 0.75rem 1rem;
-  background: #f8fafc;
-  color: #64748b;
+  background: #f4f7fe;
+  color: #6c757d;
   font-weight: 600;
   white-space: nowrap;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #dee2e6;
 }
 
 .report-table td {
   padding: 0.65rem 1rem;
-  border-bottom: 1px solid #f1f5f9;
-  color: #334155;
+  border-bottom: 1px solid #eef2f9;
+  color: #495057;
 }
 
 .report-table tbody tr:hover {
-  background: #f8fafc;
+  background: #f4f7fe;
 }
 
 .report-table-pagination {
@@ -40,14 +40,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #dee2e6;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
 .report-table-count {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: #6c757d;
 }
 
 .report-table-pagination-btns {
@@ -57,7 +57,7 @@
 
 .report-table-pagination-btns button {
   padding: 0.35rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #dee2e6;
   border-radius: 6px;
   background: #fff;
   cursor: pointer;
@@ -72,7 +72,7 @@
 .report-table-empty {
   text-align: center;
   padding: 3rem 1rem;
-  color: #64748b;
+  color: #6c757d;
   font-size: 0.875rem;
 }
 
@@ -85,7 +85,7 @@
 
 .report-table-spinner {
   animation: report-spin 1s linear infinite;
-  color: #3b82f6;
+  color: #1e60d2;
 }
 
 @keyframes report-spin {

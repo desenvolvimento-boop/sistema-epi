@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { ListFiltersBar } from '../../components/list/ListFiltersBar';
+import { activeStatusMatcher, filterListRows } from '../../utils/listFilters';
 import { 
   Shield, 
   Link as LinkIcon, 
@@ -26,6 +28,7 @@ import { authService } from '../../services/authService';
 import { accessProfileService, type AccessProfileAPI } from '../../services/accessProfileService';
 import { featureService, type FeatureAPI } from '../../services/featureService';
 import { permissionService, type PermissionAPI, type PermissionBulkItem } from '../../services/permissionService';
+import { validateAccessProfileUniqueness } from '../../utils/uniqueness';
 import './styles.css';
 
 interface PermissionSet {
@@ -42,6 +45,8 @@ const Configuracoes = () => {
   const canViewNomenclatura = canView(FEATURE_PATHS.NOMENCLATURA);
   const canEditNomenclatura = canEdit(FEATURE_PATHS.NOMENCLATURA);
   const [activeTab, setActiveTab] = useState('perfil');
+  const [profileSearch, setProfileSearch] = useState('');
+  const [profileFilterValues, setProfileFilterValues] = useState<Record<string, string>>({});
 
   const [profiles, setProfiles] = useState<AccessProfileAPI[]>([]);
   const [features, setFeatures] = useState<FeatureAPI[]>([]);
@@ -132,6 +137,25 @@ const Configuracoes = () => {
     );
     setProfilePermissionsCount(counts);
   }, [features]);
+
+  const filteredProfiles = useMemo(
+    () =>
+      filterListRows(profiles, profileSearch, profileFilterValues, {
+        searchText: (profile) =>
+          [
+            profile.acp_description,
+            profile.acp_integration_id,
+            String(profile.acp_id),
+            String(profilePermissionsCount[profile.acp_id] ?? ''),
+          ]
+            .filter(Boolean)
+            .join(' '),
+        fields: {
+          status: activeStatusMatcher((profile) => profile.acp_active),
+        },
+      }),
+    [profiles, profileSearch, profileFilterValues, profilePermissionsCount],
+  );
 
   const fetchData = useCallback(async () => {
     try {
@@ -262,6 +286,16 @@ const Configuracoes = () => {
   };
 
   const handleSaveProfile = async () => {
+    const duplicateMsg = validateAccessProfileUniqueness(
+      profiles,
+      newProfileName,
+      editingProfile?.acp_id,
+    );
+    if (duplicateMsg) {
+      setError(duplicateMsg);
+      return;
+    }
+
     try {
       setSaving(true);
       let profileId: number;
@@ -388,6 +422,28 @@ const Configuracoes = () => {
                     <Loader2 className="config-icon-lg" style={{ animation: 'spin 1s linear infinite' }} />
                   </div>
                 ) : (
+                  <>
+                  <ListFiltersBar
+                    searchValue={profileSearch}
+                    onSearchChange={setProfileSearch}
+                    searchPlaceholder="Buscar perfil de acesso..."
+                    fields={[
+                      {
+                        id: 'status',
+                        label: 'Status',
+                        type: 'select',
+                        options: [
+                          { value: '1', label: 'Ativo' },
+                          { value: '0', label: 'Inativo' },
+                        ],
+                      },
+                    ]}
+                    values={profileFilterValues}
+                    onFieldChange={(id, value) =>
+                      setProfileFilterValues((prev) => ({ ...prev, [id]: value }))
+                    }
+                    onClear={() => setProfileFilterValues({})}
+                  />
                   <div className="config-table-scroll">
                     <table className="config-table">
                       <thead>
@@ -400,7 +456,14 @@ const Configuracoes = () => {
                         </tr>
                       </thead>
                       <tbody className="config-tbody">
-                        {profiles.map(profile => (
+                        {filteredProfiles.length === 0 ? (
+                          <tr className="config-row">
+                            <td colSpan={5} className="config-cell">
+                              Nenhum perfil encontrado com os filtros aplicados.
+                            </td>
+                          </tr>
+                        ) : (
+                        filteredProfiles.map(profile => (
                           <tr key={profile.acp_id} className="config-row">
                             <td className="config-cell table-cell-id">{profile.acp_id}</td>
                             <td className="config-cell">
@@ -444,10 +507,12 @@ const Configuracoes = () => {
                               </div>
                             </td>
                           </tr>
-                        ))}
+                        ))
+                        )}
                       </tbody>
                     </table>
                   </div>
+                  </>
                 )}
               </motion.div>
             )}

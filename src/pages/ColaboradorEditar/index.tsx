@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, User, Briefcase, Loader2, Plus } from 'lucide-react';
 import { SimpleCrudModal, type SimpleCrudItem } from '../../components/forms/SimpleCrudModal';
 import { employeeService, type EmployeeAPI } from '../../services/employeeService';
+import { validateEmployeeUniqueness } from '../../utils/uniqueness';
 import { roleService, type RoleAPI } from '../../services/roleService';
 import { sectionService, type SectionAPI } from '../../services/sectionService';
 import { employerService, type EmployerAPI } from '../../services/employerService';
@@ -127,6 +128,23 @@ const ColaboradorEditar = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!employee) return;
+
+    try {
+      const allEmployees = await employeeService.getAll();
+      const duplicateMsg = validateEmployeeUniqueness(
+        allEmployees,
+        cpfValue,
+        matricula,
+        employee.emp_id,
+      );
+      if (duplicateMsg) {
+        alert(duplicateMsg);
+        return;
+      }
+    } catch {
+      /* segue para API */
+    }
+
     setSaving(true);
     try {
       await employeeService.update(employee.emp_id, {

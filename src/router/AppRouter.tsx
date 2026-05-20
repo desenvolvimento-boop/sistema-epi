@@ -78,8 +78,8 @@ export const AppRouter = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'var(--color-slate-950, #020617)',
-        color: 'var(--color-slate-400, #94a3b8)',
+        backgroundColor: 'var(--color-slate-950, #0a1128)',
+        color: 'var(--color-slate-400, #adb5bd)',
         fontSize: '0.875rem',
       }}>
         Carregando...

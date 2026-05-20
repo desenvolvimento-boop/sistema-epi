@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Lock, User, AlertCircle, Loader2 } from 'lucide-react';
+import { Lock, User, AlertCircle, Loader2 } from 'lucide-react';
+import { AppLogo } from '../../components/ui/AppLogo';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'motion/react';
@@ -40,11 +41,7 @@ const Login = () => {
       >
         <div className="login-card">
           <div className="login-header">
-            <div className="login-icon-wrapper">
-              <ShieldCheck className="login-icon" strokeWidth={2.5} />
-            </div>
-            <h1 className="login-title">EPI Control</h1>
-            <p className="login-subtitle">Gestão Inteligente de Segurança do Trabalho</p>
+            <AppLogo variant="auth" />
           </div>
 
           <form onSubmit={handleSubmit} className="login-form">

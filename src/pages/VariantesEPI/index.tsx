@@ -8,16 +8,17 @@ import { Modal } from '../../components/ui/Modal';
 import { EpiVariantForm } from '../../components/forms/EpiVariantForm';
 import { useAuth } from '../../contexts/AuthContext';
 import '../EPIs/styles.css';
+import { ListFiltersBar } from '../../components/list/ListFiltersBar';
+import { activeStatusMatcher, filterListRows } from '../../utils/listFilters';
 import './styles.css';
-
-const ALL_TYPES_FILTER = '';
 
 const VariantesEPI = () => {
   const navigate = useNavigate();
   const [types, setTypes] = useState<EpiTypeAPI[]>([]);
   const [variants, setVariants] = useState<EpiVariantAPI[]>([]);
   const [loading, setLoading] = useState(true);
-  const [typeFilter, setTypeFilter] = useState(ALL_TYPES_FILTER);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingVariant, setEditingVariant] = useState<EpiVariantAPI | null>(null);
   const { canCreate, canEdit } = useAuth();
@@ -46,11 +47,32 @@ const VariantesEPI = () => {
     loadData();
   }, [loadData]);
 
-  const filteredVariants = useMemo(() => {
-    if (!typeFilter) return variants;
-    const eptId = Number(typeFilter);
-    return variants.filter((v) => v.ept_id === eptId);
-  }, [variants, typeFilter]);
+  const filteredVariants = useMemo(
+    () =>
+      filterListRows(variants, searchTerm, filterValues, {
+        searchText: (v) => {
+          const tipo = v.epiType ?? typesById.get(v.ept_id);
+          return [
+            v.epv_manufacturer,
+            v.epv_model,
+            v.epv_ca,
+            v.epv_technical_description,
+            tipo?.ept_description,
+            tipo?.ept_category,
+            v.epv_integration_source,
+            String(v.epv_id),
+          ]
+            .filter(Boolean)
+            .join(' ');
+        },
+        fields: {
+          ept_id: (v, value) => String(v.ept_id) === value,
+          status: activeStatusMatcher((v) => v.epv_active),
+          origem: (v, value) => (v.epv_integration_source || 'Manual').toLowerCase() === value.toLowerCase(),
+        },
+      }),
+    [variants, searchTerm, filterValues, typesById],
+  );
 
   const handleOpenEditModal = (variant: EpiVariantAPI) => {
     setEditingVariant(variant);
@@ -63,7 +85,8 @@ const VariantesEPI = () => {
   };
 
   const handleNavigateCreate = () => {
-    const path = typeFilter ? `/variantes-epi/novo?tipo=${typeFilter}` : '/variantes-epi/novo';
+    const tipo = filterValues.ept_id;
+    const path = tipo ? `/variantes-epi/novo?tipo=${tipo}` : '/variantes-epi/novo';
     navigate(path);
   };
 
@@ -99,24 +122,44 @@ const VariantesEPI = () => {
         <strong>Tipo de EPIs</strong>.
       </p>
 
-      <div className="variantes-epi-toolbar">
-        <label className="variantes-epi-filter-label" htmlFor="variantes-type-filter">
-          Filtrar por tipo
-        </label>
-        <select
-          id="variantes-type-filter"
-          className="epi-form-input variantes-epi-filter-select"
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-        >
-          <option value={ALL_TYPES_FILTER}>Todos os tipos</option>
-          {types.map((t) => (
-            <option key={t.ept_id} value={String(t.ept_id)}>
-              {t.ept_description}
-            </option>
-          ))}
-        </select>
-      </div>
+      <ListFiltersBar
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Buscar fabricante, modelo, CA ou tipo..."
+        fields={[
+          {
+            id: 'ept_id',
+            label: 'Tipo de EPI',
+            type: 'select',
+            options: types.map((t) => ({
+              value: String(t.ept_id),
+              label: t.ept_description,
+            })),
+          },
+          {
+            id: 'status',
+            label: 'Status',
+            type: 'select',
+            options: [
+              { value: '1', label: 'Ativo' },
+              { value: '0', label: 'Inativo' },
+            ],
+          },
+          {
+            id: 'origem',
+            label: 'Origem',
+            type: 'select',
+            options: [
+              { value: 'Manual', label: 'Manual' },
+              { value: 'ERP', label: 'ERP' },
+              { value: 'Integração', label: 'Integração' },
+            ],
+          },
+        ]}
+        values={filterValues}
+        onFieldChange={(id, value) => setFilterValues((prev) => ({ ...prev, [id]: value }))}
+        onClear={() => setFilterValues({})}
+      />
 
       <Modal
         isOpen={isEditModalOpen}
@@ -133,6 +176,7 @@ const VariantesEPI = () => {
               loadData();
             }}
             initialData={editingVariant}
+            existingVariants={variants}
           />
         )}
       </Modal>
@@ -169,8 +213,8 @@ const VariantesEPI = () => {
               {filteredVariants.length === 0 ? (
                 <tr>
                   <td colSpan={allowEdit ? 8 : 7} className="table-cell epis-empty-cell">
-                    {typeFilter
-                      ? 'Nenhuma variante para este tipo.'
+                    {searchTerm || Object.keys(filterValues).some((k) => filterValues[k])
+                      ? 'Nenhuma variante encontrada com os filtros aplicados.'
                       : 'Nenhuma variante cadastrada.'}
                   </td>
                 </tr>

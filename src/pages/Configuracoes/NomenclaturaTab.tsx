@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, BookOpen, CheckCircle2, Loader2, RotateCcw, Save, Search } from 'lucide-react';
+import { ListFiltersBar } from '../../components/list/ListFiltersBar';
 import clsx from 'clsx';
 import {
   nomenclatureService,
@@ -30,6 +31,7 @@ export const NomenclaturaTab: React.FC<NomenclaturaTabProps> = ({ allowEdit }) =
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
 
   const loadCatalog = useCallback(async () => {
     setLoading(true);
@@ -61,17 +63,27 @@ export const NomenclaturaTab: React.FC<NomenclaturaTabProps> = ({ allowEdit }) =
     [catalog, draft]
   );
 
+  const groupOptions = useMemo(() => {
+    const groups = new Set(catalog.map((e) => e.group || 'Outros'));
+    return Array.from(groups)
+      .sort(compareNomenclatureGroups)
+      .map((g) => ({ value: g, label: g }));
+  }, [catalog]);
+
   const filteredCatalog = useMemo(() => {
-    if (!search.trim()) return catalog;
     const q = search.trim().toLowerCase();
-    return catalog.filter(
-      (e) =>
+    const groupFilter = filterValues.group ?? '';
+    return catalog.filter((e) => {
+      if (groupFilter && (e.group || 'Outros') !== groupFilter) return false;
+      if (!q) return true;
+      return (
         e.nom_key.toLowerCase().includes(q) ||
         e.defaultLabel.toLowerCase().includes(q) ||
         (draft[e.nom_key] ?? '').toLowerCase().includes(q) ||
         (e.group || '').toLowerCase().includes(q)
-    );
-  }, [catalog, draft, search]);
+      );
+    });
+  }, [catalog, draft, search, filterValues]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, NomenclatureCatalogEntry[]>();
@@ -153,17 +165,23 @@ export const NomenclaturaTab: React.FC<NomenclaturaTabProps> = ({ allowEdit }) =
         )}
       </div>
 
+      <ListFiltersBar
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Buscar termo, chave ou grupo..."
+        fields={[
+          {
+            id: 'group',
+            label: 'Grupo',
+            type: 'select',
+            options: groupOptions,
+          },
+        ]}
+        values={filterValues}
+        onFieldChange={(id, value) => setFilterValues((prev) => ({ ...prev, [id]: value }))}
+        onClear={() => setFilterValues({})}
+      />
       <div className="config-nom-toolbar">
-        <div className="config-nom-search-wrap">
-          <Search className="config-nom-search-icon" />
-          <input
-            type="search"
-            className="config-form-input config-nom-search-input"
-            placeholder="Buscar termo ou grupo..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
         <span className="config-permissions-badge">{catalog.length} termos</span>
         {modifiedCount > 0 && (
           <span className="config-nom-modified-badge">{modifiedCount} alterados</span>

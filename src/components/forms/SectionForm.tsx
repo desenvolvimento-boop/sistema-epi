@@ -4,6 +4,7 @@ import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
 import { sectionService } from '../../services/sectionService';
 import { useNomenclature } from '../../hooks/useNomenclature';
 import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
+import { validateSectionUniqueness } from '../../utils/uniqueness';
 import './SectionForm.css';
 import './SimpleCrudModal.css';
 import '../../pages/ColaboradorEditar/styles.css';
@@ -12,9 +13,10 @@ interface SectionFormProps {
   onClose: () => void;
   onSaved?: () => void;
   sectionId?: number;
+  existingSections?: { sec_id: number; sec_description?: string | null }[];
 }
 
-export const SectionForm = ({ onClose, onSaved, sectionId }: SectionFormProps) => {
+export const SectionForm = ({ onClose, onSaved, sectionId, existingSections }: SectionFormProps) => {
   const { t } = useNomenclature();
   const isEditing = sectionId != null;
   const sectionLabel = t(NOMENCLATURE_KEYS.entity.section_singular);
@@ -75,6 +77,21 @@ export const SectionForm = ({ onClose, onSaved, sectionId }: SectionFormProps) =
     if (!hasRequiredEpis) {
       alert(`Selecione pelo menos 1 EPI do ${sectionLabel} para salvar.`);
       return;
+    }
+
+    try {
+      const sectionsForCheck = existingSections ?? await sectionService.getAll();
+      const duplicateMsg = validateSectionUniqueness(
+        sectionsForCheck,
+        formName,
+        isEditing ? sectionId : undefined,
+      );
+      if (duplicateMsg) {
+        alert(duplicateMsg);
+        return;
+      }
+    } catch {
+      /* segue para API */
     }
 
     setSaving(true);

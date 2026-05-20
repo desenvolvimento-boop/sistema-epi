@@ -1,0 +1,111 @@
+.dashboard-filters {
+  background-color: var(--color-white, #fff);
+  border: 1px solid var(--color-slate-200);
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.dashboard-filters-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dashboard-filters-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.5rem;
+  background: var(--color-white, #fff);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-slate-700);
+  cursor: pointer;
+}
+
+.dashboard-filters-toggle:hover {
+  background-color: var(--color-slate-50);
+}
+
+.dashboard-filters-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dashboard-filters-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  font-size: 0.8125rem;
+  color: var(--color-slate-600);
+  cursor: pointer;
+}
+
+.dashboard-filters-clear:hover {
+  color: var(--color-slate-900);
+  background-color: var(--color-slate-100);
+}
+
+.dashboard-filters-apply {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  background-color: var(--color-primary-600, #2563eb);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dashboard-filters-apply:hover:not(:disabled) {
+  background-color: var(--color-primary-700, #1d4ed8);
+}
+
+.dashboard-filters-apply:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.dashboard-filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-slate-100);
+}
+
+.dashboard-filters-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--color-slate-600);
+}
+
+.dashboard-filters-field input,
+.dashboard-filters-field select {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-slate-800);
+  background: var(--color-white, #fff);
+}
+
+.dashboard-filters-field input:focus,
+.dashboard-filters-field select:focus {
+  outline: none;
+  border-color: var(--color-primary-500, #3b82f6);
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.15);
+}
