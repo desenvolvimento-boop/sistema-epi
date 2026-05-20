@@ -22,6 +22,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import clsx from 'clsx';
 import { Modal } from '../../components/ui/Modal';
 import { useAuth } from '../../contexts/AuthContext';
+import { authService } from '../../services/authService';
 import { accessProfileService, type AccessProfileAPI } from '../../services/accessProfileService';
 import { featureService, type FeatureAPI } from '../../services/featureService';
 import { permissionService, type PermissionAPI, type PermissionBulkItem } from '../../services/permissionService';
@@ -56,6 +57,13 @@ const Configuracoes = () => {
   const [newStatus, setNewStatus] = useState<number>(1);
   const [newIsDefault, setNewIsDefault] = useState<number>(0);
   const [selectedPermissions, setSelectedPermissions] = useState<Record<string, PermissionSet>>({});
+
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
 
   const tabs = [
     { id: 'perfil', label: 'Perfil de Acesso', icon: Shield },
@@ -151,6 +159,54 @@ const Configuracoes = () => {
       loadPermissionsCount(profiles);
     }
   }, [profiles, features, loadPermissionsCount]);
+
+  useEffect(() => {
+    if (activeTab === 'senha') return;
+    setPasswordError(null);
+    setPasswordSuccess(null);
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+  }, [activeTab]);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError(null);
+    setPasswordSuccess(null);
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError('Preencha todos os campos.');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError('A nova senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('A confirmação da nova senha não confere.');
+      return;
+    }
+
+    if (currentPassword === newPassword) {
+      setPasswordError('A nova senha deve ser diferente da senha atual.');
+      return;
+    }
+
+    try {
+      setPasswordSaving(true);
+      const result = await authService.changePassword(currentPassword, newPassword);
+      setPasswordSuccess(result.message || 'Senha alterada com sucesso.');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      setPasswordError(err instanceof Error ? err.message : 'Erro ao alterar senha.');
+    } finally {
+      setPasswordSaving(false);
+    }
+  };
 
   const handleAddProfile = () => {
     setEditingProfile(null);
@@ -442,21 +498,74 @@ const Configuracoes = () => {
                   <p className="config-section-desc">Mantenha sua conta segura trocando sua senha regularmente.</p>
                 </div>
 
-                <form className="config-form" onSubmit={(e) => e.preventDefault()}>
+                <form className="config-form" onSubmit={handleChangePassword}>
+                  {passwordError && (
+                    <p className="config-password-feedback config-password-feedback--error" role="alert">
+                      {passwordError}
+                    </p>
+                  )}
+                  {passwordSuccess && (
+                    <p className="config-password-feedback config-password-feedback--success" role="status">
+                      {passwordSuccess}
+                    </p>
+                  )}
                   <div className="config-form-group">
-                    <label className="config-form-label">Senha Atual</label>
-                    <input type="password" placeholder="••••••••" className="config-form-input" />
+                    <label className="config-form-label" htmlFor="current-password">Senha Atual</label>
+                    <input
+                      id="current-password"
+                      type="password"
+                      placeholder="••••••••"
+                      className="config-form-input"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      autoComplete="current-password"
+                      disabled={passwordSaving}
+                      required
+                    />
                   </div>
                   <div className="config-form-group">
-                    <label className="config-form-label">Nova Senha</label>
-                    <input type="password" placeholder="••••••••" className="config-form-input" />
+                    <label className="config-form-label" htmlFor="new-password">Nova Senha</label>
+                    <input
+                      id="new-password"
+                      type="password"
+                      placeholder="••••••••"
+                      className="config-form-input"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      autoComplete="new-password"
+                      disabled={passwordSaving}
+                      minLength={6}
+                      required
+                    />
                   </div>
                   <div className="config-form-group">
-                    <label className="config-form-label">Confirmar Nova Senha</label>
-                    <input type="password" placeholder="••••••••" className="config-form-input" />
+                    <label className="config-form-label" htmlFor="confirm-password">Confirmar Nova Senha</label>
+                    <input
+                      id="confirm-password"
+                      type="password"
+                      placeholder="••••••••"
+                      className="config-form-input"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      autoComplete="new-password"
+                      disabled={passwordSaving}
+                      minLength={6}
+                      required
+                    />
                   </div>
-                  <button className="config-submit-btn">
-                    Atualizar Senha
+                  <button
+                    type="submit"
+                    className="config-submit-btn"
+                    disabled={passwordSaving}
+                  >
+                    {passwordSaving ? (
+                      <>
+                        <Loader2 className="config-icon-sm config-spin" aria-hidden />
+                        Atualizando...
+                      </>
+                    ) : (
+                      'Atualizar Senha'
+                    )}
                   </button>
                 </form>
               </motion.div>

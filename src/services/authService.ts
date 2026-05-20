@@ -56,6 +56,35 @@ export const authService = {
     return res.json();
   },
 
+  async changePassword(
+    currentPassword: string,
+    newPassword: string
+  ): Promise<{ message: string }> {
+    const token = this.getToken();
+    if (!token) {
+      throw new Error('Sessão expirada. Faça login novamente.');
+    }
+
+    const res = await fetch(`${API_BASE_URL}/auth/change-password`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        current_password: currentPassword,
+        new_password: newPassword,
+      }),
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || body.message || 'Erro ao alterar senha.');
+    }
+
+    return res.json();
+  },
+
   async me(token: string): Promise<AuthMeResponse> {
     const res = await fetch(`${API_BASE_URL}/auth/me`, {
       headers: {

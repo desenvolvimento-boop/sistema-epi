@@ -615,6 +615,10 @@
 }
 
 .config-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   width: 100%;
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
@@ -628,8 +632,32 @@
   margin-top: 1rem;
 }
 
-.config-submit-btn:hover {
+.config-submit-btn:hover:not(:disabled) {
   background-color: var(--color-primary-700);
+}
+
+.config-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.config-password-feedback {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.5rem;
+}
+
+.config-password-feedback--error {
+  color: var(--color-red-700);
+  background-color: var(--color-red-50);
+  border: 1px solid var(--color-red-100);
+}
+
+.config-password-feedback--success {
+  color: var(--color-green-700);
+  background-color: var(--color-green-50);
+  border: 1px solid var(--color-green-100);
 }
 
 .config-logout-icon-wrapper {
