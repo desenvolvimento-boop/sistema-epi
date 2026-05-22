@@ -13,6 +13,7 @@ import {
 import { ListFiltersBar } from '../../components/list/ListFiltersBar';
 import { useNomenclature } from '../../hooks/useNomenclature';
 import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { format, parseISO } from 'date-fns';
 import {
   deliveryService,
@@ -98,12 +99,11 @@ const Historico = () => {
 
   return (
     <div className="historico-container">
-      <div className="historico-header">
-        <div>
-          <h2 className="historico-title">{t(NOMENCLATURE_KEYS.menu.historico)} Geral</h2>
-          <p className="historico-subtitle">Rastreabilidade completa de todas as movimentações de EPI</p>
-        </div>
-      </div>
+      <PageHeader
+        icon={History}
+        title={t(NOMENCLATURE_KEYS.page.historico)}
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_historico)}
+      />
 
       <ListFiltersBar
         searchValue={searchTerm}

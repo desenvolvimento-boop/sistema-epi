@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, History, Package, Calendar, CheckCircle2 } from 'lucide-react';
+import { History, Package, Calendar, CheckCircle2 } from 'lucide-react';
+import { PageHeader, PageHeaderBackButton } from '../../components/layout/PageHeader';
 import { EMPLOYEES } from '../../services/api';
 import './styles.css';
 
@@ -18,15 +19,12 @@ const ColaboradorHistorico = () => {
 
   return (
     <div className="historico-container">
-      <div className="historico-header">
-        <button onClick={() => navigate('/colaboradores')} className="historico-back-btn">
-          <ArrowLeft className="historico-back-icon" />
-        </button>
-        <div>
-          <h2 className="historico-title">Histórico do Colaborador</h2>
-          <p className="historico-subtitle">Rastreabilidade completa de {colaborador.nome}</p>
-        </div>
-      </div>
+      <PageHeader
+        leading={<PageHeaderBackButton onClick={() => navigate('/colaboradores')} />}
+        icon={History}
+        title="Histórico do Colaborador"
+        subtitle={`Rastreabilidade completa de ${colaborador.nome}`}
+      />
 
       <div className="historico-stats-grid">
         <div className="historico-stat-card">

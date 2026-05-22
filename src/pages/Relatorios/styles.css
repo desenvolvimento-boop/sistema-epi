@@ -633,8 +633,12 @@
 .relatorios-section-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #495057;
-  margin-bottom: 1rem;
+  color: var(--color-slate-800);
+  margin: 0 0 1rem;
+}
+
+.relatorios-quick-card .relatorios-section-title {
+  padding: 1.25rem 1.5rem 0;
 }
 
 .relatorios-error {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, History, UserCog, MoreVertical, Loader2 } from 'lucide-react';
+import { Plus, History, UserCog, MoreVertical, Loader2, Users } from 'lucide-react';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { ListFiltersBar } from '../../components/list/ListFiltersBar';
 import { activeStatusMatcher, filterListRows } from '../../utils/listFilters';
 import { employeeService, type EmployeeAPI } from '../../services/employeeService';
@@ -105,17 +106,22 @@ const Colaboradores = () => {
 
   return (
     <div className="colaboradores-container">
-      <div className="colaboradores-header">
-        {allowCreate && (
-          <button 
-            onClick={() => navigate('/colaboradores/novo')}
-            className="colaboradores-add-btn"
-            type="button"
-          >
-            <Plus className="colaboradores-btn-icon" /> {t(NOMENCLATURE_KEYS.action.new)} {t(NOMENCLATURE_KEYS.entity.colaborador_singular)}
-          </button>
-        )}
-      </div>
+      <PageHeader
+        icon={Users}
+        title={t(NOMENCLATURE_KEYS.page.colaboradores)}
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_colaboradores)}
+        actions={
+          allowCreate ? (
+            <button
+              onClick={() => navigate('/colaboradores/novo')}
+              className="colaboradores-add-btn"
+              type="button"
+            >
+              <Plus className="colaboradores-btn-icon" /> {t(NOMENCLATURE_KEYS.action.new)} {t(NOMENCLATURE_KEYS.entity.colaborador_singular)}
+            </button>
+          ) : undefined
+        }
+      />
 
       <ListFiltersBar
         searchValue={searchTerm}

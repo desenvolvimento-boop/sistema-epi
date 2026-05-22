@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MoreHorizontal, ShieldCheck, FileText, UserMinus, RefreshCw, Loader2 } from 'lucide-react';
+import { MoreHorizontal, ShieldCheck, FileText, UserMinus, RefreshCw, Loader2, User } from 'lucide-react';
+import { PageHeader, PageHeaderBackButton } from '../../components/layout/PageHeader';
 import { employeeService, type EmployeeAPI } from '../../services/employeeService';
 import { StatusBadge } from '../../components/StatusBadge';
 import { useAuth } from '../../contexts/AuthContext';
@@ -61,23 +62,17 @@ const ColaboradorDetalhes = () => {
 
   return (
     <div className="detalhes-container">
-      <div className="detalhes-header">
-        <div className="detalhes-header-left">
-          <button 
-            onClick={() => navigate('/colaboradores')}
-            className="detalhes-back-btn"
-          >
-            <ArrowLeft className="detalhes-back-icon" />
+      <PageHeader
+        leading={<PageHeaderBackButton onClick={() => navigate('/colaboradores')} />}
+        icon={User}
+        title="Detalhes do Colaborador"
+        subtitle="Gestão avançada de perfil e conformidade de EPIs"
+        actions={
+          <button type="button" className="detalhes-more-btn">
+            <MoreHorizontal className="detalhes-more-icon" />
           </button>
-          <div>
-            <h2 className="detalhes-title">Detalhes do Colaborador</h2>
-            <p className="detalhes-subtitle">Gestão avançada de perfil</p>
-          </div>
-        </div>
-        <button className="detalhes-more-btn">
-          <MoreHorizontal className="detalhes-more-icon" />
-        </button>
-      </div>
+        }
+      />
 
       <div className="detalhes-grid">
         <div className="detalhes-main">

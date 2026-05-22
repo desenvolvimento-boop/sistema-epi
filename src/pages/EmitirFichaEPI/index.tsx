@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, FileText, Download, Printer, ShieldCheck } from 'lucide-react';
+import { FileText, Download, Printer, ShieldCheck } from 'lucide-react';
+import { PageHeader, PageHeaderBackButton } from '../../components/layout/PageHeader';
 import { EMPLOYEES } from '../../services/api';
 import './styles.css';
 
@@ -11,15 +12,12 @@ const EmitirFichaEPI = () => {
 
   return (
     <div className="ficha-container">
-      <div className="ficha-header">
-        <button onClick={() => navigate(`/colaboradores/${id}/detalhes`)} className="ficha-back-btn">
-          <ArrowLeft className="ficha-back-icon" />
-        </button>
-        <div>
-          <h2 className="ficha-title">Emitir Ficha de EPI</h2>
-          <p className="ficha-subtitle">Documento oficial de controle para {colaborador.nome}</p>
-        </div>
-      </div>
+      <PageHeader
+        leading={<PageHeaderBackButton onClick={() => navigate(`/colaboradores/${id}/detalhes`)} />}
+        icon={FileText}
+        title="Emitir Ficha de EPI"
+        subtitle={`Documento oficial de controle para ${colaborador.nome}`}
+      />
 
       <div className="ficha-grid">
         <div className="ficha-main">

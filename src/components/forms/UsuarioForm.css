@@ -4,11 +4,36 @@
   gap: 1.25rem;
 }
 
-/* Toggle */
+/* Toggles */
+.usuario-form-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem 2rem;
+}
+
 .usuario-form-toggle-row {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.usuario-form-sections-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.usuario-form-sections-label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-slate-700);
+}
+
+.usuario-form-sections-hint {
+  font-size: 0.75rem;
+  color: var(--color-slate-500);
+  margin: 0;
 }
 
 .usuario-form-toggle-label {

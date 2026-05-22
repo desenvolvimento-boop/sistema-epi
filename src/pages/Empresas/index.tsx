@@ -5,11 +5,15 @@ import { Plus, Edit2, Loader2, Building2 } from 'lucide-react';
 import { employerService, type EmployerAPI } from '../../services/employerService';
 import { EmpresaForm } from '../../components/forms/EmpresaForm';
 import { useAuth } from '../../contexts/AuthContext';
+import { PageHeader } from '../../components/layout/PageHeader';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import './styles.css';
 
 type TabId = 'lista' | 'cadastro';
 
 const Empresas = () => {
+  const { t } = useNomenclature();
   const [empresas, setEmpresas] = useState<EmployerAPI[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>('lista');
@@ -67,19 +71,19 @@ const Empresas = () => {
 
   return (
     <div className="empresas-container">
-      <div className="empresas-header">
-        <div>
-          <h2 className="empresas-title">Empresas</h2>
-          <p className="empresas-subtitle">
-            Cadastro operacional para vínculo de colaboradores. Integração ERP fica em Configurações.
-          </p>
-        </div>
-        {activeTab === 'lista' && allowCreate && (
-          <button type="button" onClick={handleOpenCreate} className="empresas-add-btn">
-            <Plus className="empresas-btn-icon" /> Nova empresa
-          </button>
-        )}
-      </div>
+      <PageHeader
+        icon={Building2}
+        iconTone="amber"
+        title={t(NOMENCLATURE_KEYS.page.empresas)}
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_empresas)}
+        actions={
+          activeTab === 'lista' && allowCreate ? (
+            <button type="button" onClick={handleOpenCreate} className="empresas-add-btn">
+              <Plus className="empresas-btn-icon" /> Nova empresa
+            </button>
+          ) : undefined
+        }
+      />
 
       {activeTab === 'cadastro' && canShowFormTab && (
         <div className="empresas-form-panel">

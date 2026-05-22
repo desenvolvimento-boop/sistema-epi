@@ -46,3 +46,38 @@
 .section-form-epi-grid {
   max-height: min(24rem, 50vh);
 }
+
+.section-form-tabs {
+  margin-bottom: 1.25rem;
+}
+
+.section-form-regras > * + * {
+  margin-top: 1rem;
+}
+
+.section-form-rules-scroll {
+  max-height: min(28rem, 55vh);
+  overflow: auto;
+}
+
+.section-form-regras .section-form-rule-row {
+  cursor: default;
+}
+
+.section-form-rule-row--override {
+  background-color: var(--color-primary-50);
+}
+
+.section-form-rule-row--override:hover {
+  background-color: rgb(239 246 255 / 0.85);
+}
+
+.section-form-rule-input {
+  max-width: 8.5rem;
+}
+
+.section-form-regras .epis-empty-cell {
+  text-align: center;
+  color: var(--color-slate-500);
+  padding: 2rem 1.5rem !important;
+}

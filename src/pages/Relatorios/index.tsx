@@ -26,6 +26,9 @@ import {
 } from 'recharts';
 import { defaultReportFilters, reportService } from '../../services/reportService';
 import type { ReportCatalogItem, ReportDashboard, ReportFilters } from '../../types/report.types';
+import { PageHeader } from '../../components/layout/PageHeader';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import './styles.css';
 
 const COLORS = ['#1e60d2', '#4a82d7', '#7aa5e3', '#adc8ef', '#d6e5f7'];
@@ -44,6 +47,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 const Relatorios = () => {
   const navigate = useNavigate();
+  const { t } = useNomenclature();
   const [catalog, setCatalog] = useState<ReportCatalogItem[]>([]);
   const [dashboard, setDashboard] = useState<ReportDashboard | null>(null);
   const [filters, setFilters] = useState<ReportFilters>(defaultReportFilters);
@@ -77,13 +81,11 @@ const Relatorios = () => {
 
   return (
     <div className="relatorios-container">
-      <div className="relatorios-header">
-        <div>
-          <h2 className="relatorios-title">Relatórios e BI</h2>
-          <p className="relatorios-subtitle">
-            Análise de dados e exportação de indicadores de segurança.
-          </p>
-        </div>
+      <PageHeader
+        icon={BarChart3}
+        title={t(NOMENCLATURE_KEYS.page.relatorios)}
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_relatorios)}
+        actions={
         <div className="relatorios-filters">
           <label className="relatorios-date-wrapper">
             <span className="relatorios-filter-label">De</span>
@@ -104,7 +106,8 @@ const Relatorios = () => {
             />
           </label>
         </div>
-      </div>
+        }
+      />
 
       {error && <div className="relatorios-error">{error}</div>}
 

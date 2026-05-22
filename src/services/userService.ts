@@ -30,6 +30,10 @@ export interface UserAPI {
   usr_datetimeupdate?: string;
   acp_id: number | null;
   agg_id: number | null;
+  usr_center_access?: number | null;
+  usr_perform_delivery?: number | null;
+  section_ids?: number[];
+  sections?: { sec_id: number; sec_description: string }[];
 }
 
 export type UserCreatePayload = Omit<UserAPI, 'usr_id' | 'usr_datetimeinsert' | 'usr_datetimeupdate'>;

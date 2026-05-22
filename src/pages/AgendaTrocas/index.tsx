@@ -14,6 +14,9 @@ import { format, parseISO } from 'date-fns';
 import { Modal } from '../../components/ui/Modal';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
+import { PageHeader } from '../../components/layout/PageHeader';
 import {
   deliveryService,
   type ExchangeAgendaItem,
@@ -26,6 +29,7 @@ import './styles.css';
 
 const AgendaTrocas = () => {
   const navigate = useNavigate();
+  const { t } = useNomenclature();
   const [agenda, setAgenda] = useState<ExchangeAgendaResponse | null>(null);
   const [sections, setSections] = useState<SectionAPI[]>([]);
   const [loading, setLoading] = useState(true);
@@ -156,31 +160,32 @@ const AgendaTrocas = () => {
 
   return (
     <div className="agenda-container">
-      <div className="agenda-header">
-        <div>
-          <h2 className="agenda-title">Agenda de Trocas</h2>
-          <p className="agenda-subtitle">Planejamento preventivo de substituição de EPIs por vencimento.</p>
-        </div>
-        <div className="agenda-header-actions">
-          <button
-            onClick={loadAgenda}
-            className="agenda-btn-refresh"
-            type="button"
-            disabled={loading}
-            title="Atualizar agenda"
-          >
-            <RefreshCw className={`agenda-icon-md ${loading ? 'agenda-spin' : ''}`} />
-            Atualizar
-          </button>
-          <button
-            onClick={() => navigate('/agenda-trocas/calendario')}
-            className="agenda-btn-calendar"
-            type="button"
-          >
-            Visualizar Calendário
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        icon={Calendar}
+        title={t(NOMENCLATURE_KEYS.page.agenda_trocas)}
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_agenda_trocas)}
+        actions={
+          <>
+            <button
+              onClick={loadAgenda}
+              className="agenda-btn-refresh"
+              type="button"
+              disabled={loading}
+              title="Atualizar agenda"
+            >
+              <RefreshCw className={`agenda-icon-md ${loading ? 'agenda-spin' : ''}`} />
+              Atualizar
+            </button>
+            <button
+              onClick={() => navigate('/agenda-trocas/calendario')}
+              className="agenda-btn-calendar"
+              type="button"
+            >
+              Visualizar Calendário
+            </button>
+          </>
+        }
+      />
 
       {successMessage && (
         <div className="agenda-success-banner" role="status">

@@ -2,17 +2,21 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ListFiltersBar } from '../../components/list/ListFiltersBar';
 import { activeStatusMatcher, filterListRows } from '../../utils/listFilters';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Eye, Edit2, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, Eye, Edit2, Loader2, RefreshCw, UserCog } from 'lucide-react';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { User } from '../../types/system.types';
 import { userService } from '../../services/userService';
 import { StatusBadge } from '../../components/StatusBadge';
 import { Modal } from '../../components/ui/Modal';
 import { UsuarioForm } from '../../components/forms/UsuarioForm';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import './styles.css';
 
 const Usuarios = () => {
   const navigate = useNavigate();
+  const { t } = useNomenclature();
   const { canCreate, canEdit } = useAuth();
   const allowCreate = canCreate('/usuarios');
   const allowEdit = canEdit('/usuarios');
@@ -95,19 +99,23 @@ const Usuarios = () => {
 
   return (
     <div className="usuarios-container">
-      <div className="usuarios-header">
-        <h2 className="usuarios-title">Usuários</h2>
-        <div className="usuarios-header-actions">
-          <button onClick={fetchUsers} className="usuarios-refresh-btn" title="Atualizar lista" disabled={loading}>
-            <RefreshCw className={`usuarios-icon-sm ${loading ? 'usuarios-spin' : ''}`} />
-          </button>
-          {allowCreate && (
-            <button onClick={() => navigate('/usuarios/novo')} className="usuarios-add-btn">
-              <Plus className="usuarios-icon-sm" /> Novo Usuário
+      <PageHeader
+        icon={UserCog}
+        title={t(NOMENCLATURE_KEYS.page.usuarios)}
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_usuarios)}
+        actions={
+          <>
+            <button onClick={fetchUsers} className="usuarios-refresh-btn" title="Atualizar lista" disabled={loading}>
+              <RefreshCw className={`usuarios-icon-sm ${loading ? 'usuarios-spin' : ''}`} />
             </button>
-          )}
-        </div>
-      </div>
+            {allowCreate && (
+              <button onClick={() => navigate('/usuarios/novo')} className="usuarios-add-btn">
+                <Plus className="usuarios-icon-sm" /> Novo Usuário
+              </button>
+            )}
+          </>
+        }
+      />
 
       <Modal
         isOpen={isEditModalOpen}
@@ -138,6 +146,18 @@ const Usuarios = () => {
               <ViewField label="Tipo de Usuário" value={viewUser.usr_agent_type} />
               <ViewField label="Perfil de Acesso" value={(viewUser as any).accessProfile?.acp_description || viewUser.usr_access_profile} />
               <ViewField label="Status" value={viewUser.usr_active === 1 ? 'Ativo' : 'Inativo'} />
+              <ViewField label="Acesso ao center" value={viewUser.usr_center_access === 1 ? 'Sim' : 'Não'} />
+              <ViewField label="Realizar entrega" value={viewUser.usr_perform_delivery === 1 ? 'Sim' : 'Não'} />
+              {viewUser.usr_perform_delivery === 1 && (
+                <ViewField
+                  label="Seções para entrega"
+                  value={
+                    viewUser.sections?.length
+                      ? viewUser.sections.map((s) => s.sec_description).join(', ')
+                      : '—'
+                  }
+                />
+              )}
               <ViewField label="Telefone" value={formatPhone(viewUser.usr_phone_country_code, viewUser.usr_phone_area_code, viewUser.usr_phone_number)} />
               <ViewField label="Celular" value={formatPhone(viewUser.usr_mobile_country_code, viewUser.usr_mobile_area_code, viewUser.usr_mobile_number)} />
               <ViewField label="CEP" value={viewUser.usr_zip_code} />

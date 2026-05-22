@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, RefreshCw, Building2, MapPin, Save, AlertCircle } from 'lucide-react';
+import { RefreshCw, Building2, MapPin, Save, AlertCircle } from 'lucide-react';
+import { PageHeader, PageHeaderBackButton } from '../../components/layout/PageHeader';
 import { EMPLOYEES } from '../../services/api';
 import './styles.css';
 
@@ -11,18 +12,13 @@ const TransferirUnidade = () => {
 
   return (
     <div className="page-container">
-      <div className="page-header">
-        <button 
-          onClick={() => navigate(`/colaboradores/${id}/detalhes`)}
-          className="back-button"
-        >
-          <ArrowLeft className="back-icon" />
-        </button>
-        <div>
-          <h2 className="page-title">Transferir Unidade</h2>
-          <p className="page-subtitle">Alteração de local de trabalho para {colaborador.nome}</p>
-        </div>
-      </div>
+      <PageHeader
+        leading={<PageHeaderBackButton onClick={() => navigate(`/colaboradores/${id}/detalhes`)} />}
+        icon={MapPin}
+        iconTone="blue"
+        title="Transferir Unidade"
+        subtitle={`Alteração de local de trabalho para ${colaborador.nome}`}
+      />
 
       <div className="card">
         <div className="card-body">

@@ -28,6 +28,7 @@ import {
   type IncidentStatus,
   type IncidentType,
 } from '../../services/incidentService';
+import { PageHeader } from '../../components/layout/PageHeader';
 import './styles.css';
 
 const SeverityBadge = ({ severity }: { severity: IncidentSeverity }) => {
@@ -227,19 +228,12 @@ const Intercorrencias = () => {
 
   return (
     <motion.div className="intercorrencias-container">
-      <motion.div className="intercorrencias-header">
-        <motion.div className="intercorrencias-header-left">
-          <motion.div className="intercorrencias-icon-box">
-            <AlertOctagon className="intercorrencias-icon-lg" />
-          </motion.div>
-          <motion.div>
-            <h2 className="intercorrencias-title">{t(NOMENCLATURE_KEYS.entity.intercorrencia_plural)}</h2>
-            <p className="intercorrencias-subtitle">
-              Inconsistências e possíveis fraudes identificadas pela Inteligência de Dados.
-            </p>
-          </motion.div>
-        </motion.div>
-        <motion.div className="intercorrencias-header-actions">
+      <PageHeader
+        icon={AlertOctagon}
+        iconTone="red"
+        title={t(NOMENCLATURE_KEYS.entity.intercorrencia_plural)}
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_intercorrencias)}
+        actions={
           <button
             type="button"
             className="intercorrencias-export-btn"
@@ -253,8 +247,8 @@ const Intercorrencias = () => {
             )}
             Exportar Relatório
           </button>
-        </motion.div>
-      </motion.div>
+        }
+      />
 
       <motion.div className="intercorrencias-stats-grid">
         <motion.div className="intercorrencias-stat-card">

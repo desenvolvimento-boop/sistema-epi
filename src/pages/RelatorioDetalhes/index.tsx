@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Loader2 } from 'lucide-react';
+import { BarChart3, Download, Loader2 } from 'lucide-react';
+import { PageHeader, PageHeaderBackButton } from '../../components/layout/PageHeader';
 import { useAuth } from '../../contexts/AuthContext';
 import { defaultReportFilters, reportService } from '../../services/reportService';
 import type { ExportFormat, ReportCatalogItem, ReportFilters, ReportResponse } from '../../types/report.types';
@@ -87,21 +88,13 @@ const RelatorioDetalhes = () => {
 
   return (
     <div className="rel-detalhes-container">
-      <div className="rel-detalhes-header">
-        <button
-          type="button"
-          onClick={() => navigate('/relatorios')}
-          className="rel-detalhes-back"
-        >
-          <ArrowLeft size={18} /> Voltar
-        </button>
-        <div className="rel-detalhes-header-text">
-          <h2 className="rel-detalhes-title">{title}</h2>
-          <p className="rel-detalhes-desc">
-            {data?.report?.description || catalogItem?.description}
-          </p>
-        </div>
-        {canExport && (
+      <PageHeader
+        leading={<PageHeaderBackButton onClick={() => navigate('/relatorios')} />}
+        icon={BarChart3}
+        title={title}
+        subtitle={data?.report?.description || catalogItem?.description || 'Relatório analítico'}
+        actions={
+          canExport ? (
           <div className="rel-detalhes-actions">
             <button
               type="button"
@@ -130,8 +123,9 @@ const RelatorioDetalhes = () => {
               Excel
             </button>
           </div>
-        )}
-      </div>
+          ) : undefined
+        }
+      />
 
       <ReportFiltersBar
         catalogItem={catalogItem}

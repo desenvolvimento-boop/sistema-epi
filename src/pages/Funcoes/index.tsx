@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Shield, Info, Edit2, Loader2 } from 'lucide-react';
+import { Plus, Shield, Info, Edit2, Loader2, Briefcase } from 'lucide-react';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { roleService, type RoleAPI } from '../../services/roleService';
 import { FuncaoForm } from '../../components/forms/FuncaoForm';
 import { useAuth } from '../../contexts/AuthContext';
@@ -90,14 +91,19 @@ const Funcoes = () => {
 
   return (
     <div className="funcoes-container">
-      <div className="funcoes-header">
-        <h2 className="funcoes-title">Definição de Funções e Riscos</h2>
-        {activeTab === 'lista' && allowCreate && (
-          <button onClick={handleOpenCreate} className="funcoes-add-btn" type="button">
-            <Plus className="funcoes-btn-icon" /> {t(NOMENCLATURE_KEYS.action.new)} {t(NOMENCLATURE_KEYS.entity.funcao_singular)}
-          </button>
-        )}
-      </div>
+      <PageHeader
+        icon={Briefcase}
+        iconTone="amber"
+        title={t(NOMENCLATURE_KEYS.page.funcoes)}
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_funcoes)}
+        actions={
+          activeTab === 'lista' && allowCreate ? (
+            <button onClick={handleOpenCreate} className="funcoes-add-btn" type="button">
+              <Plus className="funcoes-btn-icon" /> {t(NOMENCLATURE_KEYS.action.new)} {t(NOMENCLATURE_KEYS.entity.funcao_singular)}
+            </button>
+          ) : undefined
+        }
+      />
 
       {activeTab === 'cadastro' && canShowFormTab && (
         <div className="funcoes-form-panel">

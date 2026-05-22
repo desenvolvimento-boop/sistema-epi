@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit3, Loader2, Package } from 'lucide-react';
+import { Plus, Edit3, Loader2, Layers } from 'lucide-react';
+import { PageHeader } from '../../components/layout/PageHeader';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
 import { epiVariantService, type EpiVariantAPI } from '../../services/epiVariantService';
 import { StatusBadge } from '../../components/StatusBadge';
@@ -14,6 +17,7 @@ import './styles.css';
 
 const VariantesEPI = () => {
   const navigate = useNavigate();
+  const { t } = useNomenclature();
   const [types, setTypes] = useState<EpiTypeAPI[]>([]);
   const [variants, setVariants] = useState<EpiVariantAPI[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,25 +106,24 @@ const VariantesEPI = () => {
 
   return (
     <div className="epis-page variantes-epi-page">
-      <div className="page-header">
-        <h2 className="page-title">Variantes de EPIs</h2>
-        {allowCreate && (
-          <button
-            type="button"
-            onClick={handleNavigateCreate}
-            className="btn-add"
-            disabled={activeTypes.length === 0}
-            title={activeTypes.length === 0 ? 'Cadastre um tipo de EPI primeiro' : undefined}
-          >
-            <Plus className="icon-sm" /> Nova Variante
-          </button>
-        )}
-      </div>
-
-      <p className="epis-page-hint">
-        Gerencie as <strong>variantes homologadas</strong> (fabricante, modelo e CA) vinculadas aos tipos cadastrados em{' '}
-        <strong>Tipo de EPIs</strong>.
-      </p>
+      <PageHeader
+        icon={Layers}
+        title={t(NOMENCLATURE_KEYS.page.variantes_epi)}
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_variantes_epi)}
+        actions={
+          allowCreate ? (
+            <button
+              type="button"
+              onClick={handleNavigateCreate}
+              className="btn-add"
+              disabled={activeTypes.length === 0}
+              title={activeTypes.length === 0 ? 'Cadastre um tipo de EPI primeiro' : undefined}
+            >
+              <Plus className="icon-sm" /> Nova Variante
+            </button>
+          ) : undefined
+        }
+      />
 
       <ListFiltersBar
         searchValue={searchTerm}

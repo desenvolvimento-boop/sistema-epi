@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, UserMinus, AlertTriangle, Save, FileText, CheckCircle2 } from 'lucide-react';
+import { UserMinus, AlertTriangle, Save, FileText, CheckCircle2 } from 'lucide-react';
+import { PageHeader, PageHeaderBackButton } from '../../components/layout/PageHeader';
 import { EMPLOYEES } from '../../services/api';
 import './styles.css';
 
@@ -11,18 +12,13 @@ const DesativarColaborador = () => {
 
   return (
     <div className="page-container">
-      <div className="page-header">
-        <button 
-          onClick={() => navigate(`/colaboradores/${id}/detalhes`)}
-          className="back-button"
-        >
-          <ArrowLeft className="back-icon" />
-        </button>
-        <div>
-          <h2 className="page-title">Desativar Colaborador</h2>
-          <p className="page-subtitle">Processo de desligamento para {colaborador.nome}</p>
-        </div>
-      </div>
+      <PageHeader
+        leading={<PageHeaderBackButton onClick={() => navigate(`/colaboradores/${id}/detalhes`)} />}
+        icon={UserMinus}
+        iconTone="red"
+        title="Desativar Colaborador"
+        subtitle={`Processo de desligamento para ${colaborador.nome}`}
+      />
 
       <div className="content-wrapper">
         <div className="danger-alert">

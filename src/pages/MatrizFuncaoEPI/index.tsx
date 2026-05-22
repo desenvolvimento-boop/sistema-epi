@@ -2,7 +2,10 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ListFiltersBar } from '../../components/list/ListFiltersBar';
 import { filterListRows } from '../../utils/listFilters';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, Plus, Edit3, Eye, Loader2 } from 'lucide-react';
+import { CheckCircle2, Plus, Edit3, Eye, Loader2, Grid3x3 } from 'lucide-react';
+import { PageHeader } from '../../components/layout/PageHeader';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import { roleService, type RoleAPI, type RoleMatrixResponse } from '../../services/roleService';
 import { Modal } from '../../components/ui/Modal';
 import { MatrizForm } from '../../components/forms/MatrizForm';
@@ -10,6 +13,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import './styles.css';
 
 const MatrizFuncaoEPI = () => {
+  const { t } = useNomenclature();
   const [matrixData, setMatrixData] = useState<RoleMatrixResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -76,14 +80,19 @@ const MatrizFuncaoEPI = () => {
 
   return (
     <div className="matriz-page">
-      <div className="matriz-header">
-        <h2 className="matriz-title">Matriz de Proteção (Função x EPI)</h2>
-        {allowCreate && (
-          <button onClick={handleNewMatriz} className="matriz-new-btn">
-            <Plus className="w-4 h-4" /> Nova Matriz
-          </button>
-        )}
-      </div>
+      <PageHeader
+        icon={Grid3x3}
+        iconTone="green"
+        title="Matriz de Proteção (Função x EPI)"
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_matriz)}
+        actions={
+          allowCreate ? (
+            <button onClick={handleNewMatriz} className="matriz-new-btn">
+              <Plus className="w-4 h-4" /> Nova Matriz
+            </button>
+          ) : undefined
+        }
+      />
 
       <Modal
         isOpen={isModalOpen}

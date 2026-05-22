@@ -9,10 +9,14 @@ import { StatusBadge } from '../../components/StatusBadge';
 import { Modal } from '../../components/ui/Modal';
 import { EpiTypeForm } from '../../components/forms/EpiTypeForm';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
+import { PageHeader } from '../../components/layout/PageHeader';
 import '../EPIs/styles.css';
 
 const TiposEPI = () => {
   const navigate = useNavigate();
+  const { t } = useNomenclature();
   const [types, setTypes] = useState<EpiTypeAPI[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -74,19 +78,18 @@ const TiposEPI = () => {
 
   return (
     <div className="epis-page">
-      <div className="page-header">
-        <h2 className="page-title">Tipo de EPIs</h2>
-        {allowCreate && (
-          <button onClick={() => navigate('/tipos-epi/novo')} className="btn-add" type="button">
-            <Plus className="icon-sm" /> Novo Tipo
-          </button>
-        )}
-      </div>
-
-      <p className="epis-page-hint">
-        Cadastre os <strong>tipos de EPI</strong> (ex: Bota PVC, Capacete). Funções e matriz vinculam apenas o tipo.
-        As <strong>variantes homologadas</strong> são cadastradas em Variantes de EPIs.
-      </p>
+      <PageHeader
+        icon={ShieldCheck}
+        title={t(NOMENCLATURE_KEYS.page.epis)}
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_tipos_epi)}
+        actions={
+          allowCreate ? (
+            <button onClick={() => navigate('/tipos-epi/novo')} className="btn-add" type="button">
+              <Plus className="icon-sm" /> Novo Tipo
+            </button>
+          ) : undefined
+        }
+      />
 
       <Modal
         isOpen={isEditModalOpen}

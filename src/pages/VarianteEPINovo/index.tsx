@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { Layers, Loader2 } from 'lucide-react';
+import { PageHeader, PageHeaderBackButton } from '../../components/layout/PageHeader';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import { epiTypeService, type EpiTypeAPI } from '../../services/epiTypeService';
 import { EpiVariantForm } from '../../components/forms/EpiVariantForm';
 import '../ColaboradorEditar/styles.css';
@@ -8,6 +11,7 @@ import '../EPIs/styles.css';
 
 const VarianteEPINovo = () => {
   const navigate = useNavigate();
+  const { t } = useNomenclature();
   const [searchParams] = useSearchParams();
   const [types, setTypes] = useState<EpiTypeAPI[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,17 +42,12 @@ const VarianteEPINovo = () => {
 
   return (
     <div className="editar-container">
-      <div className="editar-header">
-        <button onClick={handleClose} className="editar-back-btn" type="button">
-          <ArrowLeft className="editar-back-icon" />
-        </button>
-        <div>
-          <h2 className="editar-title">Nova Variante</h2>
-          <p className="editar-subtitle">
-            Cadastre uma variante homologada (fabricante, modelo e CA) vinculada a um tipo de EPI
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        leading={<PageHeaderBackButton onClick={handleClose} />}
+        icon={Layers}
+        title={t(NOMENCLATURE_KEYS.page.variantes_epi_novo)}
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_variantes_epi_novo)}
+      />
 
 
       <div className="editar-card">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, User, Briefcase, Loader2, Plus } from 'lucide-react';
+import { Save, User, Briefcase, Loader2, Plus, UserCog } from 'lucide-react';
+import { PageHeader, PageHeaderBackButton } from '../../components/layout/PageHeader';
 import { SimpleCrudModal, type SimpleCrudItem } from '../../components/forms/SimpleCrudModal';
 import { employeeService, type EmployeeAPI } from '../../services/employeeService';
 import { validateEmployeeUniqueness } from '../../utils/uniqueness';
@@ -174,15 +175,12 @@ const ColaboradorEditar = () => {
 
   return (
     <div className="editar-container">
-      <div className="editar-header">
-        <button onClick={() => navigate('/colaboradores')} className="editar-back-btn">
-          <ArrowLeft className="editar-back-icon" />
-        </button>
-        <div>
-          <h2 className="editar-title">Editar Colaborador</h2>
-          <p className="editar-subtitle">Atualize as informações de {nomeCompleto}</p>
-        </div>
-      </div>
+      <PageHeader
+        leading={<PageHeaderBackButton onClick={() => navigate('/colaboradores')} />}
+        icon={UserCog}
+        title="Editar Colaborador"
+        subtitle={`Atualize as informações de ${nomeCompleto}`}
+      />
 
       <div className="editar-card">
         <div className="editar-card-body">

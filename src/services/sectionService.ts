@@ -24,6 +24,20 @@ export type SectionEpiTypeWithLink = EpiTypeAPI & {
   sle_mandatory?: number;
 };
 
+export interface SectionLifespanRuleItem {
+  ept_id: number;
+  ept_description: string;
+  ept_category: string | null;
+  ept_lifespan_days: number;
+  slr_lifespan_days: number | null;
+  effective_lifespan_days: number;
+}
+
+export interface SectionLifespanRuleLink {
+  ept_id: number;
+  slr_lifespan_days: number;
+}
+
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem('token');
   return {
@@ -99,5 +113,24 @@ export const sectionService = {
       body: JSON.stringify({ items }),
     });
     return handleResponse<SectionEpiTypeWithLink[]>(res);
+  },
+
+  async getLifespanRules(sectionId: number): Promise<SectionLifespanRuleItem[]> {
+    const res = await fetch(`${API_BASE_URL}/section/${sectionId}/lifespan-rules`, {
+      headers: getAuthHeaders(),
+    });
+    return handleResponse<SectionLifespanRuleItem[]>(res);
+  },
+
+  async setLifespanRules(
+    sectionId: number,
+    items: SectionLifespanRuleLink[],
+  ): Promise<SectionLifespanRuleItem[]> {
+    const res = await fetch(`${API_BASE_URL}/section/${sectionId}/lifespan-rules`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ items }),
+    });
+    return handleResponse<SectionLifespanRuleItem[]>(res);
   },
 };

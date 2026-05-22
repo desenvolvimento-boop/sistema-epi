@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Shield, AlertTriangle, Users, Edit3, Trash2, CheckCircle2, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
+import { Shield, AlertTriangle, Users, Edit3, Trash2, CheckCircle2, Loader2, ChevronDown, ChevronRight, Briefcase } from 'lucide-react';
+import { PageHeader, PageHeaderBackButton } from '../../components/layout/PageHeader';
 import { roleService, type RoleAPI, type RoleRiskAPI, type RoleEpiTypeWithLink } from '../../services/roleService';
 import { useAuth } from '../../contexts/AuthContext';
 import './styles.css';
@@ -82,29 +83,27 @@ const FuncaoDetalhes = () => {
 
   return (
     <div className="funcao-detalhes-container">
-      <div className="funcao-detalhes-header">
-        <div className="funcao-detalhes-header-left">
-          <button onClick={() => navigate('/funcoes')} className="funcao-detalhes-back-btn" type="button">
-            <ArrowLeft className="funcao-detalhes-back-icon" />
-          </button>
-          <div>
-            <h2 className="funcao-detalhes-title">Detalhes da Função</h2>
-            <p className="funcao-detalhes-subtitle">Configurações e requisitos de segurança</p>
+      <PageHeader
+        leading={<PageHeaderBackButton onClick={() => navigate('/funcoes')} />}
+        icon={Briefcase}
+        iconTone="amber"
+        title="Detalhes da Função"
+        subtitle="Configurações e requisitos de segurança"
+        actions={
+          <div className="funcao-detalhes-header-actions">
+            {allowEdit && (
+              <button onClick={() => navigate(`/funcoes/${id}/editar`)} className="funcao-detalhes-edit-btn" type="button">
+                <Edit3 className="funcao-detalhes-icon-sm" /> Editar
+              </button>
+            )}
+            {allowDelete && (
+              <button onClick={handleDelete} className="funcao-detalhes-delete-btn" type="button">
+                <Trash2 className="funcao-detalhes-icon-sm" /> Inativar
+              </button>
+            )}
           </div>
-        </div>
-        <div className="funcao-detalhes-header-actions">
-          {allowEdit && (
-            <button onClick={() => navigate(`/funcoes/${id}/editar`)} className="funcao-detalhes-edit-btn" type="button">
-              <Edit3 className="funcao-detalhes-icon-sm" /> Editar
-            </button>
-          )}
-          {allowDelete && (
-            <button onClick={handleDelete} className="funcao-detalhes-delete-btn" type="button">
-              <Trash2 className="funcao-detalhes-icon-sm" /> Inativar
-            </button>
-          )}
-        </div>
-      </div>
+        }
+      />
 
       <div className="funcao-detalhes-grid">
         <div className="funcao-detalhes-main">

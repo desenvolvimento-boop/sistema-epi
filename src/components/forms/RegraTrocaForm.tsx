@@ -76,7 +76,6 @@ export const RegraTrocaForm = ({
           />
           <p className="regra-troca-form-hint">
             Prazo padrão de troca para este tipo. Variantes podem sobrescrever em Variantes de EPI.
-            Gatilhos condicionais ajustam o prazo efetivo na agenda.
           </p>
         </div>
       </div>

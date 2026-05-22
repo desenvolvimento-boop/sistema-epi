@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ListFiltersBar } from '../../components/list/ListFiltersBar';
 import { activeStatusMatcher, filterListRows } from '../../utils/listFilters';
-import { Edit3, Loader2, Plus, Trash2 } from 'lucide-react';
+import { Edit3, Loader2, Plus, Trash2, RefreshCw } from 'lucide-react';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { epiTypeService, epiTypeCategoryLabel, type EpiTypeAPI } from '../../services/epiTypeService';
 import { epiVariantService } from '../../services/epiVariantService';
 import {
@@ -18,6 +19,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import './styles.css';
 
 type TabId = 'base' | 'triggers';
+
+const SHOW_CONDITIONAL_TRIGGERS = false;
 
 const RegrasTroca = () => {
   const { t } = useNomenclature();
@@ -200,46 +203,46 @@ const RegrasTroca = () => {
 
   return (
     <div className="regras-page">
-      <div className="page-header">
-        <h2 className="page-title">Regras de Troca e Substituição</h2>
-        {activeTab === 'triggers' && allowCreate && (
-          <button type="button" className="btn-add" onClick={() => handleOpenRuleModal()}>
-            <Plus className="icon-sm" />
-            Novo gatilho
+      <PageHeader
+        icon={RefreshCw}
+        title={t(NOMENCLATURE_KEYS.page.regras_troca)}
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_regras_troca)}
+        actions={
+          SHOW_CONDITIONAL_TRIGGERS && activeTab === 'triggers' && allowCreate ? (
+            <button type="button" className="btn-add" onClick={() => handleOpenRuleModal()}>
+              <Plus className="icon-sm" />
+              Novo gatilho
+            </button>
+          ) : undefined
+        }
+      />
+
+      {SHOW_CONDITIONAL_TRIGGERS && (
+        <div className="regras-tabs">
+          <button
+            type="button"
+            className={clsx('regras-tab', activeTab === 'base' && 'regras-tab--active')}
+            onClick={() => {
+              setActiveTab('base');
+              setSearchTerm('');
+              setFilterValues({});
+            }}
+          >
+            Vida útil padrão
           </button>
-        )}
-      </div>
-
-      <p className="regras-page-hint">
-        <strong>Vida útil (configuração)</strong> define o prazo padrão por tipo.{' '}
-        <strong>Gatilhos condicionais</strong> ajustam o prazo efetivo por empresa, setor, função ou colaborador.{' '}
-        A <strong>prioridade da agenda</strong> é operacional (proximidade do vencimento).
-      </p>
-
-      <div className="regras-tabs">
-        <button
-          type="button"
-          className={clsx('regras-tab', activeTab === 'base' && 'regras-tab--active')}
-          onClick={() => {
-          setActiveTab('base');
-          setSearchTerm('');
-          setFilterValues({});
-        }}
-        >
-          Vida útil padrão
-        </button>
-        <button
-          type="button"
-          className={clsx('regras-tab', activeTab === 'triggers' && 'regras-tab--active')}
-          onClick={() => {
-          setActiveTab('triggers');
-          setSearchTerm('');
-          setFilterValues({});
-        }}
-        >
-          Gatilhos condicionais
-        </button>
-      </div>
+          <button
+            type="button"
+            className={clsx('regras-tab', activeTab === 'triggers' && 'regras-tab--active')}
+            onClick={() => {
+              setActiveTab('triggers');
+              setSearchTerm('');
+              setFilterValues({});
+            }}
+          >
+            Gatilhos condicionais
+          </button>
+        </div>
+      )}
 
       {error && <div className="regras-error-banner">{error}</div>}
 
@@ -253,7 +256,7 @@ const RegrasTroca = () => {
           onSaved={loadTypes}
           initialData={selectedType || undefined}
           onManageTriggers={
-            selectedType
+            SHOW_CONDITIONAL_TRIGGERS && selectedType
               ? () => {
                   setIsBaseModalOpen(false);
                   setActiveTab('triggers');
@@ -387,7 +390,7 @@ const RegrasTroca = () => {
         </div>
       )}
 
-      {activeTab === 'triggers' && (
+      {SHOW_CONDITIONAL_TRIGGERS && activeTab === 'triggers' && (
         <div className="table-container">
           {rulesLoading ? (
             <div className="regras-loading">

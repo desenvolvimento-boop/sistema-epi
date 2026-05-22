@@ -1,26 +1,27 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { EpiTypeForm } from '../../components/forms/EpiTypeForm';
+import { PageHeader, PageHeaderBackButton } from '../../components/layout/PageHeader';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import '../ColaboradorEditar/styles.css';
 
 const TipoEPINovo = () => {
   const navigate = useNavigate();
+  const { t } = useNomenclature();
 
   const handleClose = () => navigate('/tipos-epi');
   const handleSaved = () => navigate('/tipos-epi');
 
   return (
     <div className="editar-container">
-      <div className="editar-header">
-        <button onClick={handleClose} className="editar-back-btn" type="button">
-          <ArrowLeft className="editar-back-icon" />
-        </button>
-        <div>
-          <h2 className="editar-title">Novo Tipo de EPI</h2>
-          <p className="editar-subtitle">Cadastre um novo tipo de EPI para vincular em funções e matriz</p>
-        </div>
-      </div>
+      <PageHeader
+        leading={<PageHeaderBackButton onClick={handleClose} />}
+        icon={ShieldCheck}
+        title={t(NOMENCLATURE_KEYS.page.tipos_epi_novo)}
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_tipos_epi_novo)}
+      />
 
       <div className="editar-card">
         <div className="editar-card-body">

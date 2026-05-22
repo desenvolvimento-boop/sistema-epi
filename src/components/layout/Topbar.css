@@ -9,7 +9,7 @@
   z-index: 40;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 0 var(--layout-content-padding-x, 1rem);
   gap: 1rem;
 }
@@ -19,7 +19,7 @@
   align-items: center;
   gap: 0.75rem;
   min-width: 0;
-  flex: 1;
+  margin-right: auto;
 }
 
 .topbar-menu-btn {
@@ -41,16 +41,6 @@
 .topbar-menu-icon {
   width: 1.25rem;
   height: 1.25rem;
-}
-
-.topbar-title {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
-  font-weight: 700;
-  color: var(--color-slate-800);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .topbar-actions {
@@ -135,9 +125,3 @@
   }
 }
 
-@media (max-width: 639px) {
-  .topbar-title {
-    font-size: 1rem;
-    line-height: 1.5rem;
-  }
-}

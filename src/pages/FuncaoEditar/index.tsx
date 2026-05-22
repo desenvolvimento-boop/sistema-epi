@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Loader2, Briefcase } from 'lucide-react';
+import { PageHeader, PageHeaderBackButton } from '../../components/layout/PageHeader';
 import { roleService, RISK_SEVERITIES, type RoleAPI, type RoleRiskAPI } from '../../services/roleService';
 import { riskTypeService, type RiskTypeAPI } from '../../services/riskTypeService';
 import { SimpleCrudModal, type SimpleCrudItem } from '../../components/forms/SimpleCrudModal';
@@ -166,19 +167,13 @@ const FuncaoEditar = () => {
 
   return (
     <div className="funcao-editar-container">
-      <div className="funcao-editar-header">
-        <button
-          onClick={() => navigate(`/funcoes/${id}/detalhes`)}
-          className="funcao-editar-back-btn"
-          type="button"
-        >
-          <ArrowLeft className="funcao-editar-back-icon" />
-        </button>
-        <div>
-          <h2 className="funcao-editar-title">Editar Função</h2>
-          <p className="funcao-editar-subtitle">Atualize os requisitos para {funcao.rol_description}</p>
-        </div>
-      </div>
+      <PageHeader
+        leading={<PageHeaderBackButton onClick={() => navigate(`/funcoes/${id}/detalhes`)} />}
+        icon={Briefcase}
+        iconTone="amber"
+        title="Editar Função"
+        subtitle={`Atualize os requisitos para ${funcao.rol_description}`}
+      />
 
       <div className="funcao-editar-card">
         <FuncaoForm

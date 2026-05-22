@@ -16,6 +16,9 @@ import {
   Loader2,
   BookOpen,
 } from 'lucide-react';
+import { PageHeader } from '../../components/layout/PageHeader';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import { NomenclaturaTab } from './NomenclaturaTab';
 import { OrigemTab } from './OrigemTab';
 import { IntegracaoTab } from './IntegracaoTab';
@@ -39,6 +42,7 @@ interface PermissionSet {
 }
 
 const Configuracoes = () => {
+  const { t } = useNomenclature();
   const { logout, canCreate, canEdit, canView, user, refreshPermissions } = useAuth();
   const allowCreate = canCreate('/configuracoes');
   const allowEdit = canEdit('/configuracoes');
@@ -351,15 +355,12 @@ const Configuracoes = () => {
 
   return (
     <div className="config-container">
-      <div className="config-header">
-        <div className="config-header-icon">
-          <SettingsIcon className="config-icon-lg" />
-        </div>
-        <div>
-          <h2 className="config-title">Configurações do Sistema</h2>
-          <p className="config-subtitle">Gerencie acessos, integrações e sua conta.</p>
-        </div>
-      </div>
+      <PageHeader
+        icon={SettingsIcon}
+        iconTone="slate"
+        title={t(NOMENCLATURE_KEYS.page.configuracoes)}
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_configuracoes)}
+      />
 
       <div className="config-layout">
         <aside className="config-sidebar">

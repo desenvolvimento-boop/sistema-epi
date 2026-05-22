@@ -1,12 +1,49 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Check, X, Search, Loader2, Plus } from 'lucide-react';
 import { User } from '../../types/system.types';
 import { userService } from '../../services/userService';
 import { accessProfileService, type AccessProfileAPI } from '../../services/accessProfileService';
 import { userGroupService, type UserGroupAPI } from '../../services/userGroupService';
+import { sectionService, type SectionAPI } from '../../services/sectionService';
+import { DualList, type DualListItem } from '../ui/DualList';
 import { UserGroupCrudModal } from './UserGroupCrudModal';
 import { validateUserUniqueness } from '../../utils/uniqueness';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import './UsuarioForm.css';
+
+function FormToggle({
+  label,
+  active,
+  onToggle,
+  ariaLabel,
+}: {
+  label: string;
+  active: boolean;
+  onToggle: () => void;
+  ariaLabel: string;
+}) {
+  return (
+    <div className="usuario-form-toggle-row">
+      <span className="usuario-form-toggle-label">{label}</span>
+      <button
+        type="button"
+        className={`usuario-form-toggle ${active ? 'usuario-form-toggle--active' : ''}`}
+        onClick={onToggle}
+        aria-label={ariaLabel}
+      >
+        <span className="usuario-form-toggle-thumb" />
+      </button>
+    </div>
+  );
+}
+
+function resolveInitialSectionIds(data?: User): number[] {
+  if (!data) return [];
+  if (data.section_ids?.length) return data.section_ids;
+  if (data.sections?.length) return data.sections.map((s) => s.sec_id);
+  return [];
+}
 
 interface UsuarioFormProps {
   onClose: () => void;
@@ -16,7 +53,20 @@ interface UsuarioFormProps {
 }
 
 export const UsuarioForm = ({ onClose, onSaved, initialData, existingUsers }: UsuarioFormProps) => {
+  const { t } = useNomenclature();
+  const sectionLabel = t(NOMENCLATURE_KEYS.entity.section_plural);
   const [ativo, setAtivo] = useState(initialData ? initialData.usr_active === 1 : true);
+  const [acessoCenter, setAcessoCenter] = useState(
+    initialData ? initialData.usr_center_access === 1 : false,
+  );
+  const [realizarEntrega, setRealizarEntrega] = useState(
+    initialData ? initialData.usr_perform_delivery === 1 : false,
+  );
+  const [selectedSectionIds, setSelectedSectionIds] = useState<number[]>(
+    () => resolveInitialSectionIds(initialData),
+  );
+  const [sections, setSections] = useState<SectionAPI[]>([]);
+  const [loadingSections, setLoadingSections] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [accessProfiles, setAccessProfiles] = useState<AccessProfileAPI[]>([]);
@@ -39,6 +89,27 @@ export const UsuarioForm = ({ onClose, onSaved, initialData, existingUsers }: Us
   };
 
   const isEdit = !!initialData;
+
+  useEffect(() => {
+    if (!isEdit || !initialData?.usr_id) return;
+    let cancelled = false;
+    const loadUser = async () => {
+      try {
+        const user = await userService.getById(initialData.usr_id);
+        if (cancelled) return;
+        setAtivo(user.usr_active === 1);
+        setAcessoCenter(user.usr_center_access === 1);
+        setRealizarEntrega(user.usr_perform_delivery === 1);
+        setSelectedSectionIds(resolveInitialSectionIds(user));
+      } catch (err) {
+        console.error('Erro ao carregar usuário:', err);
+      }
+    };
+    loadUser();
+    return () => {
+      cancelled = true;
+    };
+  }, [isEdit, initialData?.usr_id]);
 
   useEffect(() => {
     const fetchProfiles = async () => {
@@ -69,6 +140,35 @@ export const UsuarioForm = ({ onClose, onSaved, initialData, existingUsers }: Us
     fetchUserGroups();
   }, []);
 
+  useEffect(() => {
+    if (!realizarEntrega) return;
+    let cancelled = false;
+    const loadSections = async () => {
+      setLoadingSections(true);
+      try {
+        const data = await sectionService.getActive();
+        if (!cancelled) setSections(data);
+      } catch (err) {
+        console.error('Erro ao carregar seções:', err);
+        if (!cancelled) setSections([]);
+      } finally {
+        if (!cancelled) setLoadingSections(false);
+      }
+    };
+    loadSections();
+    return () => {
+      cancelled = true;
+    };
+  }, [realizarEntrega]);
+
+  const sectionDualListItems: DualListItem[] = useMemo(
+    () =>
+      [...sections]
+        .sort((a, b) => a.sec_description.localeCompare(b.sec_description, 'pt-BR'))
+        .map((s) => ({ id: s.sec_id, label: s.sec_description })),
+    [sections],
+  );
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
@@ -82,8 +182,17 @@ export const UsuarioForm = ({ onClose, onSaved, initialData, existingUsers }: Us
     const aggId = selectedGroupId ? parseInt(selectedGroupId) : null;
     const selectedGroup = userGroups.find(g => g.usg_id === aggId);
 
+    if (realizarEntrega && selectedSectionIds.length === 0) {
+      setError(`Selecione ao menos um ${t(NOMENCLATURE_KEYS.entity.section_singular).toLowerCase()} para entrega.`);
+      setLoading(false);
+      return;
+    }
+
     const payload: Record<string, any> = {
       usr_active: ativo ? 1 : 0,
+      usr_center_access: acessoCenter ? 1 : 0,
+      usr_perform_delivery: realizarEntrega ? 1 : 0,
+      section_ids: realizarEntrega ? selectedSectionIds : [],
       usr_full_name: fd.get('usr_full_name') as string || null,
       usr_username: fd.get('usr_username') as string || null,
       usr_email: fd.get('usr_email') as string || null,
@@ -154,16 +263,25 @@ export const UsuarioForm = ({ onClose, onSaved, initialData, existingUsers }: Us
         </div>
       )}
 
-      <div className="usuario-form-toggle-row">
-        <span className="usuario-form-toggle-label">Ativo</span>
-        <button
-          type="button"
-          className={`usuario-form-toggle ${ativo ? 'usuario-form-toggle--active' : ''}`}
-          onClick={() => setAtivo(!ativo)}
-          aria-label="Toggle ativo"
-        >
-          <span className="usuario-form-toggle-thumb" />
-        </button>
+      <div className="usuario-form-toggles">
+        <FormToggle
+          label="Ativo"
+          active={ativo}
+          onToggle={() => setAtivo(!ativo)}
+          ariaLabel="Toggle ativo"
+        />
+        <FormToggle
+          label="Acesso ao center"
+          active={acessoCenter}
+          onToggle={() => setAcessoCenter(!acessoCenter)}
+          ariaLabel="Toggle acesso ao center"
+        />
+        <FormToggle
+          label="Realizar entrega"
+          active={realizarEntrega}
+          onToggle={() => setRealizarEntrega(!realizarEntrega)}
+          ariaLabel="Toggle realizar entrega"
+        />
       </div>
 
       <div className="usuario-form-grid">
@@ -316,6 +434,28 @@ export const UsuarioForm = ({ onClose, onSaved, initialData, existingUsers }: Us
         <label className="usuario-form-label">Observação</label>
         <textarea name="usr_notes" placeholder="Observações adicionais" defaultValue={initialData?.usr_notes ?? ''} className="usuario-form-textarea" rows={3} />
       </div>
+
+      {realizarEntrega && (
+        <div className="usuario-form-sections-block usuario-form-full">
+          <span className="usuario-form-sections-label">{sectionLabel} para entrega</span>
+          <p className="usuario-form-sections-hint">
+            Selecione os {sectionLabel.toLowerCase()} em que este usuário poderá registrar entregas.
+          </p>
+          <DualList
+            available={sectionDualListItems}
+            selectedIds={selectedSectionIds}
+            onChange={setSelectedSectionIds}
+            availableTitle="Disponíveis"
+            selectedTitle="Selecionados"
+            loading={loadingSections}
+            emptyAvailableMessage={
+              loadingSections
+                ? 'Carregando...'
+                : `Nenhum ${t(NOMENCLATURE_KEYS.entity.section_singular).toLowerCase()} disponível`
+            }
+          />
+        </div>
+      )}
 
       <div className="usuario-form-actions">
         <button type="submit" className="usuario-form-submit" disabled={loading}>

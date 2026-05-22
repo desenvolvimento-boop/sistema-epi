@@ -30,12 +30,16 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Modal } from '../../components/ui/Modal';
 import { deliveryService, type ExchangeAgendaItem } from '../../services/deliveryService';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
+import { PageHeader, PageHeaderBackButton } from '../../components/layout/PageHeader';
 import './styles.css';
 
 type ViewMode = 'month' | 'week' | 'day';
 
 const CalendarioAgenda = () => {
   const navigate = useNavigate();
+  const { t } = useNomenclature();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [items, setItems] = useState<ExchangeAgendaItem[]>([]);
@@ -113,19 +117,13 @@ const CalendarioAgenda = () => {
   const goToToday = () => setCurrentDate(new Date());
 
   const renderHeader = () => (
-    <div className="calendario-header">
-      <div className="calendario-header-left">
-        <button onClick={() => navigate('/agenda-trocas')} className="calendario-back-btn" type="button">
-          <ArrowLeft className="calendario-icon-sm" />
-        </button>
-        <div>
-          <h2 className="calendario-title">Calendário de Trocas</h2>
-          <p className="calendario-subtitle">
-            {format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}
-          </p>
-        </div>
-      </div>
-
+    <>
+      <PageHeader
+        leading={<PageHeaderBackButton onClick={() => navigate('/agenda-trocas')} />}
+        icon={CalendarIcon}
+        title={t(NOMENCLATURE_KEYS.page.agenda_trocas_calendario)}
+        subtitle={format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}
+        actions={
       <div className="calendario-view-switcher">
         {(['month', 'week', 'day'] as ViewMode[]).map((mode) => (
           <button
@@ -140,6 +138,8 @@ const CalendarioAgenda = () => {
           </button>
         ))}
       </div>
+        }
+      />
 
       <div className="calendario-nav-controls">
         <button onClick={goToToday} className="calendario-today-btn" type="button">
@@ -154,7 +154,7 @@ const CalendarioAgenda = () => {
           </button>
         </div>
       </div>
-    </div>
+    </>
   );
 
   const renderMonthView = () => {

@@ -7,7 +7,11 @@ import {
   FileText,
   ShieldAlert,
   Loader2,
+  LayoutDashboard,
 } from 'lucide-react';
+import { PageHeader } from '../../components/layout/PageHeader';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import { useNavigate } from 'react-router-dom';
 import { StatsCard } from '../../components/dashboard/StatsCard';
 import { ConsumptionChart } from '../../components/dashboard/ConsumptionChart';
@@ -46,6 +50,7 @@ function dashboardFiltersInitial(): ReportFilters {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { t } = useNomenclature();
   const [filters, setFilters] = useState<ReportFilters>(dashboardFiltersInitial);
   const [overview, setOverview] = useState<ReportDashboard | null>(null);
   const [auditAlerts, setAuditAlerts] = useState<IncidentAPI[]>([]);
@@ -146,15 +151,12 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-page">
-      <div className="dashboard-page-header">
-        <div>
-          <h2 className="dashboard-page-title">Visão geral</h2>
-          <p className="dashboard-page-subtitle">
-            Indicadores operacionais e de conformidade do controle de EPIs.
-          </p>
-        </div>
-        <span className="dashboard-period-badge">{periodLabel}</span>
-      </div>
+      <PageHeader
+        icon={LayoutDashboard}
+        title={t(NOMENCLATURE_KEYS.page.dashboard)}
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_dashboard)}
+        actions={<span className="dashboard-period-badge">{periodLabel}</span>}
+      />
 
       <DashboardFiltersBar
         filters={filters}

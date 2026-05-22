@@ -4,8 +4,8 @@ import {
   CheckCircle2,
   ShieldCheck,
   RefreshCw,
-  ArrowLeft,
   Calendar,
+  History,
   User,
   Loader2,
   Package,
@@ -23,6 +23,7 @@ import {
   type DeliveryAPI,
   type HistoryStatus,
 } from '../../services/deliveryService';
+import { PageHeader, PageHeaderBackButton } from '../../components/layout/PageHeader';
 import './styles.css';
 
 const HistoricoDetalhes = () => {
@@ -114,15 +115,12 @@ const HistoricoDetalhes = () => {
 
   return (
     <div className="detalhes-container">
-      <div className="detalhes-header">
-        <button onClick={() => navigate('/historico')} className="detalhes-back-btn" type="button">
-          <ArrowLeft className="detalhes-back-icon" />
-        </button>
-        <div>
-          <h2 className="detalhes-title">Prontuário de Entregas</h2>
-          <p className="detalhes-subtitle">Rastreabilidade de entregas e trocas de EPI</p>
-        </div>
-      </div>
+      <PageHeader
+        leading={<PageHeaderBackButton onClick={() => navigate('/historico')} />}
+        icon={History}
+        title="Prontuário de Entregas"
+        subtitle="Rastreabilidade de entregas e trocas de EPI"
+      />
 
       {error && (
         <div className="detalhes-error">

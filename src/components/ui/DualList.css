@@ -1,0 +1,122 @@
+.dual-list {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.dual-list--loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.dual-list-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.dual-list-panel-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-slate-600);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.dual-list-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.5rem;
+  background-color: #fff;
+  min-height: 11rem;
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.dual-list-item {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-bottom: 1px solid var(--color-slate-100);
+  background: transparent;
+  text-align: left;
+  font-size: 0.8125rem;
+  color: var(--color-slate-800);
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.dual-list-item:last-child {
+  border-bottom: none;
+}
+
+.dual-list-item:hover {
+  background-color: var(--color-slate-50);
+}
+
+.dual-list-item--picked {
+  background-color: rgba(30, 96, 210, 0.1);
+  color: #1e60d2;
+  font-weight: 600;
+}
+
+.dual-list-empty {
+  padding: 1rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--color-slate-400);
+  text-align: center;
+}
+
+.dual-list-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.375rem;
+}
+
+.dual-list-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.5rem;
+  background-color: #fff;
+  color: var(--color-slate-700);
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.dual-list-action-btn:hover:not(:disabled) {
+  background-color: var(--color-slate-50);
+  border-color: #1e60d2;
+  color: #1e60d2;
+}
+
+.dual-list-action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dual-list-action-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+@media (max-width: 639px) {
+  .dual-list {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+
+  .dual-list-actions {
+    flex-direction: row;
+    justify-content: center;
+  }
+}

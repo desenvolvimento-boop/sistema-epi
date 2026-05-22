@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Loader2, Building2 } from 'lucide-react';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { ListFiltersBar } from '../../components/list/ListFiltersBar';
 import { activeStatusMatcher, filterListRows } from '../../utils/listFilters';
 import { sectionService, type SectionAPI } from '../../services/sectionService';
@@ -84,17 +85,23 @@ const NovaSecao = () => {
 
   return (
     <div className="nova-secao-container">
-      <div className="nova-secao-header">
-        {allowCreate && (
-          <button
-            type="button"
-            onClick={() => navigate('/nova-secao/novo')}
-            className="nova-secao-add-btn"
-          >
-            <Plus className="nova-secao-btn-icon" /> {t(NOMENCLATURE_KEYS.action.new_section)}
-          </button>
-        )}
-      </div>
+      <PageHeader
+        icon={Building2}
+        iconTone="amber"
+        title={t(NOMENCLATURE_KEYS.page.section_list)}
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_section_list)}
+        actions={
+          allowCreate ? (
+            <button
+              type="button"
+              onClick={() => navigate('/nova-secao/novo')}
+              className="nova-secao-add-btn"
+            >
+              <Plus className="nova-secao-btn-icon" /> {t(NOMENCLATURE_KEYS.action.new_section)}
+            </button>
+          ) : undefined
+        }
+      />
 
       <ListFiltersBar
         searchValue={searchTerm}

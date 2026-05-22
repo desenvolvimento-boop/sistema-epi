@@ -9,9 +9,13 @@ import { ListFiltersBar } from '../../components/list/ListFiltersBar';
 import { filterListRows } from '../../utils/listFilters';
 import { format, parseISO } from 'date-fns';
 import { deliveryService, type DeliveryAPI, type DeliveryStatsItem } from '../../services/deliveryService';
+import { PageHeader } from '../../components/layout/PageHeader';
+import { useNomenclature } from '../../hooks/useNomenclature';
+import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import './styles.css';
 
 const Consumo = () => {
+  const { t } = useNomenclature();
   const [deliveries, setDeliveries] = useState<DeliveryAPI[]>([]);
   const [stats, setStats] = useState<DeliveryStatsItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,15 +89,16 @@ const Consumo = () => {
 
   return (
     <div className="consumo-page">
-      <div className="consumo-header">
-        <div>
-          <h2 className="consumo-title">Registro de Consumo</h2>
-          <p className="consumo-subtitle">Acompanhamento do fluxo de entregas e trocas de EPI (últimos 30 dias).</p>
-        </div>
-        <button className="consumo-export-btn" type="button">
-          <Download className="consumo-export-icon" /> Exportar Log
-        </button>
-      </div>
+      <PageHeader
+        icon={Package}
+        title="Registro de Consumo"
+        subtitle={t(NOMENCLATURE_KEYS.page.subtitle_consumo)}
+        actions={
+          <button className="consumo-export-btn" type="button">
+            <Download className="consumo-export-icon" /> Exportar Log
+          </button>
+        }
+      />
 
       <div className="consumo-stats-grid">
         <div className="consumo-stat-card">
