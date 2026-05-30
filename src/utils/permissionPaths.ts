@@ -7,7 +7,6 @@ export const FEATURE_PATHS = {
   EMPRESAS: '/empresas',
   FUNCOES: '/funcoes',
   EPIS: '/epis',
-  REGRAS_TROCA: '/regras-troca',
   INTERCORRENCIAS: '/intercorrencias',
   AGENDA_TROCAS: '/agenda-trocas',
   HISTORICO: '/historico',
@@ -35,7 +34,6 @@ export const PERMISSION_PATH_GROUPS: Record<string, string[]> = {
   'usuarios': ['usuarios'],
   'nova-secao': ['nova-secao', 'colaboradores', 'configuracoes'],
   'intercorrencias': ['intercorrencias'],
-  'regras-troca': ['regras-troca'],
 };
 
 export function resolvePermissionPaths(perm: AuthPermission): string[] {

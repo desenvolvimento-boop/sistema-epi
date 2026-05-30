@@ -13,7 +13,6 @@ import TiposEPI from '../pages/TiposEPI';
 import TipoEPINovo from '../pages/TipoEPINovo';
 import VariantesEPI from '../pages/VariantesEPI';
 import VarianteEPINovo from '../pages/VarianteEPINovo';
-import RegrasTroca from '../pages/RegrasTroca';
 import Intercorrencias from '../pages/Intercorrencias';
 import Historico from '../pages/Historico';
 import HistoricoDetalhes from '../pages/HistoricoDetalhes';
@@ -127,7 +126,6 @@ export const AppRouter = () => {
       <Route path="/tipos-epi/novo" element={<ProtectedRoute path="/tipos-epi" action="prm_create"><TipoEPINovo /></ProtectedRoute>} />
       <Route path="/variantes-epi" element={<ProtectedRoute path="/variantes-epi"><VariantesEPI /></ProtectedRoute>} />
       <Route path="/variantes-epi/novo" element={<ProtectedRoute path="/variantes-epi" action="prm_create"><VarianteEPINovo /></ProtectedRoute>} />
-      <Route path="/regras-troca" element={<ProtectedRoute path="/regras-troca"><RegrasTroca /></ProtectedRoute>} />
       <Route path="/intercorrencias" element={<ProtectedRoute path="/intercorrencias"><Intercorrencias /></ProtectedRoute>} />
       <Route path="/agenda-trocas" element={<ProtectedRoute path="/agenda-trocas"><AgendaTrocas /></ProtectedRoute>} />
       <Route path="/agenda-trocas/calendario" element={<ProtectedRoute path="/agenda-trocas"><CalendarioAgenda /></ProtectedRoute>} />

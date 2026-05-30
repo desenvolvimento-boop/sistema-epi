@@ -13,7 +13,6 @@ import { validateSectionUniqueness } from '../../utils/uniqueness';
 import './SectionForm.css';
 import './SimpleCrudModal.css';
 import '../../pages/ColaboradorEditar/styles.css';
-import '../../pages/RegrasTroca/styles.css';
 
 type SectionFormTab = 'dados' | 'regras';
 
@@ -51,13 +50,19 @@ export const SectionForm = ({ onClose, onSaved, sectionId, existingSections }: S
   const [formDesc, setFormDesc] = useState('');
   const [formActive, setFormActive] = useState(true);
   const [episCatalog, setEpisCatalog] = useState<EpiTypeAPI[]>([]);
+  /** Catálogo completo (mesma fonte da tela Tipos EPI) para a aba Regras da Seção */
+  const [episRulesCatalog, setEpisRulesCatalog] = useState<EpiTypeAPI[]>([]);
   const [selectedEptIds, setSelectedEptIds] = useState<number[]>([]);
   const [lifespanOverrides, setLifespanOverrides] = useState<Record<number, string>>({});
   const [rulesSearch, setRulesSearch] = useState('');
 
   const loadCatalog = useCallback(async () => {
-    const catalog = await epiTypeService.getActive();
-    setEpisCatalog(catalog);
+    const [active, all] = await Promise.all([
+      epiTypeService.getActive(),
+      epiTypeService.getAll(),
+    ]);
+    setEpisCatalog(active);
+    setEpisRulesCatalog(all);
   }, []);
 
   useEffect(() => {
@@ -120,10 +125,10 @@ export const SectionForm = ({ onClose, onSaved, sectionId, existingSections }: S
 
   const rulesRows = useMemo(
     () =>
-      [...episCatalog].sort((a, b) =>
+      [...episRulesCatalog].sort((a, b) =>
         a.ept_description.localeCompare(b.ept_description, 'pt-BR'),
       ),
-    [episCatalog],
+    [episRulesCatalog],
   );
 
   const filteredRulesRows = useMemo(() => {
@@ -317,11 +322,13 @@ export const SectionForm = ({ onClose, onSaved, sectionId, existingSections }: S
       {activeTab === 'regras' && (
         <div className="section-form-regras">
           <p className="regras-page-hint">
-            Defina a vida útil em dias para cada EPI neste {sectionLabel.toLowerCase()}. Deixe
-            em branco na coluna <strong>Regras</strong> para manter a vida útil padrão do cadastro.
+            Lista todos os EPIs do catálogo (mesma base da tela Tipos EPI). Defina a vida útil em
+            dias para este {sectionLabel.toLowerCase()}; deixe em branco na coluna{' '}
+            <strong>Regras</strong> para manter o padrão do cadastro. Não é necessário marcar o EPI
+            na aba Dados da seção.
           </p>
 
-          {episCatalog.length > 0 && (
+          {episRulesCatalog.length > 0 && (
             <ListFiltersBar
               searchValue={rulesSearch}
               onSearchChange={setRulesSearch}
@@ -335,7 +342,7 @@ export const SectionForm = ({ onClose, onSaved, sectionId, existingSections }: S
               <Loader2 className="icon-sm regras-spin" />
               <span>Carregando regras...</span>
             </div>
-          ) : episCatalog.length === 0 ? (
+          ) : episRulesCatalog.length === 0 ? (
             <div className="regras-empty">Cadastre EPIs no catálogo primeiro.</div>
           ) : (
             <div className="table-container section-form-rules-scroll custom-scrollbar">
@@ -383,7 +390,7 @@ export const SectionForm = ({ onClose, onSaved, sectionId, existingSections }: S
                             <input
                               type="text"
                               inputMode="numeric"
-                              className="regra-troca-form-input section-form-rule-input"
+                              className="section-form-rule-input"
                               value={overrideRaw}
                               onChange={(e) => setLifespanOverride(epi.ept_id, e.target.value)}
                               aria-label={`Regra de vida útil em dias para ${epi.ept_description}`}

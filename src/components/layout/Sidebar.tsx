@@ -5,7 +5,6 @@ import {
   Users, 
   Briefcase, 
   ShieldCheck, 
-  RefreshCw, 
   Layers,
   Building2,
   Calendar, 
@@ -45,7 +44,6 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { path: '/tipos-epi', labelKey: NOMENCLATURE_KEYS.menu.tipos_epi, icon: ShieldCheck },
       { path: '/variantes-epi', labelKey: NOMENCLATURE_KEYS.menu.variantes_epi, icon: Layers },
-      { path: '/regras-troca', labelKey: NOMENCLATURE_KEYS.menu.regras_troca, icon: RefreshCw },
     ],
   },
   { path: '/intercorrencias', labelKey: NOMENCLATURE_KEYS.menu.intercorrencias, icon: AlertTriangle },
