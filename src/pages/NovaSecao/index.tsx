@@ -20,7 +20,7 @@ function canAccessNovaSecao(canView: (path: string) => boolean) {
   return canView('/nova-secao') || canView('/colaboradores') || canView('/configuracoes');
 }
 
-type SectionSortKey = 'id' | 'description' | 'integration' | 'status';
+type SectionSortKey = 'id' | 'description' | 'integrationId' | 'origin' | 'status';
 
 const NovaSecao = () => {
   const [sections, setSections] = useState<SectionAPI[]>([]);
@@ -94,8 +94,14 @@ const NovaSecao = () => {
     (): Record<SectionSortKey, (a: SectionAPI, b: SectionAPI) => number> => ({
       id: (a, b) => compareNumbers(a.sec_id, b.sec_id),
       description: (a, b) => compareStrings(a.sec_description, b.sec_description),
-      integration: (a, b) =>
+      integrationId: (a, b) =>
         compareNullable(a.sec_integration_id, b.sec_integration_id, compareStrings),
+      origin: (a, b) =>
+        compareNullable(
+          a.sec_integration_source || 'Manual',
+          b.sec_integration_source || 'Manual',
+          compareStrings,
+        ),
       status: (a, b) => compareNumbers(a.sec_active, b.sec_active),
     }),
     [],
@@ -179,8 +185,15 @@ const NovaSecao = () => {
                   className="nova-secao-th"
                 />
                 <SortableTableHeader
-                  label="Descrição / Integração"
-                  sortKey="integration"
+                  label="ID Integração"
+                  sortKey="integrationId"
+                  activeSort={sort}
+                  onSort={toggleSort}
+                  className="nova-secao-th"
+                />
+                <SortableTableHeader
+                  label="Origem"
+                  sortKey="origin"
                   activeSort={sort}
                   onSort={toggleSort}
                   className="nova-secao-th"
@@ -198,7 +211,7 @@ const NovaSecao = () => {
             <tbody className="nova-secao-tbody">
               {sortedItems.length === 0 && !loading ? (
                 <tr>
-                  <td colSpan={5} className="nova-secao-empty">
+                  <td colSpan={6} className="nova-secao-empty">
                     {t(NOMENCLATURE_KEYS.message.section_empty)}
                   </td>
                 </tr>
@@ -211,6 +224,11 @@ const NovaSecao = () => {
                     </td>
                     <td className="nova-secao-cell">
                       <p className="nova-secao-desc">{sec.sec_integration_id || '—'}</p>
+                    </td>
+                    <td className="nova-secao-cell">
+                      <span className={`nova-secao-origin-badge nova-secao-origin-${(sec.sec_integration_source || 'Manual').toLowerCase()}`}>
+                        {sec.sec_integration_source || 'Manual'}
+                      </span>
                     </td>
                     <td className="nova-secao-cell">
                       <StatusBadge status={sec.sec_active === 1 ? 'Ativo' : 'Inativo'} />

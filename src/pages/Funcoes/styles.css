@@ -132,19 +132,6 @@
   background-color: rgb(248 250 252 / 0.5);
 }
 
-.funcoes-name-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.funcoes-role-icon {
-  padding: 0.5rem;
-  background-color: var(--color-primary-50);
-  color: var(--color-primary-600);
-  border-radius: 0.5rem;
-}
-
 .funcoes-icon-sm {
   width: 1rem;
   height: 1rem;

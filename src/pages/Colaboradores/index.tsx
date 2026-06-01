@@ -28,7 +28,7 @@ function getStatusLabel(emp: EmployeeAPI): string {
   return emp.emp_active === 1 ? 'Ativo' : 'Inativo';
 }
 
-type EmployeeSortKey = 'id' | 'name' | 'registration' | 'role' | 'company' | 'status';
+type EmployeeSortKey = 'id' | 'name' | 'registration' | 'role' | 'company' | 'status' | 'origin';
 
 const Colaboradores = () => {
   const { t } = useNomenclature();
@@ -99,6 +99,7 @@ const Colaboradores = () => {
             emp.role?.rol_description,
             emp.company?.com_description,
             emp.section?.sec_description,
+            emp.emp_integration_source,
             String(emp.emp_id),
           ]
             .filter(Boolean)
@@ -121,6 +122,12 @@ const Colaboradores = () => {
       company: (a, b) =>
         compareNullable(a.company?.com_description, b.company?.com_description, compareStrings),
       status: (a, b) => compareNumbers(a.emp_active, b.emp_active),
+      origin: (a, b) =>
+        compareNullable(
+          a.emp_integration_source || 'Manual',
+          b.emp_integration_source || 'Manual',
+          compareStrings,
+        ),
     }),
     [],
   );
@@ -150,7 +157,7 @@ const Colaboradores = () => {
       <ListFiltersBar
         searchValue={searchTerm}
         onSearchChange={setSearchTerm}
-        searchPlaceholder="Buscar por nome, CPF, matrícula ou função..."
+        searchPlaceholder="Buscar por nome, CPF, matrícula, função ou origem..."
         fields={[
           {
             id: 'status',
@@ -240,13 +247,20 @@ const Colaboradores = () => {
                   onSort={toggleSort}
                   className="colaboradores-th"
                 />
+                <SortableTableHeader
+                  label="Origem"
+                  sortKey="origin"
+                  activeSort={sort}
+                  onSort={toggleSort}
+                  className="colaboradores-th"
+                />
                 <th className="colaboradores-th colaboradores-th--right">Ações</th>
               </tr>
             </thead>
             <tbody className="colaboradores-tbody">
               {sortedItems.length === 0 && !loading ? (
                 <tr>
-                  <td colSpan={6} className="colaboradores-empty">Nenhum colaborador encontrado.</td>
+                  <td colSpan={7} className="colaboradores-empty">Nenhum colaborador encontrado.</td>
                 </tr>
               ) : (
                 pagination.paginatedItems.map((emp) => (
@@ -275,6 +289,11 @@ const Colaboradores = () => {
                     </td>
                     <td className="colaboradores-cell">
                       <StatusBadge status={getStatusLabel(emp)} />
+                    </td>
+                    <td className="colaboradores-cell">
+                      <span className={`colaboradores-origin-badge colaboradores-origin-${(emp.emp_integration_source || 'Manual').toLowerCase()}`}>
+                        {emp.emp_integration_source || 'Manual'}
+                      </span>
                     </td>
                     <td className="colaboradores-cell--right">
                       <div className="colaboradores-actions">

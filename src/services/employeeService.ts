@@ -12,6 +12,8 @@ export interface EmployeeAPI {
   com_id: number;
   emp_status: number;
   emp_photo: string | null;
+  emp_integration_id?: string | null;
+  emp_integration_source?: string | null;
   usr_id_insert: number | null;
   emp_datetimeinsert?: string;
   usr_id_lastupdate: number | null;

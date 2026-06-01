@@ -6,6 +6,7 @@ export interface SectionAPI {
   sec_active: number;
   sec_description: string;
   sec_integration_id: string | null;
+  sec_integration_source?: string | null;
   usr_id_insert: number | null;
   sec_datetimeinsert?: string;
   usr_id_lastupdate: number | null;

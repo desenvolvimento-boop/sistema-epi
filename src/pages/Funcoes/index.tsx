@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Shield, Info, Edit2, Loader2, Briefcase } from 'lucide-react';
+import { Plus, Info, Edit2, Loader2, Briefcase } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { roleService, type RoleAPI } from '../../services/roleService';
 import { FuncaoForm } from '../../components/forms/FuncaoForm';
@@ -241,12 +241,7 @@ const Funcoes = () => {
                   <tr key={role.rol_id} className="funcoes-table-row">
                     <td className="funcoes-table-cell table-cell-id">{role.rol_id}</td>
                     <td className="funcoes-table-cell">
-                      <div className="funcoes-name-wrapper">
-                        <div className="funcoes-role-icon">
-                          <Shield className="funcoes-icon-sm" />
-                        </div>
-                        <span className="funcoes-name">{role.rol_description}</span>
-                      </div>
+                      <span className="funcoes-name">{role.rol_description}</span>
                     </td>
                     <td className="funcoes-table-cell">
                       <span className={`funcoes-status-badge ${role.rol_active === 1 ? 'funcoes-status-active' : 'funcoes-status-inactive'}`}>
