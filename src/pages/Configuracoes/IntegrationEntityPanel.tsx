@@ -320,7 +320,7 @@ export const IntegrationEntityPanel: React.FC<IntegrationEntityPanelProps> = ({
           const isSaving = savingConfig === card.entityType;
 
           return (
-            <div key={card.entityType} className="config-integration-card">
+            <div key={card.entityType} className="config-integration-card config-integration-card--entity">
               <div className="config-card-header">
                 <span className="config-card-title">{card.entityTypeLabel}</span>
                 <span className={statusClass(isSyncing ? 'SYNCING' : primary?.des_last_sync_status)}>
@@ -328,58 +328,62 @@ export const IntegrationEntityPanel: React.FC<IntegrationEntityPanelProps> = ({
                 </span>
               </div>
 
-              <div
-                className="config-card-desc"
-                style={{ display: 'grid', gap: '0.5rem', marginTop: '0.5rem' }}
-              >
-                <label className="config-form-label">
-                  Fonte de dados
-                  <select
-                    className="config-form-input"
-                    value={draft.dsoId}
-                    onChange={(e) => {
-                      const value = e.target.value ? Number(e.target.value) : '';
-                      setDrafts((prev) => ({
-                        ...prev,
-                        [card.entityType]: { ...draft, dsoId: value },
-                      }));
-                    }}
-                  >
-                    <option value="">Selecione uma fonte...</option>
-                    {compatibleSources.map((src) => (
-                      <option key={src.dso_id} value={src.dso_id}>
-                        {src.dso_name} ({src.dso_type_label || src.dso_type})
-                      </option>
-                    ))}
-                  </select>
-                </label>
+              <div className="config-entity-config-panel">
+                <div className="config-entity-config-fields">
+                  <div className="config-form-group">
+                    <label className="config-form-label" htmlFor={`entity-${card.entityType}-source`}>
+                      Fonte de dados
+                    </label>
+                    <select
+                      id={`entity-${card.entityType}-source`}
+                      className="config-form-select"
+                      value={draft.dsoId}
+                      onChange={(e) => {
+                        const value = e.target.value ? Number(e.target.value) : '';
+                        setDrafts((prev) => ({
+                          ...prev,
+                          [card.entityType]: { ...draft, dsoId: value },
+                        }));
+                      }}
+                    >
+                      <option value="">Selecione uma fonte...</option>
+                      {compatibleSources.map((src) => (
+                        <option key={src.dso_id} value={src.dso_id}>
+                          {src.dso_name} ({src.dso_type_label || src.dso_type})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                <label className="config-form-label">
-                  Intervalo de atualização
-                  <select
-                    className="config-form-input"
-                    value={draft.interval}
-                    disabled={!draft.dsoId}
-                    onChange={(e) => {
-                      setDrafts((prev) => ({
-                        ...prev,
-                        [card.entityType]: {
-                          ...draft,
-                          interval: e.target.value as SyncInterval,
-                        },
-                      }));
-                    }}
-                  >
-                    {syncIntervalOptions.map((opt) => (
-                      <option key={opt.key} value={opt.key}>{opt.label}</option>
-                    ))}
-                  </select>
-                </label>
+                  <div className="config-form-group">
+                    <label className="config-form-label" htmlFor={`entity-${card.entityType}-interval`}>
+                      Intervalo de atualização
+                    </label>
+                    <select
+                      id={`entity-${card.entityType}-interval`}
+                      className="config-form-select"
+                      value={draft.interval}
+                      disabled={!draft.dsoId}
+                      onChange={(e) => {
+                        setDrafts((prev) => ({
+                          ...prev,
+                          [card.entityType]: {
+                            ...draft,
+                            interval: e.target.value as SyncInterval,
+                          },
+                        }));
+                      }}
+                    >
+                      {syncIntervalOptions.map((opt) => (
+                        <option key={opt.key} value={opt.key}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
                 <button
                   type="button"
-                  className="config-secondary-btn"
-                  style={{ justifySelf: 'start' }}
+                  className="config-entity-save-btn"
                   disabled={!draft.dsoId || !configDirty || isSaving}
                   onClick={() => handleSaveConfig(card.entityType)}
                 >
@@ -392,7 +396,7 @@ export const IntegrationEntityPanel: React.FC<IntegrationEntityPanelProps> = ({
                 </button>
               </div>
 
-              <div className="config-card-desc" style={{ display: 'grid', gap: '0.35rem', marginTop: '0.75rem' }}>
+              <div className="config-entity-meta">
                 <span><strong>Última atualização:</strong> {formatSyncDate(primary?.des_last_sync_at)}</span>
                 <span><strong>Próxima atualização:</strong> {formatSyncDate(primary?.des_next_sync_at)}</span>
                 <span><strong>Registros na staging:</strong> {primary?.des_record_count ?? 0}</span>
@@ -449,7 +453,7 @@ export const IntegrationEntityPanel: React.FC<IntegrationEntityPanelProps> = ({
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+              <div className="config-entity-actions">
                 <button
                   type="button"
                   className="config-primary-btn"

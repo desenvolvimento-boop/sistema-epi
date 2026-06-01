@@ -127,7 +127,7 @@ export const IntegracaoTab: React.FC = () => {
             Cadastre conexões com TOTVS RM ou PROTHEUS.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="config-section-actions">
           <button type="button" className="config-secondary-btn" onClick={() => load()}>
             <RefreshCw className="config-icon-sm" />
             Atualizar

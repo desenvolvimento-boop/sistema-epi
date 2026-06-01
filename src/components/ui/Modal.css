@@ -28,6 +28,10 @@
   flex-direction: column;
 }
 
+.modal-content--wide {
+  max-width: 52rem;
+}
+
 .modal-header {
   display: flex;
   align-items: center;
