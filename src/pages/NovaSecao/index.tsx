@@ -3,7 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Edit2, Trash2, Loader2, Building2 } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { ListFiltersBar } from '../../components/list/ListFiltersBar';
+import { ListPagination } from '../../components/list/ListPagination';
+import { SortableTableHeader } from '../../components/list/SortableTableHeader';
+import { useListPagination } from '../../hooks/useListPagination';
+import { useListSort } from '../../hooks/useListSort';
 import { activeStatusMatcher, filterListRows } from '../../utils/listFilters';
+import { compareNullable, compareNumbers, compareStrings } from '../../utils/listSort';
 import { sectionService, type SectionAPI } from '../../services/sectionService';
 import { StatusBadge } from '../../components/StatusBadge';
 import { useAuth } from '../../contexts/AuthContext';
@@ -14,6 +19,8 @@ import './styles.css';
 function canAccessNovaSecao(canView: (path: string) => boolean) {
   return canView('/nova-secao') || canView('/colaboradores') || canView('/configuracoes');
 }
+
+type SectionSortKey = 'id' | 'description' | 'integration' | 'status';
 
 const NovaSecao = () => {
   const [sections, setSections] = useState<SectionAPI[]>([]);
@@ -83,6 +90,21 @@ const NovaSecao = () => {
     [sections, searchTerm, filterValues],
   );
 
+  const sectionComparators = useMemo(
+    (): Record<SectionSortKey, (a: SectionAPI, b: SectionAPI) => number> => ({
+      id: (a, b) => compareNumbers(a.sec_id, b.sec_id),
+      description: (a, b) => compareStrings(a.sec_description, b.sec_description),
+      integration: (a, b) =>
+        compareNullable(a.sec_integration_id, b.sec_integration_id, compareStrings),
+      status: (a, b) => compareNumbers(a.sec_active, b.sec_active),
+    }),
+    [],
+  );
+
+  const { sort, toggleSort, sortedItems } = useListSort(filtered, sectionComparators);
+  const pagination = useListPagination(sortedItems);
+  const sectionLabel = t(NOMENCLATURE_KEYS.entity.section_plural).toLowerCase();
+
   return (
     <div className="nova-secao-container">
       <PageHeader
@@ -142,22 +164,46 @@ const NovaSecao = () => {
           <table className="nova-secao-table">
             <thead>
               <tr className="nova-secao-thead-row">
-                <th className="nova-secao-th table-col-id">ID</th>
-                <th className="nova-secao-th">{t(NOMENCLATURE_KEYS.entity.section_compound)}</th>
-                <th className="nova-secao-th">Descrição / Integração</th>
-                <th className="nova-secao-th">Status</th>
-                <th className="nova-secao-th--right">Ações</th>
+                <SortableTableHeader
+                  label="ID"
+                  sortKey="id"
+                  activeSort={sort}
+                  onSort={toggleSort}
+                  className="nova-secao-th table-col-id"
+                />
+                <SortableTableHeader
+                  label={t(NOMENCLATURE_KEYS.entity.section_compound)}
+                  sortKey="description"
+                  activeSort={sort}
+                  onSort={toggleSort}
+                  className="nova-secao-th"
+                />
+                <SortableTableHeader
+                  label="Descrição / Integração"
+                  sortKey="integration"
+                  activeSort={sort}
+                  onSort={toggleSort}
+                  className="nova-secao-th"
+                />
+                <SortableTableHeader
+                  label="Status"
+                  sortKey="status"
+                  activeSort={sort}
+                  onSort={toggleSort}
+                  className="nova-secao-th"
+                />
+                <th className="nova-secao-th nova-secao-th--right">Ações</th>
               </tr>
             </thead>
             <tbody className="nova-secao-tbody">
-              {filtered.length === 0 && !loading ? (
+              {sortedItems.length === 0 && !loading ? (
                 <tr>
                   <td colSpan={5} className="nova-secao-empty">
                     {t(NOMENCLATURE_KEYS.message.section_empty)}
                   </td>
                 </tr>
               ) : (
-                filtered.map((sec) => (
+                pagination.paginatedItems.map((sec) => (
                   <tr key={sec.sec_id} className="nova-secao-row">
                     <td className="nova-secao-cell table-cell-id">{sec.sec_id}</td>
                     <td className="nova-secao-cell">
@@ -203,11 +249,17 @@ const NovaSecao = () => {
               )}
             </tbody>
           </table>
-          <div className="nova-secao-pagination">
-            <p className="nova-secao-pagination-info">
-              Mostrando {filtered.length} de {sections.length} {t(NOMENCLATURE_KEYS.entity.section_plural).toLowerCase()}
-            </p>
-          </div>
+          <ListPagination
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            from={pagination.from}
+            to={pagination.to}
+            total={pagination.total}
+            pageSize={pagination.pageSize}
+            onPageChange={pagination.setPage}
+            onPageSizeChange={pagination.setPageSize}
+            itemLabel={sectionLabel}
+          />
         </div>
       )}
     </div>

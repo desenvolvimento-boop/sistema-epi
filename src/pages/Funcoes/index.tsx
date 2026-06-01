@@ -8,10 +8,16 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNomenclature } from '../../hooks/useNomenclature';
 import { NOMENCLATURE_KEYS } from '../../config/nomenclatureKeys';
 import { ListFiltersBar } from '../../components/list/ListFiltersBar';
+import { ListPagination } from '../../components/list/ListPagination';
+import { SortableTableHeader } from '../../components/list/SortableTableHeader';
+import { useListPagination } from '../../hooks/useListPagination';
+import { useListSort } from '../../hooks/useListSort';
 import { activeStatusMatcher, filterListRows } from '../../utils/listFilters';
+import { compareNullable, compareNumbers, compareStrings } from '../../utils/listSort';
 import './styles.css';
 
 type TabId = 'lista' | 'cadastro';
+type RoleSortKey = 'id' | 'name' | 'status' | 'description' | 'epiCount' | 'origin';
 
 const Funcoes = () => {
   const { t } = useNomenclature();
@@ -89,6 +95,27 @@ const Funcoes = () => {
     [roles, searchTerm, filterValues],
   );
 
+  const roleComparators = useMemo(
+    (): Record<RoleSortKey, (a: RoleAPI, b: RoleAPI) => number> => ({
+      id: (a, b) => compareNumbers(a.rol_id, b.rol_id),
+      name: (a, b) => compareStrings(a.rol_description, b.rol_description),
+      status: (a, b) => compareNumbers(a.rol_active, b.rol_active),
+      description: (a, b) =>
+        compareNullable(a.rol_activities, b.rol_activities, compareStrings),
+      epiCount: (a, b) => compareNumbers(a.epi_count ?? 0, b.epi_count ?? 0),
+      origin: (a, b) =>
+        compareNullable(
+          a.rol_integration_source || 'Manual',
+          b.rol_integration_source || 'Manual',
+          compareStrings,
+        ),
+    }),
+    [],
+  );
+
+  const { sort, toggleSort, sortedItems } = useListSort(filteredRoles, roleComparators);
+  const pagination = useListPagination(sortedItems);
+
   return (
     <div className="funcoes-container">
       <PageHeader
@@ -153,27 +180,64 @@ const Funcoes = () => {
               <span>Carregando...</span>
             </div>
           ) : (
+            <>
             <table className="funcoes-table">
               <thead>
                 <tr className="funcoes-table-header">
-                  <th className="funcoes-table-th table-col-id">ID</th>
-                  <th className="funcoes-table-th">{t(NOMENCLATURE_KEYS.entity.funcao_singular)}</th>
-                  <th className="funcoes-table-th">Status</th>
-                  <th className="funcoes-table-th">Descrição</th>
-                  <th className="funcoes-table-th">EPIs</th>
-                  <th className="funcoes-table-th">Origem</th>
-                  <th className="funcoes-table-th-right">Ações</th>
+                  <SortableTableHeader
+                    label="ID"
+                    sortKey="id"
+                    activeSort={sort}
+                    onSort={toggleSort}
+                    className="funcoes-table-th table-col-id"
+                  />
+                  <SortableTableHeader
+                    label={t(NOMENCLATURE_KEYS.entity.funcao_singular)}
+                    sortKey="name"
+                    activeSort={sort}
+                    onSort={toggleSort}
+                    className="funcoes-table-th"
+                  />
+                  <SortableTableHeader
+                    label="Status"
+                    sortKey="status"
+                    activeSort={sort}
+                    onSort={toggleSort}
+                    className="funcoes-table-th"
+                  />
+                  <SortableTableHeader
+                    label="Descrição"
+                    sortKey="description"
+                    activeSort={sort}
+                    onSort={toggleSort}
+                    className="funcoes-table-th"
+                  />
+                  <SortableTableHeader
+                    label="EPIs"
+                    sortKey="epiCount"
+                    activeSort={sort}
+                    onSort={toggleSort}
+                    className="funcoes-table-th"
+                  />
+                  <SortableTableHeader
+                    label="Origem"
+                    sortKey="origin"
+                    activeSort={sort}
+                    onSort={toggleSort}
+                    className="funcoes-table-th"
+                  />
+                  <th className="funcoes-table-th funcoes-table-th-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="funcoes-table-body">
-                {filteredRoles.length === 0 ? (
+                {sortedItems.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="funcoes-table-cell" style={{ textAlign: 'center' }}>
                       Nenhuma função encontrada.
                     </td>
                   </tr>
                 ) : (
-                filteredRoles.map((role) => (
+                pagination.paginatedItems.map((role) => (
                   <tr key={role.rol_id} className="funcoes-table-row">
                     <td className="funcoes-table-cell table-cell-id">{role.rol_id}</td>
                     <td className="funcoes-table-cell">
@@ -227,6 +291,18 @@ const Funcoes = () => {
                 )}
               </tbody>
             </table>
+            <ListPagination
+              page={pagination.page}
+              totalPages={pagination.totalPages}
+              from={pagination.from}
+              to={pagination.to}
+              total={pagination.total}
+              pageSize={pagination.pageSize}
+              onPageChange={pagination.setPage}
+              onPageSizeChange={pagination.setPageSize}
+              itemLabel="funções"
+            />
+            </>
           )}
         </div>
         </>

@@ -1,7 +1,7 @@
 import { API_BASE_URL } from './authService';
 import type { EpiTypeAPI } from './epiTypeService';
 
-export const INTEGRATION_SOURCES = ['Manual', 'TOTVS', 'Senior'] as const;
+export const INTEGRATION_SOURCES = ['Manual', 'TOTVS_RM', 'PROTHEUS', 'TOTVS', 'Senior'] as const;
 
 export interface EpiVariantAPI {
   epv_id: number;

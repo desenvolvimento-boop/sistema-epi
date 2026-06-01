@@ -3,7 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, History, UserCog, MoreVertical, Loader2, Users } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { ListFiltersBar } from '../../components/list/ListFiltersBar';
+import { ListPagination } from '../../components/list/ListPagination';
+import { SortableTableHeader } from '../../components/list/SortableTableHeader';
+import { useListPagination } from '../../hooks/useListPagination';
+import { useListSort } from '../../hooks/useListSort';
 import { activeStatusMatcher, filterListRows } from '../../utils/listFilters';
+import { compareNullable, compareNumbers, compareStrings } from '../../utils/listSort';
 import { employeeService, type EmployeeAPI } from '../../services/employeeService';
 import { StatusBadge } from '../../components/StatusBadge';
 import { Modal } from '../../components/ui/Modal';
@@ -22,6 +27,8 @@ function formatDate(dateStr: string): string {
 function getStatusLabel(emp: EmployeeAPI): string {
   return emp.emp_active === 1 ? 'Ativo' : 'Inativo';
 }
+
+type EmployeeSortKey = 'id' | 'name' | 'registration' | 'role' | 'company' | 'status';
 
 const Colaboradores = () => {
   const { t } = useNomenclature();
@@ -104,6 +111,23 @@ const Colaboradores = () => {
     [employees, searchTerm, filterValues],
   );
 
+  const employeeComparators = useMemo(
+    (): Record<EmployeeSortKey, (a: EmployeeAPI, b: EmployeeAPI) => number> => ({
+      id: (a, b) => compareNumbers(a.emp_id, b.emp_id),
+      name: (a, b) => compareStrings(a.emp_full_name, b.emp_full_name),
+      registration: (a, b) => compareStrings(a.emp_registration, b.emp_registration),
+      role: (a, b) =>
+        compareNullable(a.role?.rol_description, b.role?.rol_description, compareStrings),
+      company: (a, b) =>
+        compareNullable(a.company?.com_description, b.company?.com_description, compareStrings),
+      status: (a, b) => compareNumbers(a.emp_active, b.emp_active),
+    }),
+    [],
+  );
+
+  const { sort, toggleSort, sortedItems } = useListSort(filtered, employeeComparators);
+  const pagination = useListPagination(sortedItems);
+
   return (
     <div className="colaboradores-container">
       <PageHeader
@@ -181,21 +205,51 @@ const Colaboradores = () => {
           <table className="colaboradores-table">
             <thead>
               <tr className="colaboradores-thead-row">
-                <th className="colaboradores-th table-col-id">ID</th>
-                <th className="colaboradores-th">{t(NOMENCLATURE_KEYS.entity.colaborador_singular)}</th>
-                <th className="colaboradores-th">Matrícula / CPF</th>
-                <th className="colaboradores-th">{t(NOMENCLATURE_KEYS.entity.funcao_singular)} / Empresa</th>
-                <th className="colaboradores-th">Status</th>
-                <th className="colaboradores-th--right">Ações</th>
+                <SortableTableHeader
+                  label="ID"
+                  sortKey="id"
+                  activeSort={sort}
+                  onSort={toggleSort}
+                  className="colaboradores-th table-col-id"
+                />
+                <SortableTableHeader
+                  label={t(NOMENCLATURE_KEYS.entity.colaborador_singular)}
+                  sortKey="name"
+                  activeSort={sort}
+                  onSort={toggleSort}
+                  className="colaboradores-th"
+                />
+                <SortableTableHeader
+                  label="Matrícula / CPF"
+                  sortKey="registration"
+                  activeSort={sort}
+                  onSort={toggleSort}
+                  className="colaboradores-th"
+                />
+                <SortableTableHeader
+                  label={`${t(NOMENCLATURE_KEYS.entity.funcao_singular)} / Empresa`}
+                  sortKey="role"
+                  activeSort={sort}
+                  onSort={toggleSort}
+                  className="colaboradores-th"
+                />
+                <SortableTableHeader
+                  label="Status"
+                  sortKey="status"
+                  activeSort={sort}
+                  onSort={toggleSort}
+                  className="colaboradores-th"
+                />
+                <th className="colaboradores-th colaboradores-th--right">Ações</th>
               </tr>
             </thead>
             <tbody className="colaboradores-tbody">
-              {filtered.length === 0 && !loading ? (
+              {sortedItems.length === 0 && !loading ? (
                 <tr>
                   <td colSpan={6} className="colaboradores-empty">Nenhum colaborador encontrado.</td>
                 </tr>
               ) : (
-                filtered.map((emp) => (
+                pagination.paginatedItems.map((emp) => (
                   <tr key={emp.emp_id} className="colaboradores-row">
                     <td className="colaboradores-cell table-cell-id">{emp.emp_id}</td>
                     <td className="colaboradores-cell">
@@ -254,9 +308,17 @@ const Colaboradores = () => {
               )}
             </tbody>
           </table>
-          <div className="colaboradores-pagination">
-            <p className="colaboradores-pagination-info">Mostrando {filtered.length} de {employees.length} colaboradores</p>
-          </div>
+          <ListPagination
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            from={pagination.from}
+            to={pagination.to}
+            total={pagination.total}
+            pageSize={pagination.pageSize}
+            onPageChange={pagination.setPage}
+            onPageSizeChange={pagination.setPageSize}
+            itemLabel="colaboradores"
+          />
         </div>
       )}
     </div>

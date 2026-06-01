@@ -577,6 +577,60 @@
   text-decoration: underline;
 }
 
+.config-sync-feedback {
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.config-sync-feedback-header {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.config-sync-feedback-summary {
+  margin: 0.25rem 0 0;
+  color: inherit;
+}
+
+.config-sync-feedback-detail {
+  margin: 0.35rem 0 0;
+  opacity: 0.9;
+  word-break: break-word;
+}
+
+.config-sync-feedback-success {
+  background-color: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+}
+
+.config-sync-feedback-partial-box {
+  background-color: #fffbeb;
+  border: 1px solid #fcd34d;
+  color: #92400e;
+}
+
+.config-sync-feedback-partial {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.config-sync-feedback-error {
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
+.config-sync-feedback-error-inline {
+  color: #b91c1c;
+  word-break: break-word;
+}
+
 .config-senha-header {
   margin-bottom: 2rem;
 }
